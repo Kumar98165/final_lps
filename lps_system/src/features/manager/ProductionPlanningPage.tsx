@@ -78,11 +78,7 @@ const ProductionPlanningPage = () => {
     const [editingRow, setEditingRow] = useState<any>(null);
     const [isRowModalOpen, setIsRowModalOpen] = useState(false);
 
-    // Dynamic Header Groups
-    const [productionHeaders, setProductionHeaders] = useState<string[]>([
-        "Strokes/Part", "320T", "200T", "160T", "110T", "80T", "63T",
-        "Total Strokes Req", "M/C", "Part Wt.", "Per Day Req"
-    ]);
+    const [productionHeaders, setProductionHeaders] = useState<string[]>([]);
 
     const [materialHeaders, setMaterialHeaders] = useState<string[]>([
         "RM Thk mm", "Sheet Width", "Sheet Length", "No of comp per sheet",
@@ -348,6 +344,9 @@ const ProductionPlanningPage = () => {
                     material_data
                 })
             });
+
+            if (!response.ok) throw new Error("Sync failed");
+
             // Success pop message
             setModalConfig({
                 isOpen: true,
@@ -573,11 +572,6 @@ const ProductionPlanningPage = () => {
         } finally {
             setIsSaving(false);
         }
-    };
-
-    const saveChanges = async () => {
-        // Redundant as auto-sync handles single edits
-        alert('Design Sheet synced with cloud database.');
     };
 
     const filteredRequirements = requirements.filter(req =>
@@ -971,7 +965,7 @@ const ProductionPlanningPage = () => {
                                                             )}
                                                             {isSrNo && (
                                                                 <button
-                                                                    onClick={(e) => { e.stopPropagation(); addRow(index + 1); }}
+                                                                    onClick={(e) => { e.stopPropagation(); addRow(); }}
                                                                     className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover/idx:opacity-100 hover:scale-110 transition-all shadow-lg z-[60]"
                                                                     title="Add Row Below"
                                                                 >
@@ -984,7 +978,7 @@ const ProductionPlanningPage = () => {
                                             })}
 
                                             {/* Remaining Identification Cells */}
-                                            {viewMode === 'all' && commonHeaders.slice((commonHeaders.length >= 3 ? 3 : 2)).map((h) => (
+                                            {viewMode === 'all' && commonHeaders.slice(3).map((h) => (
                                                 <td key={h} className="p-1.5 align-middle cursor-pointer" onClick={() => handleRowEdit(req)}>
                                                     <div className="w-full py-4 px-6 text-[12px] font-black uppercase text-slate-800 bg-white border border-slate-100/80 shadow-sm rounded-2xl group-hover:border-[#F37021]/30 transition-all">
                                                         {req[h] || '-'}
@@ -1087,8 +1081,9 @@ const ProductionPlanningPage = () => {
             <CustomModal
                 isOpen={modalConfig.isOpen}
                 onClose={() => setModalConfig(prev => ({ ...prev, isOpen: false }))}
-                onConfirm={modalConfig.onConfirm}
+                onConfirm={(val) => modalConfig.onConfirm(val)}
                 title={modalConfig.title}
+                description={modalConfig.description}
                 defaultValue={modalConfig.defaultValue}
                 type={modalConfig.type}
             />

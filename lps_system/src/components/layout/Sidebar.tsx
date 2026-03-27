@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
     LayoutDashboard,
-    Layers,
     Target,
     ClipboardList,
     Mail,
@@ -12,8 +11,7 @@ import {
     X,
     Activity,
     Database,
-    ClipboardCheck,
-    AlertCircle
+    ClipboardCheck
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '../../lib/utils';
@@ -31,13 +29,9 @@ import {
     ADMIN_ORDERS,
     ADMIN_USERS,
     ADMIN_AUDIT,
-    ADMIN_PLANNING,
     DEO_DASHBOARD,
     DEO_MODELS,
-    DEO_ENTRY,
-    ADMIN_ISSUES,
-    SUPERVISOR_ISSUES,
-    DEO_ISSUES
+    DEO_ENTRY
 } from '../../config/routePaths';
 
 interface SidebarProps {
@@ -67,7 +61,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             title: 'PRODUCTION OVERVIEW',
             items: [
                 { icon: LayoutDashboard, label: 'Main Dashboard', path: ADMIN_HOME },
-                { icon: Layers, label: 'Planning Chart', path: ADMIN_PLANNING },
             ]
         },
         {
@@ -85,7 +78,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             items: [
                 { icon: Users, label: 'User Accounts', path: ADMIN_USERS },
                 { icon: Activity, label: 'System Audit', path: ADMIN_AUDIT },
-                { icon: AlertCircle, label: 'Support Hub', path: ADMIN_ISSUES },
             ]
         }
     ];
@@ -97,7 +89,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             items: [
                 { icon: LayoutDashboard, label: 'Dashboard', path: '/supervisor/dashboard' },
                 { icon: ClipboardCheck, label: 'Verify Daily Production', path: '/supervisor/verify' },
-                { icon: AlertCircle, label: 'Issue tracker', path: SUPERVISOR_ISSUES },
             ]
         }
     ];
@@ -113,7 +104,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 { icon: Activity, label: 'Dashboard', path: DEO_DASHBOARD },
                 { icon: Database, label: 'My Assigned Models', path: DEO_MODELS },
                 { icon: ClipboardList, label: 'Production Entry', path: DEO_ENTRY },
-                { icon: AlertCircle, label: 'Report Issue', path: DEO_ISSUES },
             ]
         }
     ];

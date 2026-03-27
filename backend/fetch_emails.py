@@ -25,8 +25,8 @@ def fetch_unread_emails():
         status, response = mail.search(None, 'ALL')
         email_ids = response[0].split()
         
-        # Get the latest 10 emails (Fetching less for significantly faster SYNC response)
-        latest_email_ids = email_ids[-10:] if len(email_ids) > 10 else email_ids
+        # Get the latest 30 emails (Fetching enough to not miss requests, but keeping it snappy)
+        latest_email_ids = email_ids[-30:] if len(email_ids) > 30 else email_ids
         
         parsed_emails = []
         if latest_email_ids:
@@ -79,9 +79,9 @@ def fetch_unread_emails():
                     # Filter out non-order system emails (like spam from GeeksforGeeks, promotions, etc.)
                     subject_body = (subject + ' ' + body).lower()
                     
-                    is_valid_sender = any(domain in sender.lower() for domain in ['lps admin', '98165mkm@gmail.com', 'ritindia', 'ritinida', '.edu'])
-                    is_explicitly_car_order = any(kw in subject_body for kw in ['car model', 'kuv', 'xuv', 'thar', 'mpv', 'units'])
-                    is_spam_sender = any(spam in sender.lower() for spam in ['geeks', 'robin', 'day1x', 'promo', 'news', 'noreply', 'no-reply', 'substack', 'linkedin', 'github'])
+                    is_valid_sender = any(domain in sender.lower() for domain in ['lps admin', '98165mkm@gmail.com', 'ritindia', 'ritinida', '.edu', 'gmail.com', 'yahoo.com', 'outlook.com'])
+                    is_explicitly_car_order = any(kw in subject_body for kw in ['car model', 'kuv', 'xuv', 'thar', 'mpv', 'units', 'order', 'request', 'urgent', 'production', 'requirement', 'demand'])
+                    is_spam_sender = any(spam in sender.lower() for spam in ['geeks', 'robin', 'day1x', 'promo', 'news', 'noreply', 'no-reply', 'substack', 'linkedin', 'github', 'instagram', 'facebook', 'twitter', 'kling', 'user-service', 'marketing'])
                     
                     if not is_spam_sender and (is_valid_sender or is_explicitly_car_order):
                         parsed_emails.append(parsed_email)

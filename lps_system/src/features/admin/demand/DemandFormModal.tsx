@@ -26,6 +26,7 @@ interface DemandFormModalProps {
         customer?: string;
         customer_email?: string;
         requested_date?: string;
+        subject?: string;
     };
     editingDemand?: any;
 }
@@ -82,6 +83,11 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
                 const assignedModel = models.find(m => m.name === editingDemand.model_name);
                 if (assignedModel?.supervisor_id) setSupervisorId(assignedModel.supervisor_id);
             } else if (initialData) {
+                if (initialData.model_name) {
+                    // Auto-select model by name if it exists in our master list
+                    const match = models.find(m => m.name.toLowerCase() === initialData.model_name?.toLowerCase());
+                    if (match) setSelectedModel(String(match.id));
+                }
                 if (initialData.quantity) setQuantity(String(initialData.quantity));
                 const today = new Date().toISOString().split('T')[0];
                 setStartDate(today);
@@ -168,15 +174,20 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
             const token = getToken();
 
             const model = models.find(m => String(m.id) === selectedModel);
-            if (!model) {
+            
+            // Allow name-only fallback for Gmail requests (backend will create fresh model)
+            const finalModelName = model ? model.name : (initialData?.model_name || '');
+            const finalModelId = model ? Number(model.id) : 0;
+
+            if (!finalModelName) {
                 setErrorMessage('Please select a valid model');
                 setLoading(false);
                 return;
             }
 
             const demandData = {
-                model_id: Number(model.id),
-                model_name: model.name,
+                model_id: finalModelId,
+                model_name: finalModelName,
                 quantity: Number(quantity),
                 line,
                 manager,
@@ -206,9 +217,10 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
                 // Automated Email trigger to Customer
                 if (customerEmail) {
                     try {
-                        const subject = `Order Confirmed: ${model.name} - ${quantity} Units`;
+                        const originalSubject = initialData?.subject || 'Order';
+                        const subject = `Re: ${originalSubject} - Authorized Successfully`;
                         const formattedEndDate = new Date(endDate || startDate).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
-                        const body = `Hello ${customer},\n\nWe have successfully received and authorized your order for ${quantity} units of ${model.name}.\n\nYour order has been scheduled for production in our facility and will be ready for handover by ${formattedEndDate}.\n\nThank you for choosing CIE Automotive.\n\nRegards,\nLPS Production Team`;
+                        const body = `Dear Customer,\n\nThank you for choosing LPS.\n\nWe are pleased to inform you that your model order has been successfully received and approved by our team.\n\n### 📦 Order Details:\n\n* Model: ${model.name}\n* Quantity: ${quantity}\n* Expected Completion Date: ${formattedEndDate}\n\nYour order is now under process, and our production team has already initiated the work to ensure timely completion and delivery.\n\nIf you have any questions or require further assistance, please feel free to contact us at any time.\n\nThank you for trusting LPS.\n\nWarm regards,\nLPS Production Team\nThank you from LPS`;
 
                         await fetch(`${API_BASE}/orders/send-email`, {
                             method: 'POST',
@@ -286,8 +298,8 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
                                         <CheckCircle2 size={32} strokeWidth={2.5} />
                                     </div>
                                     <div className="space-y-1 pb-2">
-                                        <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Authorized</h2>
-                                        <p className="text-slate-500 font-bold text-xs">Target registered successfully.</p>
+                                        <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Model Authorized Successfully!</h2>
+                                        <p className="text-slate-500 font-bold text-xs underline underline-offset-4 decoration-emerald-500/30">Target registered & Confirmation sent to customer.</p>
                                     </div>
 
                                     <button

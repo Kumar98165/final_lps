@@ -49,9 +49,9 @@ const OrderInboxPage = () => {
                         let parsedQuantity = 0;
                         let parsedPriority: 'NORMAL' | 'HIGH' = 'NORMAL';
 
-                        const modelList = ["TML_WINGER", "XUV", "CURVV", "MPV", "MTBL", "U301", "U202", "KUV", "ARJUN", "H3", "ALFA"];
+                        const modelList = ["TML_WINGER", "XUV", "CURVV", "MPV", "MTBL", "U301", "U202", "KUV", "ARJUN", "H3", "ALFA", "BOLERO", "THAR", "EV", "SCORPIO"];
                         for (const m of modelList) {
-                            if (bodyLower.includes(m.toLowerCase()) || e.subject?.toLowerCase().includes(m.toLowerCase())) {
+                            if (bodyLower.includes(m.toLowerCase()) || (e.subject && e.subject.toLowerCase().includes(m.toLowerCase()))) {
                                 parsedModel = m;
                                 break;
                             }
@@ -61,7 +61,11 @@ const OrderInboxPage = () => {
                             parsedPriority = 'HIGH';
                         }
 
-                        const quantMatch = bodyLower.match(/(\d+)\s*units?/);
+                        const quantMatch = bodyLower.match(/(\d+)\s*units?/) || 
+                                           bodyLower.match(/(\d+)\s*order/) ||
+                                           bodyLower.match(/(\d+)\s*qty/) ||
+                                           (e.subject && e.subject.toLowerCase().match(/(\d+)\s*units?/));
+                        
                         if (quantMatch) {
                             parsedQuantity = parseInt(quantMatch[1]);
                         } else {
@@ -107,6 +111,12 @@ const OrderInboxPage = () => {
         loadEmails();
     }, []);
 
+    useEffect(() => {
+        if (emails.length > 0 && !selectedEmailId) {
+            handleEmailClick(emails[0].id);
+        }
+    }, [emails, selectedEmailId]);
+
     const selectedEmail = emails.find(e => e.id === selectedEmailId);
 
     // Filter Logic
@@ -115,8 +125,8 @@ const OrderInboxPage = () => {
             email.subject.toLowerCase().includes(searchTerm.toLowerCase());
 
         let matchesFilter = true;
-        if (filter === 'UNREAD') matchesFilter = !email.is_read;
-        else if (filter === 'READ') matchesFilter = email.is_read;
+        if (filter === 'UNREAD') matchesFilter = !email.is_read && email.status !== 'REJECTED' && email.status !== 'PROCESSED';
+        else if (filter === 'READ') matchesFilter = (email.is_read || email.status === 'PROCESSED') && email.status !== 'REJECTED';
         else if (filter === 'REJECTED') matchesFilter = email.status === 'REJECTED';
 
         return matchesSearch && matchesFilter;
@@ -147,6 +157,10 @@ const OrderInboxPage = () => {
 
         try {
             const token = getToken();
+            
+            // 1. Send Rejection Email
+            const rejectionBody = `Dear Customer,\n\nThank you for choosing LPS.\n\nWe regret to inform you that your production request for ${selectedEmail.parsed_model || 'selected model'} has been declined for the following reason:\n\n"${rejectionReason}"\n\nIf you have any questions regarding this decision, please feel free to contact us.\n\nThank you for trusting LPS.\n\nWarm regards,\nLPS Production Team\nThank you from LPS`;
+
             const response = await fetch(`${API_BASE}/orders/send-email`, {
                 method: 'POST',
                 headers: {
@@ -154,19 +168,28 @@ const OrderInboxPage = () => {
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    email: selectedEmail.sender_email,
+                    to: selectedEmail.sender_email,
                     subject: `Re: ${selectedEmail.subject} - Order Rejected`,
-                    body: rejectionReason
+                    body: rejectionBody
                 })
             });
 
             if (response.ok) {
-                setEmails(prev => prev.map(e => e.id === selectedEmailId ? { ...e, status: 'REJECTED' as const } : e));
+                // 2. Move to Trash on server
+                await fetch(`${API_BASE}/orders/emails/${selectedEmailId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                // 3. Update local state
+                setEmails(prev => prev.map(e => e.id === selectedEmailId ? { ...e, status: 'REJECTED' as const, is_read: true } : e));
                 setIsRejecting(false);
                 setShowRejectSuccess(true);
             } else {
-                console.error('Failed to send rejection email');
+                const errData = await response.json();
+                console.error('Failed to send rejection email:', errData.message);
                 setIsRejecting(false);
+                alert(`Error: ${errData.message}`);
             }
         } catch (error) {
             console.error('Error sending email:', error);
@@ -178,6 +201,8 @@ const OrderInboxPage = () => {
         setIsRejectModalOpen(false);
         setRejectionReason('');
         setShowRejectSuccess(false);
+        // Clear selection to move out of unread if processed
+        setSelectedEmailId(null);
     };
 
     const handleDeleteEmail = async (id: string) => {
@@ -265,7 +290,8 @@ const OrderInboxPage = () => {
                     quantity: selectedEmail.parsed_quantity,
                     start_date: selectedEmail.parsed_date ? new Date(selectedEmail.parsed_date).toISOString().split('T')[0] : undefined,
                     customer: selectedEmail.sender,
-                    customer_email: selectedEmail.sender_email
+                    customer_email: selectedEmail.sender_email,
+                    subject: selectedEmail.subject
                 } : undefined}
             />
 

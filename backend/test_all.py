@@ -1,9 +1,9 @@
 from app_factory import create_app
-from models import db, User, MasterData, AuditLog, ProductionLine, CarModel, DailyWorkStatus, Demand, DailyProductionLog, Issue
+from models import db, User, MasterData, AuditLog, ProductionLine, CarModel, DailyWorkStatus, Demand, DailyProductionLog
 import traceback
 app = create_app()
 with app.app_context():
-    for model in [User, MasterData, AuditLog, ProductionLine, CarModel, DailyWorkStatus, Demand, DailyProductionLog, Issue]:
+    for model in [User, MasterData, AuditLog, ProductionLine, CarModel, DailyWorkStatus, Demand, DailyProductionLog]:
         try:
             model.query.limit(1).all()
         except Exception as e:

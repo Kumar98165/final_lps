@@ -19,7 +19,6 @@ import AssignmentPage from './features/admin/assignments/AssignmentPage';
 import ProductionPlanningPage from './features/manager/ProductionPlanningPage';
 import TeamManagementPage from './features/supervisor/TeamManagementPage';
 import DEODashboardPage from './features/deo/DEODashboardPage';
-import IssueTrackerPage from './features/support/IssueTrackerPage';
 import { UserRole } from './config/roles';
 import {
   AUTH_LOGIN,
@@ -42,11 +41,7 @@ import {
   ADMIN_DEMAND,
   ADMIN_ORDERS,
   ADMIN_USERS,
-  ADMIN_AUDIT,
-  ADMIN_PLANNING,
-  ADMIN_ISSUES,
-  SUPERVISOR_ISSUES,
-  DEO_ISSUES
+  ADMIN_AUDIT
 } from './config/routePaths';
 import { getUser } from './lib/storage';
 
@@ -95,7 +90,6 @@ function App() {
                       <Route path={ADMIN_HOME}>
                         {/* Shared Routes (Admin + Manager) */}
                         <Route element={<AuthGuard allowedRoles={[UserRole.ADMIN, UserRole.MANAGER]} />}>
-                          <Route path={ADMIN_PLANNING.replace('/admin/', '')} element={<div className="p-8 text-slate-500 font-bold tracking-tight uppercase">Planning Chart Module</div>} />
                           <Route path={ADMIN_MODELS.replace('/admin/', '')} element={<ModelRegisterPage />} />
                           <Route path={ADMIN_DEMAND.replace('/admin/', '')} element={<DemandManagementPage />} />
                           <Route path={ADMIN_ORDERS.replace('/admin/', '')} element={<OrderInboxPage />} />
@@ -103,7 +97,6 @@ function App() {
                           <Route path={ADMIN_AUDIT.replace('/admin/', '')} element={<AdminAuditPage />} />
                           <Route path={ADMIN_LINES.replace('/admin/', '')} element={<ProductionLinesPage />} />
                           <Route path={ADMIN_ASSIGNMENTS.replace('/admin/', '')} element={<AssignmentPage />} />
-                          <Route path={ADMIN_ISSUES.replace('/admin/', '')} element={<IssueTrackerPage />} />
                         </Route>
 
                         {/* Admin Only Dashboard */}
@@ -127,7 +120,6 @@ function App() {
                         <Route path={SUPERVISOR_VERIFY} element={<SupervisorDashboardPage />} />
                         <Route path={SUPERVISOR_REPORTS} element={<SupervisorDashboardPage />} />
                         <Route path={SUPERVISOR_ALERTS} element={<SupervisorDashboardPage />} />
-                        <Route path={SUPERVISOR_ISSUES} element={<IssueTrackerPage />} />
                       </Route>
                       <Route element={<AuthGuard allowedRoles={[UserRole.DEO, UserRole.ADMIN]} />}>
                         <Route path={DEO_DASHBOARD} element={<DEODashboardPage />} />
@@ -136,7 +128,6 @@ function App() {
                         <Route path={DEO_REPORTS} element={<DEODashboardPage />} />
                         <Route path={DEO_VERIFY} element={<DEODashboardPage />} />
                         <Route path={DEO_NOTIFICATIONS} element={<DEODashboardPage />} />
-                        <Route path={DEO_ISSUES} element={<IssueTrackerPage />} />
                       </Route>
 
                       <Route path="/" element={<RoleBasedRedirect />} />

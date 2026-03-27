@@ -22,7 +22,3 @@ export const ADMIN_DEMAND = "/admin/demand";
 export const ADMIN_ORDERS = "/admin/orders";
 export const ADMIN_USERS = "/admin/users";
 export const ADMIN_AUDIT = "/admin/audit";
-export const ADMIN_PLANNING = "/admin/planning";
-export const ADMIN_ISSUES = "/admin/issues";
-export const SUPERVISOR_ISSUES = "/supervisor/issues";
-export const DEO_ISSUES = "/deo/issues";

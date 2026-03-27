@@ -9,7 +9,6 @@ interface RowEditModalProps {
     onDelete: (id: number) => void;
     row: any;
     commonHeaders: string[];
-    productionHeaders: string[];
     materialHeaders: string[];
 }
 
@@ -20,7 +19,6 @@ const RowEditModal: React.FC<RowEditModalProps> = ({
     onDelete,
     row,
     commonHeaders,
-    productionHeaders,
     materialHeaders
 }) => {
     const [formData, setFormData] = useState<any>(null);
@@ -134,7 +132,7 @@ const RowEditModal: React.FC<RowEditModalProps> = ({
                         <div className="space-y-6">
                             <div className="flex items-center gap-3">
                                 <div className="h-px flex-1 bg-slate-100" />
-                                <span className="text-[10px] font-black text-[#F37021] uppercase tracking-[0.3em]">G-Chart View Data</span>
+                                <span className="text-[10px] font-black text-[#F37021] uppercase tracking-[0.3em]">Operational Targets & Stock</span>
                                 <div className="h-px flex-1 bg-slate-100" />
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -146,20 +144,15 @@ const RowEditModal: React.FC<RowEditModalProps> = ({
                             </div>
                         </div>
 
-                        {/* Section 3: Production & RM Sheet */}
+                        {/* Section 3: Material Data */}
                         <div className="space-y-6">
                             <div className="flex items-center gap-3">
                                 <div className="h-px flex-1 bg-slate-100" />
-                                <span className="text-[10px] font-black text-[#F37021] uppercase tracking-[0.3em]">Production & RM Data</span>
+                                <span className="text-[10px] font-black text-[#F37021] uppercase tracking-[0.3em]">Material Data</span>
                                 <div className="h-px flex-1 bg-slate-100" />
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                                 {materialHeaders.filter(h => !["TOTAL SCHEDULE QTY", "PER DAY"].includes(h)).map(h => (
-                                    <div key={h}>
-                                        {renderInput(h)}
-                                    </div>
-                                ))}
-                                {productionHeaders.filter(h => !["TOTAL SCHEDULE QTY", "PER DAY"].includes(h)).map(h => (
                                     <div key={h}>
                                         {renderInput(h)}
                                     </div>

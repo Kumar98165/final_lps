@@ -206,12 +206,13 @@ def create_app():
     @jwt_required()
     def send_order_email():
         payload = request.json or {}
-        to_email = payload.get('email')
+        # Support both 'to' (frontend) and 'email' (legacy/other)
+        to_email = payload.get('to') or payload.get('email')
         subject = payload.get('subject')
         body = payload.get('body')
         
         if not to_email or not subject or not body:
-            return jsonify({"success": False, "message": "Missing required email fields"}), 400
+            return jsonify({"success": False, "message": "Missing required email fields (to/email, subject, body)"}), 400
             
         success, message = send_email(to_email, subject, body)
         if success:

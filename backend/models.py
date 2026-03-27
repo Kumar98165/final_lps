@@ -265,7 +265,8 @@ class DailyProductionLog(db.Model):
             "createdAt": self.created_at.isoformat() if self.created_at else None,
             "target_vehicles": self.demand.quantity if self.demand else 0,
             "line_name": self.car_model.line.name if self.car_model and self.car_model.line else "LINE 1",
-            "customer_name": self.demand.customer if self.demand else "T4"
+            "customer_name": self.demand.customer if self.demand else "T4",
+            "manager_name": self.demand.manager if self.demand else "Admin"
         }
         
         # Calculate derived stats if log_data exists
@@ -286,41 +287,3 @@ class DailyProductionLog(db.Model):
         return d
 
 
-class Issue(db.Model):
-    __tablename__ = 'issues'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    model_id = db.Column(db.Integer, db.ForeignKey('car_models.id'), nullable=True)
-    title = db.Column(db.String(255), nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    status = db.Column(db.String(20), default='OPEN') # OPEN, ESCALATED, RESOLVED
-    urgency = db.Column(db.String(20), default='MEDIUM') # LOW, MEDIUM, HIGH
-    admin_comment = db.Column(db.Text)
-    supervisor_comment = db.Column(db.Text)
-    image_url = db.Column(db.String(500)) # Store URL/path to uploaded photo
-    created_at = db.Column(db.DateTime, default=db.func.now())
-    updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
-
-    # Relationships
-    reporter = db.relationship('User', backref='reported_issues')
-    car_model = db.relationship('CarModel', backref='issues')
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "user_id": self.user_id,
-            "reporter_name": self.reporter.name if self.reporter else 'Unknown',
-            "reporter_role": self.reporter.role if self.reporter else 'Unknown',
-            "model_id": self.model_id,
-            "model_name": self.car_model.name if self.car_model else 'General',
-            "title": self.title,
-            "description": self.description,
-            "status": self.status,
-            "urgency": self.urgency,
-            "admin_comment": self.admin_comment,
-            "supervisor_comment": self.supervisor_comment,
-            "image_url": self.image_url,
-            "createdAt": self.created_at.isoformat() if self.created_at else None,
-            "updatedAt": self.updated_at.isoformat() if self.updated_at else None
-        }

@@ -2,7 +2,7 @@
 import os
 from datetime import datetime, date
 from flask import Blueprint, request, jsonify, current_app
-from models import db, MasterData, CarModel, DailyWorkStatus, User, Demand, DailyProductionLog, Issue
+from models import db, MasterData, CarModel, DailyWorkStatus, User, Demand, DailyProductionLog
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from middleware.auth_middleware import role_required
 from utils.audit_logger import log_audit
@@ -297,7 +297,7 @@ def update_demand(id):
 @jwt_required()
 @role_required(['Manager', 'Admin'])
 def delete_demand(id):
-    from models import DailyProductionLog, DailyWorkStatus, Issue, CarModel
+    from models import DailyProductionLog, DailyWorkStatus, CarModel
     demand = Demand.query.get(id)
     if not demand:
         return jsonify({"success": False, "message": "Demand not found"}), 404
@@ -1080,146 +1080,3 @@ def finalize_assignment(id):
     db.session.commit()
     log_audit("FINALIZE_ASSIGNMENT")
     return jsonify({"success": True, "message": "Assignment finalized successfully", "status": "READY"})
-@production_bp.route('/issues', methods=['POST'])
-@jwt_required()
-def create_issue():
-    identity = get_jwt_identity()
-    # Handle cases where identity is username or ID
-    user = User.query.get(identity) if isinstance(identity, int) or (isinstance(identity, str) and identity.isdigit()) else User.query.filter_by(username=identity).first()
-    
-    if not user:
-        return jsonify({"success": False, "message": "User not found"}), 404
-        
-    user_id = user.id
-    title = request.form.get('title')
-    description = request.form.get('description')
-    model_id = request.form.get('model_id')
-    urgency = request.form.get('urgency', 'MEDIUM')
-    
-    if not title or not description:
-        return jsonify({"success": False, "message": "Missing title or description"}), 400
-        
-    image_url = None
-    if 'image' in request.files:
-        file = request.files['image']
-        if file and file.filename:
-            filename = secure_filename(f"issue_{user_id}_{datetime.now().timestamp()}_{file.filename}")
-            upload_path = os.path.join(current_app.root_path, 'static', 'uploads', 'issues')
-            if not os.path.exists(upload_path):
-                os.makedirs(upload_path)
-            file.save(os.path.join(upload_path, filename))
-            image_url = f"/static/uploads/issues/{filename}"
-
-    new_issue = Issue(
-        user_id=user_id,
-        model_id=model_id if model_id and model_id != "" else None,
-        title=title,
-        description=description,
-        urgency=urgency,
-        image_url=image_url
-    )
-    
-    db.session.add(new_issue)
-    db.session.commit()
-    
-    log_audit(user_id, f"REPORT_ISSUE: {new_issue.title}")
-    return jsonify({"success": True, "data": new_issue.to_dict()}), 201
-
-@production_bp.route('/issues', methods=['GET'])
-@jwt_required()
-def get_issues():
-    identity = get_jwt_identity()
-    user = User.query.get(identity) if isinstance(identity, int) or (isinstance(identity, str) and identity.isdigit()) else User.query.filter_by(username=identity).first()
-    
-    if not user:
-        return jsonify({"success": False, "message": "User not found"}), 404
-        
-    query = Issue.query
-    user_id = user.id
-    
-    # Filtering based on role
-    if user.role == 'DEO':
-        # DEO only sees their own issues
-        query = query.filter_by(user_id=user_id)
-    elif user.role == 'Supervisor':
-        # Supervisor sees issues for models they supervise or escalated to them (currently all for simplicity)
-        # In a real app, we might filter by models supervised by this user
-        pass 
-    elif user.role == 'Admin':
-        # Admin sees everything
-        pass
-        
-    issues = query.order_by(Issue.created_at.desc()).all()
-    return jsonify({
-        "success": True, 
-        "data": [i.to_dict() for i in issues]
-    })
-
-@production_bp.route('/issues/<int:issue_id>', methods=['PUT'])
-@jwt_required()
-def update_issue(issue_id):
-    identity = get_jwt_identity()
-    user = User.query.filter_by(username=identity).first()
-    data = request.json
-    
-    issue = Issue.query.get_or_404(issue_id)
-    
-    if user.role == 'Supervisor':
-        if 'status' in data:
-            issue.status = data['status']
-        if 'comment' in data:
-            issue.supervisor_comment = data['comment']
-    elif user.role == 'Admin':
-        if 'status' in data:
-            issue.status = data['status']
-        if 'comment' in data:
-            issue.admin_comment = data['comment']
-    else:
-        # DEO can only update their own OPEN issues (title/desc)
-        if user and issue.user_id == user.id and issue.status == 'OPEN':
-            if 'title' in data: issue.title = data['title']
-            if 'description' in data: issue.description = data['description']
-        else:
-            return jsonify({"success": False, "message": "Unauthorized"}), 403
-            
-    db.session.commit()
-    log_audit(user_id, f"UPDATE_ISSUE: {issue_id} status={issue.status}")
-    return jsonify({"success": True, "data": issue.to_dict()})
-
-@production_bp.route('/issues/<int:issue_id>', methods=['DELETE'])
-@jwt_required()
-def delete_issue(issue_id):
-    identity = get_jwt_identity()
-    user = User.query.get(identity) if isinstance(identity, int) or (isinstance(identity, str) and identity.isdigit()) else User.query.filter_by(username=identity).first()
-    
-    if not user:
-        return jsonify({"success": False, "message": "User not found"}), 404
-        
-    issue = Issue.query.get_or_404(issue_id)
-    
-    # Permission check: Only the reporter (DEO) or Admin can delete
-    # DEO can only delete if the issue is still OPEN
-    if user.role == 'Admin':
-        pass # Admin can delete anything
-    elif user.role == 'DEO':
-        if issue.user_id != user.id:
-            return jsonify({"success": False, "message": "Unauthorized: You can only delete your own issues"}), 403
-        if issue.status != 'OPEN':
-            return jsonify({"success": False, "message": "Unauthorized: You can only delete OPEN issues"}), 403
-    else:
-        return jsonify({"success": False, "message": "Unauthorized"}), 403
-        
-    # Delete associated image if it exists
-    if issue.image_url:
-        image_path = os.path.join(current_app.root_path, issue.image_url.lstrip('/'))
-        if os.path.exists(image_path):
-            try:
-                os.remove(image_path)
-            except Exception as e:
-                print(f"Error deleting image file: {e}")
-
-    db.session.delete(issue)
-    db.session.commit()
-    
-    log_audit(user.id, f"DELETE_ISSUE: {issue_id}")
-    return jsonify({"success": True, "message": "Issue deleted successfully"})
