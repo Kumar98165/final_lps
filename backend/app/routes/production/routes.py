@@ -729,12 +729,24 @@ def submit_daily_log():
         return jsonify({"success": True, "message": "Daily log updated successfully", "data": existing_log.to_dict()})
 
         
+    # NEW LOG: Ensure all rows start with a clean status to prevent carry-over from previous days
+    cleaned_log_data = []
+    for r in log_data:
+        if isinstance(r, dict):
+            new_r = r.copy()
+            new_r['row_status'] = None
+            new_r['rejection_reason'] = None
+            new_r['supervisor_reviewed'] = False
+            cleaned_log_data.append(new_r)
+        else:
+            cleaned_log_data.append(r)
+
     new_log = DailyProductionLog(
         car_model_id=car_model_id,
         demand_id=demand_id,
         deo_id=target_deo_id,
         model_name=model_name,
-        log_data=log_data,
+        log_data=cleaned_log_data,
         status=log_status
     )
     db.session.add(new_log)
@@ -906,6 +918,17 @@ def verify_daily_log():
     log_entry.status = status
     log_entry.supervisor_comment = comment
     
+    # If APPROVED, mark all individual rows as VERIFIED as well
+    if status == 'APPROVED' and log_entry.log_data:
+        log_data = list(log_entry.log_data)
+        for row in log_data:
+            if isinstance(row, dict):
+                row['row_status'] = 'VERIFIED'
+                row['supervisor_reviewed'] = True
+        log_entry.log_data = log_data
+        from sqlalchemy.orm.attributes import flag_modified
+        flag_modified(log_entry, "log_data")
+
     db.session.commit()
     log_audit(f"VERIFY_LOG_{status}")
     return jsonify({"success": True, "message": f"Log {status.lower()} successfully"})

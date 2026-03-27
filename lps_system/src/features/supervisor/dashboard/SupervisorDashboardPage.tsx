@@ -128,8 +128,8 @@ const SupervisorDashboardPage = () => {
 
         setModalConfig({
             isOpen: true,
-            title: 'Confirm Finalization',
-            message: `Are you sure you want to VERIFY ALL rows and mark ${selectedLog.model_name} as READY?\n\nThis will synchronize the completed status across all dashboards.`,
+            title: 'Verify Production',
+            message: `Authorize final verification for ${selectedLog.model_name}?`,
             type: 'confirm',
             onConfirm: async (_: string) => {
                 setModalConfig(prev => ({ ...prev, isOpen: false }));
@@ -152,8 +152,8 @@ const SupervisorDashboardPage = () => {
                     if (response.ok) {
                         setModalConfig({
                             isOpen: true,
-                            title: 'Success',
-                            message: `${selectedLog.model_name} is now READY and synchronized!`,
+                            title: 'Verification Confirmed',
+                            message: `The production log for ${selectedLog.model_name} has been successfully verified.`,
                             type: 'alert',
                             onConfirm: (_: string) => {
                                 setModalConfig(prev => ({ ...prev, isOpen: false }));
@@ -198,7 +198,7 @@ const SupervisorDashboardPage = () => {
             setModalConfig({
                 isOpen: true,
                 title: 'Submission Rejected',
-                message: `${selectedLog.model_name} has been sent back to DEO for correction.\n\nReason: ${reason}`,
+                message: `The log for ${selectedLog.model_name} has been returned to the DEO for correction.`,
                 type: 'alert',
                 onConfirm: (_: string) => {
                     setModalConfig(prev => ({ ...prev, isOpen: false }));

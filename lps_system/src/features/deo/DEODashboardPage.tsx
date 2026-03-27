@@ -443,13 +443,13 @@ const DEODashboardPage = () => {
                     })
                     .sort((a: any, b: any) => b.id - a.id)[0];
 
-                // Fields that DEO actually types in — PLUS supervisor fields for persistence
-                const DEO_EDITABLE_FIELDS = [
-                    "SAP Stock", "Opening Stock", "Todays Stock",
-                    "Today Produced", "Remain Qty", "Balance Qty",
-                    "Production Status", "Defect Count", "Failure Reason", "Remarks",
-                    "row_status", "rejection_reason", "supervisor_reviewed", "deo_reply"
-                ];
+                // Determine if we should restore "today's" session data or start fresh
+                // If the latest log is already APPROVED/VERIFIED, it's likely from a previous session/day
+                const isNewSession = latestLog && (latestLog.status === 'APPROVED' || latestLog.status === 'VERIFIED' || latestLog.status === 'COMPLETED');
+
+                // Fields that DEO actually types in
+                const DATA_FIELDS = ["SAP Stock", "Opening Stock", "Todays Stock", "Balance Qty", "Defect Count", "Failure Reason", "Remarks"];
+                const RESET_FIELDS = ["Today Produced", "Remain Qty", "Production Status", "row_status", "rejection_reason", "supervisor_reviewed", "deo_reply"];
 
                 let finalData = formatted;
 
@@ -462,12 +462,23 @@ const DEODashboardPage = () => {
                         );
                         if (hRow) {
                             const newFields: any = {};
-                            // Only restore DEO-entered fields, NOT computed ones
-                            DEO_EDITABLE_FIELDS.forEach(field => {
+                            
+                            // 1. Always restore static data fields (Stock counts etc.)
+                            DATA_FIELDS.forEach(field => {
                                 if (hRow[field] !== undefined && hRow[field] !== null && hRow[field] !== '') {
                                     newFields[field] = hRow[field];
                                 }
                             });
+
+                            // 2. Only restore status/production fields if NOT a new session (e.g. editing a DRAFT or REJECTED log)
+                            if (!isNewSession) {
+                                RESET_FIELDS.forEach(field => {
+                                    if (hRow[field] !== undefined && hRow[field] !== null && hRow[field] !== '') {
+                                        newFields[field] = hRow[field];
+                                    }
+                                });
+                            }
+
                             return { ...fRow, ...newFields };
                         }
                         return fRow;

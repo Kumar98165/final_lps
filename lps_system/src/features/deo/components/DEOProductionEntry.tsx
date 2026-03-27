@@ -309,8 +309,14 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                         </div>
                                     </div>
 
-                                    {/* Editable Fields */}
+                                    {/* Editable & Metric Fields */}
                                     <div className="col-span-12 grid grid-cols-4 gap-4 pt-1">
+                                        <div className="space-y-1.5">
+                                            <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">PER DAY</label>
+                                            <div className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-[10px] font-black text-slate-900 flex items-center shadow-sm h-[48px] justify-center">
+                                                {editingPart["PER DAY"] || "0"}
+                                            </div>
+                                        </div>
                                         <div className="space-y-1.5">
                                             <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">SAP Stock</label>
                                             <input
@@ -321,7 +327,7 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                                     setEditingPart((prev: any) => ({ ...prev, "SAP Stock": val, row_status: null }));
                                                     handleCellEdit(editingPart.id, "SAP Stock", val);
                                                 }}
-                                                className="w-full bg-white border-2 border-slate-100 focus:border-[#F37021] rounded-xl p-3 text-center text-base font-black text-slate-900 transition-all outline-none shadow-sm"
+                                                className="w-full bg-white border-2 border-slate-100 focus:border-[#F37021] rounded-xl p-3 text-center text-base font-black text-slate-900 transition-all outline-none shadow-sm h-[48px]"
                                             />
                                         </div>
                                         <div className="space-y-1.5">
@@ -334,7 +340,7 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                                     setEditingPart((prev: any) => ({ ...prev, "Opening Stock": val, row_status: null }));
                                                     handleCellEdit(editingPart.id, "Opening Stock", val);
                                                 }}
-                                                className="w-full bg-white border-2 border-slate-100 focus:border-[#F37021] rounded-xl p-3 text-center text-base font-black text-slate-900 transition-all outline-none shadow-sm"
+                                                className="w-full bg-white border-2 border-slate-100 focus:border-[#F37021] rounded-xl p-3 text-center text-base font-black text-slate-900 transition-all outline-none shadow-sm h-[48px]"
                                             />
                                         </div>
                                         <div className="space-y-1.5">
@@ -347,9 +353,13 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                                     setEditingPart((prev: any) => ({ ...prev, "Todays Stock": val, row_status: null }));
                                                     handleCellEdit(editingPart.id, "Todays Stock", val);
                                                 }}
-                                                className="w-full bg-white border-2 border-slate-100 focus:border-[#F37021] rounded-xl p-3 text-center text-base font-black text-slate-900 transition-all outline-none shadow-sm"
+                                                className="w-full bg-white border-2 border-slate-100 focus:border-[#F37021] rounded-xl p-3 text-center text-base font-black text-slate-900 transition-all outline-none shadow-sm h-[48px]"
                                             />
                                         </div>
+                                    </div>
+
+                                    {/* Production & Coverage Group */}
+                                    <div className="col-span-12 grid grid-cols-3 gap-4">
                                         <div className="space-y-1.5">
                                             <label className="block text-[8px] font-black text-[#F37021] uppercase tracking-widest px-1 flex items-center gap-1">
                                                 <Target size={10} />
@@ -363,23 +373,13 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                                     setEditingPart((prev: any) => ({ ...prev, "Today Produced": val, row_status: null }));
                                                     handleCellEdit(editingPart.id, "Today Produced", val);
                                                 }}
-                                                className="w-full bg-[#F37021]/5 border-2 border-[#F37021]/20 focus:border-[#F37021] rounded-xl p-3 text-center text-base font-black text-[#F37021] transition-all outline-none shadow-md"
+                                                className="w-full bg-[#F37021]/5 border-2 border-[#F37021]/20 focus:border-[#F37021] rounded-xl p-3 text-center text-base font-black text-[#F37021] transition-all outline-none shadow-md h-[48px]"
                                                 autoFocus
                                             />
                                         </div>
-                                    </div>
-
-                                    {/* Efficiency & Target Info */}
-                                    <div className="col-span-12 grid grid-cols-2 gap-4">
-                                        <div className="space-y-1.5">
-                                            <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">PER DAY</label>
-                                            <div className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-[10px] font-black text-slate-900 flex items-center shadow-sm h-[42px]">
-                                                {editingPart["PER DAY"] || "0"}
-                                            </div>
-                                        </div>
                                         <div className="space-y-1.5">
                                             <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">Coverage Days</label>
-                                            <div className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-[10px] font-black text-slate-900 flex justify-center items-center shadow-inner h-[42px]">
+                                            <div className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-[10px] font-black text-slate-900 flex justify-center items-center shadow-inner h-[48px]">
                                                 <span className={cn(
                                                     "px-3 py-1 rounded-lg text-[10px]",
                                                     parseFloat(editingPart["Coverage Days"] || "0") < 5 ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700"
@@ -388,39 +388,36 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                                 </span>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div className="col-span-12 mt-2 pt-4 border-t border-slate-100">
-                                        <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1 mb-2">STATUS</label>
-                                        <div className="relative group">
-                                            <select
-                                                value={editingPart["Production Status"] || "PENDING"}
-                                                onChange={(e) => {
-                                                    const val = e.target.value;
-                                                    setEditingPart((prev: any) => ({ ...prev, "Production Status": val, row_status: null }));
-                                                    handleCellEdit(editingPart.id, "Production Status", val);
-                                                }}
-                                                className={cn(
-                                                    "w-full h-[48px] rounded-xl px-5 text-[10px] font-black uppercase tracking-widest transition-all border-2 outline-none appearance-none cursor-pointer",
-                                                    (editingPart["Production Status"] || 'PENDING') === 'COMPLETE' 
-                                                        ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                                                        : (editingPart["Production Status"] || 'PENDING') === 'IN PROGRESS'
-                                                        ? "bg-amber-50 border-amber-200 text-amber-700"
-                                                        : "bg-slate-50 border-slate-200 text-slate-600"
-                                                )}
-                                            >
-                                                {(editingPart.row_status || 'PENDING') === 'REJECTED' && (
-                                                    <option value="REJECTED" disabled className="text-red-600 font-bold">⚠️ NOT VERIFIED (REJECTED)</option>
-                                                )}
-                                                <option value="PENDING">PENDING</option>
-                                                <option value="IN PROGRESS">IN PROGRESS</option>
-                                                <option value="COMPLETE">COMPLETE</option>
-                                            </select>
-                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                                                <ChevronDown size={14} />
+                                        <div className="space-y-1.5">
+                                            <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">Status</label>
+                                            <div className="relative">
+                                                <select
+                                                    value={editingPart["Production Status"] || "PENDING"}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        setEditingPart((prev: any) => ({ ...prev, "Production Status": val, row_status: null }));
+                                                        handleCellEdit(editingPart.id, "Production Status", val);
+                                                    }}
+                                                    className={cn(
+                                                        "w-full h-[48px] rounded-xl px-4 text-[10px] font-black uppercase tracking-widest transition-all border-2 outline-none appearance-none cursor-pointer",
+                                                        (editingPart["Production Status"] || 'PENDING') === 'COMPLETE' 
+                                                            ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                                                            : (editingPart["Production Status"] || 'PENDING') === 'IN PROGRESS'
+                                                            ? "bg-amber-50 border-amber-200 text-amber-700"
+                                                            : "bg-slate-50 border-slate-200 text-slate-600"
+                                                    )}
+                                                >
+                                                    <option value="PENDING">PENDING</option>
+                                                    <option value="IN PROGRESS">IN PROGRESS</option>
+                                                    <option value="COMPLETE">COMPLETE</option>
+                                                </select>
+                                                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                                    <ChevronDown size={12} />
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+
 
                                 {/* Issue & Reply Section */}
                                 <div className="col-span-12 mt-2 pt-5 border-t border-slate-100">
