@@ -1,0 +1,184 @@
+Total rows in CSV: 1017
+Total items in Database: 566
+
+--- Statistics ---
+Matches (Model + SAP): 906
+Missing in DB: 111
+Description Mismatches: 174
+Material/Yield Mismatches: 842
+
+--- Missing in DB (First 50) ---
+('XUV', 'PMAM0101EW1360N')
+('XUV', 'PMAM0101EW1360N')
+('KUV', 'PMVM0101EAZ0523N-I')
+('KUV', 'PMVM0101EAZ0523N-I')
+('TML-WINGER', 'PTML284562200130PH')
+('TML-WINGER', 'PTML284562200130PH')
+('TML-WINGER', 'PTML284588700165PH')
+('TML-WINGER', 'PTML284588700166PH')
+('MTBL', 'PMNA6101EAA00270N')
+('MTBL', 'PMNA6101EAA00270N')
+('MTBL', 'PMNA6101BAA00180N')
+('H3', 'PMAM7500155D1')
+('H3', 'PMAM7500156D1')
+('H3', 'PMAM7500157D2')
+('TIM - WINGER', 'PTML284560100152PH')
+('TIM - WINGER', 'PTML284560100154PH')
+('TIM - WINGER', 'PTML284560100155PH')
+('TIM - WINGER', 'PTML284560100156PH')
+('TIM - WINGER', 'PTML284560103301-I')
+('TIM - WINGER', 'PTML284562203301-I')
+('TIM - WINGER', 'PTML284562203301-I')
+('TIM - WINGER', 'PTML284560103302-I')
+('TIM - WINGER', 'PTML284560108216-I')
+('TIM - WINGER', 'PTML284562200142PH')
+('TIM - WINGER', 'PTML284562200143PH')
+('TIM - WINGER', 'PTML284562600178PH')
+('TIM - WINGER', 'PTML284562600179PH')
+('TIM - WINGER', 'PTML284562600180PH')
+('TIM - WINGER', 'PTML284562600181PH')
+('TIM - WINGER', 'PTML284588100107PH')
+('TIM - WINGER', 'PTML284588100108PH')
+('MPV', 'PMVL0101EAR2610N-V')
+('TIM - WINGER', 'PTML284562208205-I')
+('TIM - WINGER', 'PTML284562608281-I')
+('TIM - WINGER', 'PTML284562608282-I')
+('TIM - WINGER', 'PTML284562608283-I')
+('TIM - WINGER', 'PTML284562608284-I')
+('TIM - WINGER', 'PTML284588700172PH')
+('TIM - WINGER', 'PTML284588700183PH')
+('LOADKING', 'PMIL76432T8001')
+('LOADKING', 'PMIL76433T8001')
+('LOADKING', 'PMIL76532T6000')
+('LOADKING', 'PMIL76533T6000')
+('LOADKING', 'PMIL79135T6000')
+('H3', 'PMAM007530150D91')
+('COMPACT', 'PMAM7538151D1')
+('LOADKING', 'PMNA6101EAJ00030N')
+('LOADKING', 'PMNA6101EAJ00040N')
+('TIM - WINGER', 'PTML284588460106-I')
+('H3', 'PMAM007530151D1')
+
+--- Description Mismatches (First 20) ---
+Key: ('MTBL', 'PMNA6101EAA00450NI')
+  CSV: REINF EXT STORAGE HINGE MTG.
+  DB:  REINF EXT STORAGE HINGE MTG.-V
+Key: ('MTBL', 'PMNA6101EAA00450NI')
+  CSV: REINF EXT STORAGE HINGE MTG.
+  DB:  REINF EXT STORAGE HINGE MTG.-V
+Key: ('MTBL', 'PMNA6101EAA00260NI')
+  CSV: REINF STRIKER MTG
+  DB:  REINF STRIKER MTG   (OP30)
+Key: ('H3', 'PMAM7505099D1')
+  CSV: SCUTTLE NUT PLATE
+  DB:  NAN
+Key: ('H3', 'PMAM7505099D1')
+  CSV: SCUTTLE NUT PLATE
+  DB:  NAN
+Key: ('H3', 'PMAM7505248D1')
+  CSV: BOTTOM COVER BKT
+  DB:  NAN
+Key: ('H3', 'PMAM7505248D1')
+  CSV: BOTTOM COVER BKT
+  DB:  NAN
+Key: ('COMPACT', 'PMAM7501126D91')
+  CSV: SIDE PANEL SEALING SUB ASSY LH
+  DB:  SIDE PANEL SEALING SUB ASSY LH (7501088)
+Key: ('COMPACT', 'PMAM7501127D91')
+  CSV: SIDE PANEL SEALING SUB ASSY RH
+  DB:  SIDE PANEL SEALING SUB ASSY RH (7501092)
+Key: ('COMPACT', 'PMAM7538271D1')
+  CSV: FIREWALL SIDE SPACER RH
+  DB:  NAN
+Key: ('COMPACT', 'PMAM7538271D1')
+  CSV: FIREWALL SIDE SPACER RH
+  DB:  NAN
+Key: ('COMPACT', 'PMAM7538272D1')
+  CSV: FIREWALL SIDE SPACER LH
+  DB:  NAN
+Key: ('COMPACT', 'PMAM7538272D1')
+  CSV: FIREWALL SIDE SPACER LH
+  DB:  NAN
+Key: ('COMPACT', 'PMAM7538516D1')
+  CSV: SOFT JOINT FIREWALL WASHER
+  DB:  NAN
+Key: ('COMPACT', 'PMAM7538516D1')
+  CSV: SOFT JOINT FIREWALL WASHER
+  DB:  NAN
+Key: ('COMPACT', 'PMAME007531704D1')
+  CSV: IDENTIFICATION PLATE ( FEND 388/389D91)
+  DB:  NAN
+Key: ('COMPACT', 'PMAME007531704D1')
+  CSV: IDENTIFICATION PLATE ( FEND 388/389D91)
+  DB:  NAN
+Key: ('W601', 'PMVM0101BAW04020-I')
+  CSV: BRAKE HOSE MTG BRKT
+  DB:  RAKE HOSE MTG BRKT
+Key: ('W601', 'PMVM0101BAW04020-I')
+  CSV: BRAKE HOSE MTG BRKT
+  DB:  RAKE HOSE MTG BRKT
+Key: ('W601', 'PMVM0101BAW04020-I')
+  CSV: BRAKE HOSE MTG BRKT
+  DB:  RAKE HOSE MTG BRKT
+
+--- Material/Yield Mismatches (First 20) ---
+Key: ('XUV', 'PMAM0102AAW00690-I')
+  CSV: {'t': 1.0, 'w': '1250', 'l': '2500', 'y': 360.0}
+  DB:  {'t': 0.0, 'w': '0', 'l': '0', 'y': 0.0}
+Key: ('XUV', 'PMAM0102AAW00690-I')
+  CSV: {'t': 1.0, 'w': '1250', 'l': '2500', 'y': 360.0}
+  DB:  {'t': 0.0, 'w': '0', 'l': '0', 'y': 0.0}
+Key: ('XUV', 'PMAM0102AAW00680-I')
+  CSV: {'t': 1.0, 'w': '1250', 'l': '2500', 'y': 360.0}
+  DB:  {'t': 0.0, 'w': '0', 'l': '0', 'y': 0.0}
+Key: ('XUV', 'PMAM0102AAW00680-I')
+  CSV: {'t': 1.0, 'w': '1250', 'l': '2500', 'y': 360.0}
+  DB:  {'t': 0.0, 'w': '0', 'l': '0', 'y': 0.0}
+Key: ('XUV', 'PMAM0102AAW01380-I')
+  CSV: {'t': 1.0, 'w': '1250', 'l': '2500', 'y': 299.0}
+  DB:  {'t': 0.0, 'w': '0', 'l': '0', 'y': 0.0}
+Key: ('XUV', 'PMAM0102AAW01380-I')
+  CSV: {'t': 1.0, 'w': '1250', 'l': '2500', 'y': 299.0}
+  DB:  {'t': 0.0, 'w': '0', 'l': '0', 'y': 0.0}
+Key: ('XUV', 'PMVM0102AAW04990-I')
+  CSV: {'t': 0.0, 'w': '1250', 'l': '2500', 'y': 0.0}
+  DB:  {'t': 0.0, 'w': '0', 'l': '0', 'y': 0.0}
+Key: ('XUV', 'PMAM0102AW0610N-I')
+  CSV: {'t': 1.2, 'w': '340', 'l': '430', 'y': 1.0}
+  DB:  {'t': 0.0, 'w': '0', 'l': '0', 'y': 0.0}
+Key: ('XUV', 'PMAM0101EW1370N')
+  CSV: {'t': 0.8, 'w': 'OFFCUT', 'l': 'OFFCUT', 'y': 0.0}
+  DB:  {'t': 0.0, 'w': '0', 'l': '0', 'y': 0.0}
+Key: ('XUV', 'PMAM0101EW1370N')
+  CSV: {'t': 0.8, 'w': 'OFFCUT', 'l': 'OFFCUT', 'y': 0.0}
+  DB:  {'t': 0.0, 'w': '0', 'l': '0', 'y': 0.0}
+Key: ('XUV', 'PMAM0102AW06100N-I')
+  CSV: {'t': 1.2, 'w': '1250', 'l': '2500', 'y': 19.0}
+  DB:  {'t': 0.0, 'w': '0', 'l': '0', 'y': 0.0}
+Key: ('XUV', 'PMAM0102AW06100N-I')
+  CSV: {'t': 1.2, 'w': '1250', 'l': '2500', 'y': 19.0}
+  DB:  {'t': 0.0, 'w': '0', 'l': '0', 'y': 0.0}
+Key: ('XUV', 'PMAM0102AW0670N-I')
+  CSV: {'t': 1.2, 'w': '1250', 'l': '2500', 'y': 19.0}
+  DB:  {'t': 0.0, 'w': '0', 'l': '0', 'y': 0.0}
+Key: ('XUV', 'PMAM0102AW0670N-I')
+  CSV: {'t': 1.2, 'w': '1250', 'l': '2500', 'y': 19.0}
+  DB:  {'t': 0.0, 'w': '0', 'l': '0', 'y': 0.0}
+Key: ('XUV', 'PMAM0102AAW01770N')
+  CSV: {'t': 0.8, 'w': '1250', 'l': '2500', 'y': 2322.0}
+  DB:  {'t': 0.0, 'w': '0', 'l': '0', 'y': 0.0}
+Key: ('XUV', 'PMAM0102AAW01770N')
+  CSV: {'t': 0.8, 'w': '1250', 'l': '2500', 'y': 2322.0}
+  DB:  {'t': 0.0, 'w': '0', 'l': '0', 'y': 0.0}
+Key: ('XUV', 'PMAM0102AAW02640-I')
+  CSV: {'t': 1.0, 'w': '133', 'l': '2500', 'y': 630.0}
+  DB:  {'t': 0.0, 'w': '0', 'l': '0', 'y': 0.0}
+Key: ('XUV', 'PMAM0102AAW02640-I')
+  CSV: {'t': 1.0, 'w': '133', 'l': '2500', 'y': 630.0}
+  DB:  {'t': 0.0, 'w': '0', 'l': '0', 'y': 0.0}
+Key: ('XUV', 'PMAM0102AW0630N-I')
+  CSV: {'t': 0.8, 'w': '1250', 'l': '2500', 'y': 110.0}
+  DB:  {'t': 0.0, 'w': '0', 'l': '0', 'y': 0.0}
+Key: ('XUV', 'PMAM0102AW0630N-I')
+  CSV: {'t': 0.8, 'w': '1250', 'l': '2500', 'y': 110.0}
+  DB:  {'t': 0.0, 'w': '0', 'l': '0', 'y': 0.0}

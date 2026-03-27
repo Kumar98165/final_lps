@@ -1,0 +1,13 @@
+Sheets: ['Sheet4', 'Sheet1', 'PIVOT', 'coil material', 'Summery', 'LPS STOCK', 'Sheet3', 'Week wise plan', 'C CLASS', 'PHY STOCK Dorle sir', 'OFFLOADING PLAN', 'Capacity', 'MB52', 'Mane', 'G-Chart', 'Dispatch', 'Strokes', 'RM', 'Curvv', 'P112', 'P113 Assly', 'Z101 &PIAGGIO', 'W601 Assly', 'Coil feeder', 'TML Xenon', 'Saleble parts', 'BOP', 'Week', 'XUV, KUV, TML, MPV, MTBL', 'W601 CAP', 'RM Stock W601', 'Sheet2']
+
+Scanning sheet: RM Stock W601
+  Found SAP at header=1: ['SAP Part Number ']
+  Sample SAP numbers: ['PMVM0101DW600210-I', 'PMVM0101EW600590-I', 'PMVM0101EW600600-I', 'PMVM0101BW602620-I', 'PMVM0101BW601550-I']
+
+Scanning sheet: coil material
+  Found SAP at header=2: ['SAP Part Number ']
+  Sample SAP numbers: ['PTML543861608205-I', 'PTML543861608206-I', 'PTML543863218221-I', 'PTML543863218207-I', 'PTML543863218208-I']
+
+Scanning sheet: RM
+  Found SAP at header=0: ['SAP Part Number ']
+  Sample SAP numbers: ['PMAM0102AAW00690-I', 'PMAM0102AAW00680-I', 'PMAM0102AAW01380-I', 'PMVM0102AAW04990-I', 'PMAM0102AW0610N-I']

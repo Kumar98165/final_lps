@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+@plugin "tailwindcss-animate";
+
+@theme {
+  --color-primary: #F37021;
+  --color-primary-foreground: #FFFFFF;
+  --color-sidebar: #FFFFFF;
+  --color-sidebar-foreground: #64748b;
+  --font-sans: "Inter", "sans-serif";
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --primary: 24.6 90.1% 54.3%;
+    /* #F37021 as HSL */
+    --primary-foreground: 210 40% 98%;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 font-sans;
+  }
+}
+
+@layer components {
+
+  /* Common UI patterns */
+  .card-premium {
+    @apply bg-white rounded-xl shadow-sm border border-slate-200 p-6 transition-all hover:shadow-md;
+  }
+}
+
+/* Custom Scrollbar for consistent industrial look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-slate-200 rounded-full;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-400 rounded-full transition-colors;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-500;
+}

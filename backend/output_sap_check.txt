@@ -1,0 +1,2 @@
+Matches in RM sheet for PMAM0101EAF02880-I:
+{'Sr No': 400.0, 'Model': 'BOLERO- P107', 'Part Number': 'PMAM0102AAP2410N-V', 'SAP Part Number ': 'PMAM0101EAF02880-I', 'Part Description': 'BRKT SEAT BELT ANCHG B PLR ( 2410 )', 'RM\nThk \nmm': 2.0, 'Unnamed: 6': 'X', 'Sheet Width': 134, 'Unnamed: 8': 'X', 'Sheet Length': 1250, 'No of comp per sheet': 23, 'RM SIZE': '2X134X1250', 'RM Grade': 'D513', 'Act RM Sizes': nan, 'Revised': nan, 'VALIDITY': nan, 'CLEAN_SAP': 'PMAM0101EAF02880-I'}
