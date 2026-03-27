@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { getAccessToken } from '../../../lib/storage';
 import { API_BASE } from '../../../lib/apiConfig';
 import { Car, User as UserIcon, Shield, ChevronRight, X, UserCog, UserCheck, Save, Loader2, Search, Hash, LayoutGrid, CheckCircle2 } from 'lucide-react';
@@ -255,7 +255,7 @@ const AssignmentPage = () => {
                                     className={`
                                         relative rounded-3xl p-5 border transition-all cursor-pointer group flex flex-col h-full active:scale-[0.98] overflow-hidden
                                         ${isCompleted 
-                                            ? 'bg-emerald-400/10 backdrop-blur-md border-emerald-400/20 hover:border-emerald-400/40 shadow-[0_8px_30px_rgba(52,211,153,0.1)]' 
+                                            ? 'bg-emerald-50/60 backdrop-blur-md border-emerald-100 hover:border-emerald-200 shadow-[0_8px_30px_rgba(16,185,129,0.05)]' 
                                             : 'bg-white border-slate-100/80 hover:border-[#F37021]/30 shadow-sm'}
                                     `}
                                 >
@@ -270,7 +270,7 @@ const AssignmentPage = () => {
                                         <div className="flex items-center gap-3.5">
                                             <div className={`
                                                 w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm group-hover:rotate-2 transition-transform duration-500
-                                                ${isCompleted ? 'bg-emerald-500/20 text-emerald-600' : 'bg-orange-50 text-[#F37021]'}
+                                                ${isCompleted ? 'bg-emerald-100/50 text-emerald-600' : 'bg-orange-50 text-[#F37021]'}
                                             `}>
                                                 <Car size={24} strokeWidth={2.5} />
                                             </div>
@@ -280,26 +280,26 @@ const AssignmentPage = () => {
                                                 </h3>
                                                 <div className="flex items-center gap-2">
                                                     <span className={`text-[9px] font-black px-2 py-0.5 rounded-md border uppercase tracking-widest ${
-                                                        isCompleted ? 'bg-emerald-500/20 border-emerald-500/20 text-emerald-700' : 'bg-slate-50 border-slate-100 text-slate-400'
+                                                        isCompleted ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-slate-50 border-slate-100 text-slate-400'
                                                     }`}>
                                                         {model.model_code}
                                                     </span>
                                                     <span className={`text-[9px] font-black px-2 py-0.5 rounded-md text-white uppercase tracking-widest ${
-                                                        isCompleted ? 'bg-emerald-500' : 'bg-orange-500'
+                                                        isCompleted ? 'bg-emerald-400/80' : 'bg-orange-500'
                                                     }`}>
                                                         {model.status || 'PENDING'}
                                                     </span>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className={`p-2 rounded-xl transition-all ${isCompleted ? 'bg-emerald-500/20 text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white' : 'bg-slate-50 text-slate-400 group-hover:bg-[#F37021] group-hover:text-white'}`}>
+                                        <div className={`p-2 rounded-xl transition-all ${isCompleted ? 'bg-emerald-100/40 text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white' : 'bg-slate-50 text-slate-400 group-hover:bg-[#F37021] group-hover:text-white'}`}>
                                             <ChevronRight size={16} strokeWidth={3} />
                                         </div>
                                     </div>
 
                                     {/* Assignment Boxes */}
                                     <div className={`rounded-2xl p-4 grid grid-cols-1 gap-3 mb-2 transition-colors relative ${
-                                        isCompleted ? 'bg-emerald-500/5' : 'bg-slate-50/60 group-hover:bg-orange-50/30'
+                                        isCompleted ? 'bg-white/40' : 'bg-slate-50/60 group-hover:bg-orange-50/30'
                                     }`}>
                                         {/* Line Box */}
                                         <div className="flex items-center gap-3">
@@ -375,7 +375,7 @@ const AssignmentPage = () => {
 
             {/* Professional Assignment Modal */}
             {selectedModel && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8 overflow-y-auto">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 sm:p-12 overflow-hidden">
                     {/* Vibrant Backdrop */}
                     <div
                         className="fixed inset-0 bg-slate-900/40 backdrop-blur-md transition-all duration-500 animate-in fade-in"
@@ -387,7 +387,7 @@ const AssignmentPage = () => {
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className="relative bg-white rounded-[2.5rem] shadow-[0_40px_120px_-20px_rgba(0,0,0,0.3)] w-full max-w-xl overflow-hidden border border-slate-100/50"
+                        className="relative bg-white rounded-[2.5rem] shadow-[0_40px_120px_-20px_rgba(0,0,0,0.3)] w-full max-w-lg max-h-full overflow-hidden border border-slate-100/50 flex flex-col"
                     >
                         {/* Success Pop Overlay */}
                         <AnimatePresence>
@@ -402,15 +402,15 @@ const AssignmentPage = () => {
                                         initial={{ scale: 0.5, opacity: 0 }}
                                         animate={{ scale: 1, opacity: 1 }}
                                         transition={{ type: 'spring', damping: 12, stiffness: 200 }}
-                                        className="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-[0_20px_40px_-10px_rgba(16,185,129,0.5)] mb-6"
+                                        className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-[0_20px_40px_-10px_rgba(16,185,129,0.5)] mb-4"
                                     >
-                                        <CheckCircle2 size={48} strokeWidth={3} />
+                                        <CheckCircle2 size={32} strokeWidth={3} />
                                     </motion.div>
                                     <motion.h3 
                                         initial={{ y: 20, opacity: 0 }}
                                         animate={{ y: 0, opacity: 1 }}
                                         transition={{ delay: 0.1 }}
-                                        className="text-2xl font-black text-slate-900 tracking-tight"
+                                        className="text-xl font-black text-slate-900 tracking-tight"
                                     >
                                         Assign Successfully!
                                     </motion.h3>
@@ -426,8 +426,8 @@ const AssignmentPage = () => {
                             )}
                         </AnimatePresence>
                         
-                        {/* Dynamic Decorative Header */}
-                        <div className="relative px-10 py-10 overflow-hidden bg-slate-50/30">
+                        {/* Dynamic Decorative Header - Sticky */}
+                        <div className="relative px-10 pt-16 pb-10 overflow-hidden bg-slate-50/30 shrink-0 border-b border-slate-100/50">
                             {/* Animated Background Accents */}
                             <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl animate-pulse" />
                             <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/5 rounded-full translate-y-1/2 -translate-x-1/4 blur-3xl" />
@@ -461,8 +461,8 @@ const AssignmentPage = () => {
                             </div>
                         </div>
 
-                        {/* Modal Body: Focus-Rich Form */}
-                        <div className="p-10 space-y-8 bg-white relative">
+                        {/* Modal Body: Focus-Rich Form - Scrollable */}
+                        <div className="px-8 py-8 space-y-6 bg-white relative overflow-y-auto flex-1 custom-scrollbar">
                             <div className="grid grid-cols-1 gap-6">
                                 {/* Model Name */}
                                 <div className="space-y-3">
@@ -566,8 +566,8 @@ const AssignmentPage = () => {
                             </div>
                         </div>
 
-                        {/* Modal Footer: Soft Glass Actions */}
-                        <div className="px-10 py-8 bg-slate-50/80 backdrop-blur-xl border-t border-slate-100 flex flex-col-reverse sm:flex-row justify-end gap-4">
+                        {/* Modal Footer: Soft Glass Actions - Sticky */}
+                        <div className="px-8 py-6 bg-slate-50/80 backdrop-blur-xl border-t border-slate-100 flex flex-col-reverse sm:flex-row justify-end gap-3 shrink-0">
                             <button
                                 onClick={handleCloseModal}
                                 disabled={saving}

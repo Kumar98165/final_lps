@@ -1,7 +1,0 @@
---- SYNC RESULTS ---
-Total Rows Processed: 1017
-New entries added: 0
-Existing entries updated: 1017
-Rows skipped: 0
-Final MasterData table count: 651
---------------------
