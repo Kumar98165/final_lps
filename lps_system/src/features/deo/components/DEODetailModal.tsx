@@ -36,10 +36,11 @@ export const DEODetailModal: React.FC<DEODetailModalProps> = ({ isOpen, onClose,
             {isOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm">
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        initial={{ opacity: 0, scale: 0.3, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className="bg-white rounded-[2.5rem] w-full max-w-xl overflow-hidden shadow-2xl relative"
+                        exit={{ opacity: 0, scale: 0.3, y: 20 }}
+                        transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+                        className="bg-white rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl relative"
                     >
                         {/* Header Section */}
                         <div className="p-8 pb-4 border-b border-slate-50 flex justify-between items-start">

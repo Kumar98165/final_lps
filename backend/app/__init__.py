@@ -24,13 +24,15 @@ def create_app(config_name="dev"):
     from .routes.admin.routes import admin_bp
     from .routes.admin.audit_routes import audit_bp
     from .routes.manager.routes import manager_bp
-    from .routes.production.routes import production_bp
+    from .routes.deo.routes import deo_bp
+    from .routes.supervisor.routes import supervisor_bp
 
-    # Register blueprints
-    app.register_blueprint(admin_bp, url_prefix="/api")
-    app.register_blueprint(audit_bp, url_prefix="/api")
-    app.register_blueprint(manager_bp, url_prefix="/api")
-    app.register_blueprint(production_bp, url_prefix="/api/production")
+    # Register blueprints with explicit role-based prefixes
+    app.register_blueprint(admin_bp, url_prefix="/api/admin")
+    app.register_blueprint(audit_bp, url_prefix="/api/admin")
+    app.register_blueprint(manager_bp, url_prefix="/api/manager")
+    app.register_blueprint(deo_bp, url_prefix="/api/deo")
+    app.register_blueprint(supervisor_bp, url_prefix="/api/supervisor")
 
     # Re-register core routes from factory
     @app.route("/api/auth/login", methods=["POST"])

@@ -23,7 +23,11 @@ export interface GChartData {
 
 export interface AdminSummary {
     oee: string;
-    node_efficiency: string;
     production_units: string;
-    security_status: string;
+    stats: {
+        active_lines: number;
+        pending_reviews: number;
+        total_models: number;
+        active_deos: number;
+    };
 }

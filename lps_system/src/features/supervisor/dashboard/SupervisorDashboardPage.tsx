@@ -3,11 +3,10 @@ import { useLocation } from 'react-router-dom';
 import {
     Activity,
     AlertCircle,
-    ShieldCheck,
     Database,
-    Target,
     Users,
     Search,
+    ChevronLeft,
 } from 'lucide-react';
 import { getPendingVerifications, verifyDailyProductionRow, verifyDailyProductionLog } from '../api';
 import { API_BASE } from '../../../lib/apiConfig';
@@ -23,16 +22,15 @@ import {
 import { CustomModal } from '../../deo/components/DEOModals';
 
 // Modular Components
-import { SupervisorKPICard as KPICard } from './components/SupervisorKPICard';
 import { SupervisorVerifyLogs } from './components/SupervisorVerifyLogs';
 import { LogDetailView } from './components/LogDetailModal';
 import DEORowManualModal from '../../deo/components/DEORowManualModal';
 import { RowRejectionModal } from './components/RowRejectionModal';
-import { 
-    MonitoringView, 
-    ProgressView, 
-    ReportsView, 
-    AlertsView 
+import {
+    MonitoringView,
+    ProgressView,
+    ReportsView,
+    AlertsView
 } from './components/SupervisorViews';
 
 
@@ -53,7 +51,7 @@ const SupervisorDashboardPage = () => {
         title: '',
         message: '',
         type: 'confirm' as 'confirm' | 'alert' | 'input',
-        onConfirm: (_: string) => {}
+        onConfirm: (_: string) => { }
     });
 
     const refreshSupervisorData = async (silent = false) => {
@@ -61,7 +59,7 @@ const SupervisorDashboardPage = () => {
         const token = getToken();
         try {
             const [modelsRes, data] = await Promise.all([
-                fetch(`${API_BASE}/production/assigned-work`, {
+                fetch(`${API_BASE}/deo/assigned-work`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 }),
                 getPendingVerifications()
@@ -104,9 +102,9 @@ const SupervisorDashboardPage = () => {
         };
         setSelectedLog(updatedLog);
 
-        const sap_part_number = selectedLog.log_data[rowIndex]?.["SAP PART NUMBER"] || 
-                               selectedLog.log_data[rowIndex]?.["SAP PART #"] || 
-                               selectedLog.log_data[rowIndex]?.["sap_part_number"];
+        const sap_part_number = selectedLog.log_data[rowIndex]?.["SAP PART NUMBER"] ||
+            selectedLog.log_data[rowIndex]?.["SAP PART #"] ||
+            selectedLog.log_data[rowIndex]?.["sap_part_number"];
 
         const success = await verifyDailyProductionRow(selectedLog.id, rowIndex, status, reason, sap_part_number);
         if (!success) {
@@ -122,7 +120,7 @@ const SupervisorDashboardPage = () => {
             refreshSupervisorData(true);
         }
     };
-    
+
     const handleBulkVerify = async () => {
         if (!selectedLog) return;
 
@@ -144,7 +142,7 @@ const SupervisorDashboardPage = () => {
                     await Promise.all(verifyPromises);
 
                     // 2. Finalize the entire assignment
-                    const response = await fetch(`${API_BASE}/production/finalize-assignment/${selectedLog.car_model_id}`, {
+                    const response = await fetch(`${API_BASE}/supervisor/finalize-assignment/${selectedLog.car_model_id}`, {
                         method: 'POST',
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
@@ -238,7 +236,9 @@ const SupervisorDashboardPage = () => {
         </div>
     );
 
-    const filteredModels = assignedModels.filter(m =>
+    const activeAssignedModels = assignedModels.filter(m => !!m.assigned_deo_name && !!m.line_name);
+
+    const filteredModels = activeAssignedModels.filter(m =>
         m.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         m.model_code?.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -246,12 +246,12 @@ const SupervisorDashboardPage = () => {
     const renderContent = () => {
         switch (location.pathname) {
             case SUPERVISOR_MONITORING:
-                return <MonitoringView assignedModels={assignedModels} />;
+                return <MonitoringView assignedModels={activeAssignedModels} />;
             case SUPERVISOR_PROGRESS:
-                return <ProgressView assignedModels={assignedModels} />;
+                return <ProgressView assignedModels={activeAssignedModels} />;
             case SUPERVISOR_VERIFY:
                 return (
-                    <SupervisorVerifyLogs 
+                    <SupervisorVerifyLogs
                         verifications={verifications}
                         activeVerifyTab={activeVerifyTab}
                         setActiveVerifyTab={setActiveVerifyTab}
@@ -266,110 +266,123 @@ const SupervisorDashboardPage = () => {
             default:
                 return (
                     <div className="space-y-12">
-                        {/* Quick Stats */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                            <KPICard title="Total Assigned" value={assignedModels.length} icon={Database} color="bg-slate-900 text-white" />
-                            <KPICard title="Pending Verify" value={verifications.length} icon={ShieldCheck} color="bg-orange-500 text-white" />
-                            <KPICard title="Active DEOs" value={Array.from(new Set(assignedModels.map(m => m.assigned_deo_name))).filter(Boolean).length} icon={Users} color="bg-blue-600 text-white" />
-                            <KPICard title="Shift Progress" value={`${Math.max(0, 100 - (verifications.length * 4))}%`} icon={Target} color="bg-emerald-500 text-white" />
-                        </div>
+                        {/* Quick Stats Removed at user request */}
 
                         {/* Assigned Models */}
-                        <div className="space-y-6">
-                            <div className="flex items-center justify-between">
-                                <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Your Active Oversight</h2>
+                        <div className="space-y-8">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-4">
+                                <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter leading-none">Your Active Oversight</h2>
                                 <div className="flex items-center gap-4">
                                     <div className="relative group">
-                                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#F37021] transition-colors" size={18} />
+                                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#F37021] transition-all duration-300" size={20} />
                                         <input
                                             type="text"
                                             placeholder="SEARCH MODELS..."
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
-                                            className="bg-white border-2 border-slate-100 rounded-2xl py-3 pl-12 pr-6 text-xs font-black tracking-widest uppercase focus:border-[#F37021]/50 focus:ring-0 transition-all w-64 md:w-80 shadow-sm"
+                                            className="bg-white border-2 border-slate-100 rounded-3xl py-4 pl-14 pr-8 text-xs font-black tracking-widest uppercase focus:border-[#F37021]/30 focus:ring-0 transition-all w-full md:w-96 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:border-slate-200 placeholder:text-slate-300"
                                         />
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
-                                <table className="w-full">
-                                    <thead>
-                                        <tr className="border-b border-slate-50">
-                                            <th className="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Vehicle Configuration</th>
-                                            <th className="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Line Routing</th>
-                                            <th className="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Assigned Operator</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-50">
-                                        {filteredModels.length > 0 ? (
-                                            filteredModels.map((model) => (
-                                                <tr key={model.id} className="group hover:bg-slate-50/50 transition-all">
-                                                    <td className="px-8 py-8">
-                                                        <div className="flex items-center gap-4">
-                                                            <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center text-white shadow-lg">
-                                                                <Database size={20} />
-                                                            </div>
-                                                            <div>
-                                                                 <span className="block text-sm font-black text-slate-900 uppercase tracking-tight">
-                                                                    {model.name}
-                                                                </span>
-                                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                                                    {model.model_code} • {model.variant_name || 'Standard'}
-                                                                </span>
-                                                            </div>
+                            <div className="space-y-4">
+                                {/* Header for Columns (Hidden on small screens) */}
+                                <div className="hidden md:flex px-12 py-2">
+                                    <div className="flex-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Vehicle Configuration</div>
+                                    <div className="flex-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Line Routing</div>
+                                    <div className="flex-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Assigned Operator</div>
+                                </div>
+
+                                {filteredModels.length > 0 ? (
+                                    filteredModels.map((model) => (
+                                        <div key={model.id} className="bg-white rounded-[2.5rem] border border-slate-100/80 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.04)] hover:border-[#F37021]/10 transition-all duration-500 flex flex-col md:flex-row md:items-center p-8 group relative overflow-hidden">
+                                            {/* Hover Accent Line */}
+                                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#F37021] opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                                            {/* Vehicle Configuration */}
+                                            <div className="flex-1 flex items-center gap-6 mb-6 md:mb-0">
+                                                <div className="w-16 h-16 rounded-[1.5rem] bg-slate-900 flex items-center justify-center text-white shadow-2xl group-hover:scale-105 group-hover:bg-[#F37021] transition-all duration-500 relative overflow-hidden">
+                                                    <Database size={28} strokeWidth={2.5} />
+                                                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                                                </div>
+                                                <div>
+                                                    <span className="block text-xl font-black text-slate-900 uppercase tracking-tighter leading-none mb-1.5 transition-colors group-hover:text-[#F37021]">
+                                                        {model.name}
+                                                    </span>
+                                                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                                        <span className="bg-slate-100 px-2 py-0.5 rounded text-[10px]">{model.model_code}</span>
+                                                        <span className="opacity-50">•</span>
+                                                        {model.variant_name || 'Standard'}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Line Routing */}
+                                            <div className="flex-1 flex items-center gap-4 mb-6 md:mb-0">
+                                                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-[#F37021] group-hover:bg-[#F37021]/10 transition-all duration-300">
+                                                    <Activity size={16} />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Line Assignment</span>
+                                                    <span className="text-sm font-black text-slate-700 uppercase tracking-widest">
+                                                        {model.line_name || 'NOT ASSIGNED'}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Assigned Operator */}
+                                            <div className="flex-1 flex items-center">
+                                                {model.assigned_deo_name ? (
+                                                    <div className="flex items-center gap-4 bg-slate-50/50 p-2 pr-6 rounded-[2rem] group-hover:bg-white group-hover:shadow-sm transition-all duration-300 border border-transparent group-hover:border-slate-100">
+                                                        <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-[#F37021] shadow-md border border-slate-50 relative">
+                                                            <Users size={20} />
+                                                            <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full" />
                                                         </div>
-                                                    </td>
-                                                    <td className="px-8 py-8">
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
-                                                                <Activity size={12} />
-                                                            </div>
-                                                            <span className="text-xs font-black text-slate-700 uppercase tracking-widest">
-                                                                {model.line_name || 'NOT ASSIGNED'}
+                                                        <div>
+                                                            <span className="block text-xs font-black text-slate-900 uppercase tracking-tight leading-none mb-1">
+                                                                {model.assigned_deo_name}
+                                                            </span>
+                                                            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-1.5">
+                                                                ALLOCATED
                                                             </span>
                                                         </div>
-                                                    </td>
-                                                    <td className="px-8 py-8">
-                                                        {model.assigned_deo_name ? (
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="w-8 h-8 rounded-full bg-[#F37021]/10 flex items-center justify-center text-[#F37021]">
-                                                                    <Users size={14} />
-                                                                </div>
-                                                                <div>
-                                                                    <span className="block text-xs font-black text-slate-900 uppercase tracking-tight">
-                                                                        {model.assigned_deo_name}
-                                                                    </span>
-                                                                    <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-1 mt-0.5">
-                                                                        <Activity size={10} /> Allocated
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="flex items-center gap-3 opacity-50">
-                                                                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
-                                                                    <Users size={14} />
-                                                                </div>
-                                                                <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest bg-amber-50 px-3 py-1 rounded-full border border-amber-100">
-                                                                    Pending Assignment
-                                                                </span>
-                                                            </div>
-                                                        )}
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        ) : (
-                                            <tr>
-                                                <td colSpan={3} className="px-10 py-20 text-center">
-                                                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
-                                                        <AlertCircle size={24} />
                                                     </div>
-                                                    <p className="text-slate-500 font-black text-xs uppercase tracking-widest">No matching vehicles found.</p>
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
+                                                ) : (
+                                                    <div className="flex items-center gap-4 opacity-70">
+                                                        <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 border-2 border-dashed border-slate-200">
+                                                            <Users size={20} />
+                                                        </div>
+                                                        <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest bg-amber-50 px-5 py-2 rounded-full border border-amber-100 shadow-sm animate-pulse">
+                                                            Pending Assignment
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Action Indicator */}
+                                            <div className="absolute right-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-500 hidden md:block">
+                                                <div className="w-10 h-10 rounded-full bg-[#111827] flex items-center justify-center text-white shadow-lg">
+                                                    <ChevronLeft size={20} className="rotate-180" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="bg-white rounded-[3rem] border-2 border-dashed border-slate-100 p-24 text-center">
+                                        <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-8 text-slate-200">
+                                            <Search size={48} strokeWidth={1} />
+                                        </div>
+                                        <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight mb-2">No results found</h3>
+                                        <p className="text-slate-400 font-bold max-w-xs mx-auto text-sm leading-relaxed">We couldn't find any vehicle matching your search criteria.</p>
+                                        <button
+                                            onClick={() => setSearchTerm('')}
+                                            className="mt-8 text-[#F37021] font-black text-xs uppercase tracking-[0.2em] hover:opacity-70 transition-opacity"
+                                        >
+                                            Clear All Filters
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -380,23 +393,14 @@ const SupervisorDashboardPage = () => {
     return (
         <div className="max-w-[1920px] mx-auto min-h-screen font-sans bg-[#F8FAFC]">
             <div className="p-8 pb-4">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
-                    <div>
-                        <div className="flex items-center gap-3 mb-3">
-                            <div className="bg-[#F37021]/10 px-3 py-1 rounded-full">
-                                <span className="text-[10px] font-black tracking-[0.2em] text-[#F37021] uppercase">Oversight Dashboard</span>
-                            </div>
-                        </div>
-                        <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-                            OVERVIEW
-                        </h1>
-                    </div>
+                <div>
+                    {/* Oversight Dashboard Header Removed at user request */}
                 </div>
             </div>
 
             <div className="px-8 pb-12">
                 {selectedLog ? (
-                    <LogDetailView 
+                    <LogDetailView
                         selectedLog={selectedLog}
                         setSelectedLog={setSelectedLog}
                         onBulkVerify={handleBulkVerify}
@@ -408,7 +412,7 @@ const SupervisorDashboardPage = () => {
                 )}
             </div>
 
-            <DEORowManualModal 
+            <DEORowManualModal
                 isOpen={selectedRowIndex !== null}
                 onClose={() => setSelectedRowIndex(null)}
                 row={selectedRowIndex !== null ? selectedLog?.log_data[selectedRowIndex] : null}
@@ -424,17 +428,18 @@ const SupervisorDashboardPage = () => {
                         // Sync to backend
                         const token = getToken();
                         try {
-                            const res = await fetch(`${API_BASE}/production/daily-logs`, {
+                            const res = await fetch(`${API_BASE}/supervisor/update-log`, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
                                     'Authorization': `Bearer ${token}`
                                 },
                                 body: JSON.stringify({
+                                    log_id: selectedLog.id,
                                     model_name: selectedLog.model_name,
                                     car_model_id: selectedLog.car_model_id,
                                     demand_id: selectedLog.demand_id,
-                                    deo_id: selectedLog.deo_id, // Ensure we update the CORRECT DEO's log
+                                    deo_id: selectedLog.deo_id, 
                                     log_data: updatedLog.log_data,
                                     is_final: selectedLog.status === 'SUBMITTED' || selectedLog.status === 'VERIFIED'
                                 })
@@ -455,16 +460,17 @@ const SupervisorDashboardPage = () => {
                             const updatedLog = { ...selectedLog };
                             updatedLog.log_data[selectedRowIndex] = { ...updatedRow, row_status: status, rejection_reason: reason };
                             setSelectedLog(updatedLog);
-                            
+
                             // Save the full log to ensure the correction is persisted
                             const token = getToken();
-                            await fetch(`${API_BASE}/production/daily-logs`, {
+                            await fetch(`${API_BASE}/supervisor/update-log`, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
                                     'Authorization': `Bearer ${token}`
                                 },
                                 body: JSON.stringify({
+                                    log_id: selectedLog.id,
                                     model_name: selectedLog.model_name,
                                     car_model_id: selectedLog.car_model_id,
                                     demand_id: selectedLog.demand_id,
@@ -486,7 +492,7 @@ const SupervisorDashboardPage = () => {
                 }}
             />
 
-            <RowRejectionModal 
+            <RowRejectionModal
                 rejectingRowIndex={rejectingRowIndex}
                 setRejectingRowIndex={setRejectingRowIndex}
                 rowRejectionComment={rowRejectionComment}

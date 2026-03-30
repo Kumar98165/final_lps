@@ -6,11 +6,12 @@ prefix.
 """
 
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required
-from app.models import User, ProductionLine, CarModel, Demand, db
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from app.models import User, ProductionLine, CarModel, Demand, db, DailyWorkStatus, DailyProductionLog
 from app.services.db_service import IdentityDBService
 from app.middleware.auth_middleware import role_required
 from app.utils.audit_logger import log_audit
+import time as time_module
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -99,10 +100,8 @@ def delete_line(line_id):
 @jwt_required()
 @role_required(['Admin'])
 def get_assignments():
-    # Show models that have at least one demand
-    models = CarModel.query.filter(
-        CarModel.demands_list.any()
-    ).order_by(CarModel.name.asc()).all()
+    # Show all registered car models
+    models = CarModel.query.order_by(CarModel.name.asc()).all()
     return jsonify({
         "success": True,
         "data": [m.to_dict() for m in models]
@@ -110,7 +109,7 @@ def get_assignments():
 
 @admin_bp.route('/assignments/<int:model_id>', methods=['PUT', 'PATCH'])
 @jwt_required()
-@role_required(['Admin'])
+@role_required(['Admin', 'Supervisor'])
 def update_assignment(model_id):
     model = CarModel.query.get(model_id)
     if not model:
@@ -128,6 +127,145 @@ def update_assignment(model_id):
     log_audit("UPDATE_ASSIGNMENT")
     return jsonify({"success": True, "message": f"Assignments updated for {model.name}", "data": model.to_dict()})
 
+# ---------------------------------------------------------------------------
+# Master Data & Models (from Production BP)
+# ---------------------------------------------------------------------------
+@admin_bp.route('/models', methods=['GET'])
+@jwt_required()
+@role_required(['Admin', 'Supervisor', 'Manager', 'DEO'])
+def get_models():
+    # Return unique model names
+    from sqlalchemy import func
+    latest_ids = db.session.query(func.max(CarModel.id)).group_by(CarModel.name).all()
+    latest_ids = [id_tuple[0] for id_tuple in latest_ids]
+    models = CarModel.query.filter(CarModel.id.in_(latest_ids)).order_by(CarModel.name.asc()).all()
+    return jsonify({"success": True, "data": [m.to_dict() for m in models]})
+
+@admin_bp.route('/models', methods=['POST'])
+@jwt_required()
+@role_required(['Admin', 'Manager'])
+def create_model_master():
+    data = request.json
+    if not data or not data.get('name'):
+        return jsonify({"success": False, "message": "Name is required"}), 400
+    
+    new_model = CarModel(
+        name=data['name'],
+        model_code=data.get('model_code'),
+        type=data.get('type', 'Standard')
+    )
+    db.session.add(new_model)
+    db.session.commit()
+    log_audit("CREATE_MODEL_MASTER")
+    return jsonify({"success": True, "message": "Model created", "data": new_model.to_dict()}), 201
+
+# ---------------------------------------------------------------------------
+# Demands / Orders (from Production BP)
+# ---------------------------------------------------------------------------
+@admin_bp.route('/demands', methods=['GET'])
+@jwt_required()
+@role_required(['Admin', 'Supervisor', 'Manager', 'DEO'])
+def get_demands():
+    manager_filter = request.args.get('manager')
+    query = Demand.query
+    if manager_filter:
+        query = query.filter(Demand.manager.ilike(manager_filter))
+    demands = query.order_by(Demand.id.desc()).all()
+    return jsonify({"success": True, "data": [d.to_dict() for d in demands]})
+
+@admin_bp.route('/demands', methods=['POST'])
+@jwt_required()
+@role_required(['Admin', 'Supervisor', 'Manager'])
+def create_demand():
+    data = request.json
+    model_name = data.get('model_name') or data.get('model_id')
+    if not data or not model_name or not data.get('quantity'):
+        return jsonify({"success": False, "message": "Model and Quantity are required"}), 400
+    
+    # Generate unique DEM-ID
+    from sqlalchemy import func
+    max_id = db.session.query(func.max(Demand.id)).scalar() or 0
+    formatted_id = data.get('formatted_id', f"DEM-{(max_id + 1):03d}")
+    
+    # Clone model for independent assignment lifecycle
+    model_name_str = str(model_name).upper().strip()
+    new_model = CarModel(
+        name=model_name_str,
+        model_code=f"{model_name_str[:3]}-{str(int(time_module.time()))[-4:]}",
+        type='Standard',
+        status='PENDING'
+    )
+    db.session.add(new_model)
+    db.session.flush()
+
+    new_demand = Demand(
+        formatted_id=formatted_id,
+        model_id=new_model.id,
+        model_name=model_name_str,
+        quantity=data['quantity'],
+        start_date=data.get('start_date'),
+        end_date=data.get('end_date'),
+        line=data.get('line'),
+        manager=data.get('manager'),
+        customer=data.get('customer'),
+        status='PENDING'
+    )
+    db.session.add(new_demand)
+    db.session.commit()
+    log_audit("CREATE_DEMAND_ADMIN")
+    return jsonify({"success": True, "message": "Demand created", "data": new_demand.to_dict()}), 201
+
+@admin_bp.route('/demands/<int:id>', methods=['GET', 'PUT', 'PATCH'])
+@jwt_required()
+@role_required(['Admin', 'Supervisor', 'Manager'])
+def handle_demand_by_id(id):
+    demand = Demand.query.get(id)
+    if not demand:
+        return jsonify({"success": False, "message": "Demand not found"}), 404
+    
+    if request.method == 'GET':
+        return jsonify({"success": True, "data": demand.to_dict()})
+    
+    data = request.json or {}
+    if 'quantity' in data: demand.quantity = data['quantity']
+    if 'status' in data: demand.status = data['status']
+    if 'line' in data: demand.line = data['line']
+    if 'manager' in data: demand.manager = data['manager']
+    if 'customer' in data: demand.customer = data['customer']
+    if 'start_date' in data: demand.start_date = data['start_date']
+    if 'end_date' in data: demand.end_date = data['end_date']
+    
+    db.session.commit()
+    log_audit("UPDATE_DEMAND_ADMIN")
+    return jsonify({"success": True, "message": "Demand updated", "data": demand.to_dict()})
+
+@admin_bp.route('/demands/<int:id>', methods=['DELETE'])
+@jwt_required()
+@role_required(['Admin'])
+def delete_demand(id):
+    demand = Demand.query.get(id)
+    if not demand:
+        return jsonify({"success": False, "message": "Demand not found"}), 404
+    
+    model_id = demand.model_id
+    # Cleanup associated logs, work status, and unique model clone
+    DailyProductionLog.query.filter_by(demand_id=id).delete()
+    
+    if model_id:
+        # Prevent foreign key constraint errors by cleaning up daily status records
+        DailyWorkStatus.query.filter_by(car_model_id=model_id).delete()
+        
+    db.session.delete(demand)
+    
+    if model_id:
+        model = CarModel.query.get(model_id)
+        if model: 
+            db.session.delete(model)
+    
+    db.session.commit()
+    log_audit("DELETE_DEMAND_ADMIN")
+    return jsonify({"success": True, "message": "Demand deleted successfully"})
+
 # Helper for pagination (reuse from routes if needed)
 def paginate_query(query, default_limit=50, max_limit=200):
     try:
@@ -144,7 +282,7 @@ def paginate_query(query, default_limit=50, max_limit=200):
 @jwt_required()
 @role_required(['Admin'])
 def get_admin_summary():
-    from app.models import DailyWorkStatus
+    from app.models import DailyWorkStatus, DailyProductionLog, CarModel, ProductionLine
     from sqlalchemy import func
     import datetime
     
@@ -161,13 +299,21 @@ def get_admin_summary():
         oee_val = (total_actual / total_planned) * 100
         oee = f"{oee_val:.1f}%"
     elif total_actual > 0:
-        oee = "100.0%" # Edge case where it's 100% if no planning but work done? 
+        oee = "100.0%"
+
+    # 5. General Stats
+    stats = {
+        "active_lines": ProductionLine.query.filter_by(is_active=True).count(),
+        "pending_reviews": DailyProductionLog.query.filter_by(status='PENDING').count(),
+        "total_models": CarModel.query.count(),
+        "active_deos": User.query.filter_by(role='DEO', is_active=True).count()
+    }
         
     return jsonify({
+        "success": True,
         "oee": oee,
-        "node_efficiency": "98.2%", # Mocked for now
-        "production_units": str(total_actual) if total_actual > 0 else '0',
-        "security_status": "Verified"
+        "production_units": str(total_actual),
+        "stats": stats
     })
 
 

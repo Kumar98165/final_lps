@@ -26,7 +26,7 @@ const ModelRegisterPage = () => {
             const token = getToken();
 
             // 1. Create Model
-            const modelResponse = await fetch(`${API_BASE}/production/car-models`, {
+            const modelResponse = await fetch(`${API_BASE}/admin/models`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ const ModelRegisterPage = () => {
             const newModel = modelData.data;
 
             // 2. Create Demand using the new Model
-            const demandResponse = await fetch(`${API_BASE}/production/demands`, {
+            const demandResponse = await fetch(`${API_BASE}/admin/demands`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

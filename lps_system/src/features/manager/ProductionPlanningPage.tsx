@@ -26,7 +26,7 @@ const fetchBOMForModel = async (modelName: string): Promise<any[]> => {
     try {
         const token = getToken();
 
-        const response = await fetch(`${API_BASE}/master-data?model=${modelName}`, {
+        const response = await fetch(`${API_BASE}/manager/master-data?model=${modelName}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -100,179 +100,171 @@ const ProductionPlanningPage = () => {
             setIsLoading(true);
             try {
                 const token = getToken();
-                const response = await fetch(`${API_BASE}/production/demands/${demandId}`, {
+                const response = await fetch(`${API_BASE}/admin/demands/${demandId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 if (response.ok) {
-                    const foundDemand = await response.json();
-                    setDemand(foundDemand);
+                    const result = await response.json();
+                    if (result.success && result.data) {
+                        const foundDemand = result.data;
+                        setDemand(foundDemand);
 
-                    // 1. Fetch Schema (Headers) from Backend
-                    try {
-                        const schemaRes = await fetch(`${API_BASE}/models/${foundDemand.model_name}/schema`, {
-                            headers: { 'Authorization': `Bearer ${token}` }
-                        });
-                        if (schemaRes.ok) {
-                            const schemaData = await schemaRes.json();
-                            if (schemaData.success && schemaData.data) {
-                                // Enforce local frontend order for commonHeaders, so removed identification_headers override
-                                if (schemaData.data.production_headers) setProductionHeaders(schemaData.data.production_headers);
-                                // Material headers are currently hardcoded to match RM Sheet
-                            }
-                        }
-                    } catch (e) {
-                        console.warn("Could not load schema from backend.");
-                    }
-
-                    // 2. Fetch Data Rows
-                    const rawData = await fetchBOMForModel(foundDemand.model_name);
-
-                    // Format data with key normalization to match commonHeaders
-                    let formatted = rawData.map((item: any, idx) => {
-                        const row: any = {
-                            id: idx + 1,
-                            ...item.production_data,
-                            ...item.material_data
-                        };
-
-                        // Map common fields to UI header keys dynamically
-                        // Map common fields to UI header keys dynamically
-                        if (item.common) {
-                            // Standard UI headers (Industrial Uppercase)
-                            // Force sequential SN. NO for clean display
-                            row["SN. NO"] = idx + 1;
-                            row["SR NO"] = row["SN. NO"];
-                            row["Sr No"] = row["SN. NO"];
-                            row["S."] = row["SN. NO"];
-                            row["SN NO"] = row["SN. NO"];
-
-                            row["PART NUMBER"] = item.common.part_number;
-                            row["Part Number"] = item.common.part_number;
-
-                            row["SAP PART NUMBER"] = item.common.sap_part_number;
-                            row["SAP Part Number"] = item.common.sap_part_number;
-                            row["SAP PART #"] = item.common.sap_part_number;
-
-                            row["PART DESCRIPTION"] = item.common.description;
-                            row["Part Description"] = item.common.description;
-                            row["DESCRIPTION"] = item.common.description;
-
-                            // Standardize Saleable and Assembly from primary MasterData columns
-                            row["SALEABLE NO"] = item.common.saleable_no || "";
-                            row["ASSEMBLY NUMBER"] = item.common.assembly_number || "";
-                        }
-
-                        // Normalize specific tricky keys from Excel imports
-                        if (row['SAP Part Number .1'] !== undefined) {
-                            row['SAP PART NUMBER'] = row['SAP Part Number .1'];
-                        }
-
-                        // Initialize transient fields as empty
-                        TRANSIENT_FIELDS.forEach(field => {
-                            row[field] = "";
-                        });
-
-                        return row;
-                    });
-
-                    // If NO master data found for a new model, create a starting empty row template
-                    if (formatted.length === 0) {
-                        formatted = [{
-                            id: 1,
-                            ...commonHeaders.reduce((acc, h) => ({ ...acc, [h]: "" }), {}),
-                            ...productionHeaders.reduce((acc, h) => ({ ...acc, [h]: "" }), {}),
-                            ...materialHeaders.reduce((acc, h) => ({ ...acc, [h]: "" }), {})
-                        }];
-                    }
-
-                    // ---- Merge with latest DEO daily log to show filled data ----
-                    try {
-                        const logsRes = await fetch(`${API_BASE}/production/supervisor/submissions`, {
-                            headers: { 'Authorization': `Bearer ${token}` }
-                        });
-                        if (logsRes.ok) {
-                            const logsData = await logsRes.json();
-                            const allLogs = logsData.data || [];
-                            // Find the latest log for this demand
-                            const latestLog = allLogs
-                                .filter((s: any) => {
-                                    const modelIdMatch = s.car_model_id && foundDemand.model_id && Number(s.car_model_id) === Number(foundDemand.model_id);
-                                    const nameMatch = s.model_name?.toUpperCase().trim() === foundDemand.model_name?.toUpperCase().trim();
-                                    const logDemandId = s.demand_id ? Number(s.demand_id) : null;
-                                    const currentDemandId = foundDemand.id ? Number(foundDemand.id) : null;
-                                    const demandMatch = currentDemandId ? (logDemandId === currentDemandId) : (!logDemandId);
-                                    return (modelIdMatch || nameMatch) && demandMatch;
-                                })
-                                .sort((a: any, b: any) => b.id - a.id)[0];
-
-                            if (latestLog && latestLog.log_data) {
-                                const DEO_EDITABLE_FIELDS = [
-                                    "SAP Stock", "Opening Stock", "Todays Stock",
-                                    "Today Produced", "Remain Qty", "Balance Qty",
-                                    "Production Status", "Defect Count", "Failure Reason", "Remarks"
-                                ];
-
-                                formatted = formatted.map((fRow: any) => {
-                                    const logRow = latestLog.log_data.find((l: any) =>
-                                        l["SAP PART NUMBER"] === fRow["SAP PART NUMBER"] ||
-                                        l["SAP PART #"] === fRow["SAP PART NUMBER"] ||
-                                        l["Part Number"] === fRow["PART NUMBER"]
-                                    );
-                                    if (logRow) {
-                                        const newFields: any = {};
-                                        DEO_EDITABLE_FIELDS.forEach(field => {
-                                            if (logRow[field] !== undefined && logRow[field] !== null && logRow[field] !== '') {
-                                                newFields[field] = logRow[field];
-                                            }
-                                        });
-                                        // Also get PER DAY and Coverage Days from the log (backend calculates these)
-                                        if (logRow['PER DAY']) newFields['PER DAY'] = logRow['PER DAY'];
-                                        if (logRow['TOTAL SCHEDULE QTY']) newFields['TOTAL SCHEDULE QTY'] = logRow['TOTAL SCHEDULE QTY'];
-                                        if (logRow['Coverage Days']) newFields['Coverage Days'] = logRow['Coverage Days'];
-                                        return { ...fRow, ...newFields };
-                                    }
-                                    return fRow;
-                                });
-                            }
-                        }
-                    } catch (logErr) {
-                        console.warn("Could not fetch DEO logs for admin view:", logErr);
-                    }
-
-                    // Calculate PER DAY and Coverage Days from demand if not already set
-                    if (foundDemand.quantity) {
-                        const reqQty = Number(foundDemand.quantity) || 0;
-                        let workingDays = 0;
-                        if (foundDemand.start_date && foundDemand.end_date) {
-                            const start = new Date(foundDemand.start_date);
-                            const end = new Date(foundDemand.end_date);
-                            if (start <= end) {
-                                const current = new Date(start);
-                                while (current <= end) {
-                                    if (current.getDay() !== 0) workingDays++;
-                                    current.setDate(current.getDate() + 1);
+                        // 1. Fetch Schema (Headers) from Backend
+                        try {
+                            const schemaRes = await fetch(`${API_BASE}/manager/models/${foundDemand.model_name}/schema`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (schemaRes.ok) {
+                                const schemaData = await schemaRes.json();
+                                if (schemaData.success && schemaData.data) {
+                                    if (schemaData.data.production_headers) setProductionHeaders(schemaData.data.production_headers);
                                 }
                             }
+                        } catch (e) {
+                            console.warn("Could not load schema from backend.");
                         }
-                        if (workingDays === 0) workingDays = 25;
-                        const perDay = reqQty > 0 ? (reqQty / workingDays).toFixed(2) : '0';
 
-                        formatted.forEach((row: any) => {
-                            if (!row['PER DAY'] || row['PER DAY'] === '' || row['PER DAY'] === '0') {
-                                row['PER DAY'] = perDay;
+                        // 2. Fetch Data Rows
+                        const rawData = await fetchBOMForModel(foundDemand.model_name);
+
+                        // Format data with key normalization to match commonHeaders
+                        let formatted = rawData.map((item: any, idx) => {
+                            const row: any = {
+                                id: idx + 1,
+                                ...item.production_data,
+                                ...item.material_data
+                            };
+
+                            if (item.common) {
+                                row["SN. NO"] = idx + 1;
+                                row["SR NO"] = row["SN. NO"];
+                                row["Sr No"] = row["SN. NO"];
+                                row["S."] = row["SN. NO"];
+                                row["SN NO"] = row["SN. NO"];
+
+                                row["PART NUMBER"] = item.common.part_number;
+                                row["Part Number"] = item.common.part_number;
+
+                                row["SAP PART NUMBER"] = item.common.sap_part_number;
+                                row["SAP Part Number"] = item.common.sap_part_number;
+                                row["SAP PART #"] = item.common.sap_part_number;
+
+                                row["PART DESCRIPTION"] = item.common.description;
+                                row["Part Description"] = item.common.description;
+                                row["DESCRIPTION"] = item.common.description;
+
+                                row["SALEABLE NO"] = item.common.saleable_no || "";
+                                row["ASSEMBLY NUMBER"] = item.common.assembly_number || "";
                             }
-                            if (!row['TOTAL SCHEDULE QTY'] || row['TOTAL SCHEDULE QTY'] === '') {
-                                row['TOTAL SCHEDULE QTY'] = String(reqQty);
+
+                            if (row['SAP Part Number .1'] !== undefined) {
+                                row['SAP PART NUMBER'] = row['SAP Part Number .1'];
                             }
-                            // Recalculate Coverage Days
-                            const pDay = parseFloat(row['PER DAY']) || 0;
-                            const tStock = parseFloat(row['Todays Stock'] || '0') || 0;
-                            row['Coverage Days'] = pDay > 0 ? (tStock / pDay).toFixed(1) : '0.0';
+
+                            TRANSIENT_FIELDS.forEach(field => {
+                                row[field] = "";
+                            });
+
+                            return row;
                         });
-                    }
 
-                    setRequirements(formatted);
+                        if (formatted.length === 0) {
+                            formatted = [{
+                                id: 1,
+                                ...commonHeaders.reduce((acc: any, h: any) => ({ ...acc, [h]: "" }), {}),
+                                ...productionHeaders.reduce((acc: any, h: any) => ({ ...acc, [h]: "" }), {}),
+                                ...materialHeaders.reduce((acc: any, h: any) => ({ ...acc, [h]: "" }), {})
+                            }];
+                        }
+
+                        // ---- Merge with latest DEO daily log to show filled data ----
+                        try {
+                            const logsRes = await fetch(`${API_BASE}/supervisor/submissions`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (logsRes.ok) {
+                                const logsData = await logsRes.json();
+                                const allLogs = logsData.data || [];
+                                const latestLog = allLogs
+                                    .filter((s: any) => {
+                                        const modelIdMatch = s.car_model_id && foundDemand.model_id && Number(s.car_model_id) === Number(foundDemand.model_id);
+                                        const nameMatch = s.model_name?.toUpperCase().trim() === foundDemand.model_name?.toUpperCase().trim();
+                                        const logDemandId = s.demand_id ? Number(s.demand_id) : null;
+                                        const currentDemandId = foundDemand.id ? Number(foundDemand.id) : null;
+                                        const demandMatch = currentDemandId ? (logDemandId === currentDemandId) : (!logDemandId);
+                                        return (modelIdMatch || nameMatch) && demandMatch;
+                                    })
+                                    .sort((a: any, b: any) => b.id - a.id)[0];
+
+                                if (latestLog && latestLog.log_data) {
+                                    const DEO_EDITABLE_FIELDS = [
+                                        "SAP Stock", "Opening Stock", "Todays Stock",
+                                        "Today Produced", "Remain Qty", "Balance Qty",
+                                        "Production Status", "Defect Count", "Failure Reason", "Remarks"
+                                    ];
+
+                                    formatted = formatted.map((fRow: any) => {
+                                        const logRow = latestLog.log_data.find((l: any) =>
+                                            l["SAP PART NUMBER"] === fRow["SAP PART NUMBER"] ||
+                                            l["SAP PART #"] === fRow["SAP PART NUMBER"] ||
+                                            l["Part Number"] === fRow["PART NUMBER"]
+                                        );
+                                        if (logRow) {
+                                            const newFields: any = {};
+                                            DEO_EDITABLE_FIELDS.forEach(field => {
+                                                if (logRow[field] !== undefined && logRow[field] !== null && logRow[field] !== '') {
+                                                    newFields[field] = logRow[field];
+                                                }
+                                            });
+                                            if (logRow['PER DAY']) newFields['PER DAY'] = logRow['PER DAY'];
+                                            if (logRow['TOTAL SCHEDULE QTY']) newFields['TOTAL SCHEDULE QTY'] = logRow['TOTAL SCHEDULE QTY'];
+                                            if (logRow['Coverage Days']) newFields['Coverage Days'] = logRow['Coverage Days'];
+                                            return { ...fRow, ...newFields };
+                                        }
+                                        return fRow;
+                                    });
+                                }
+                            }
+                        } catch (logErr) {
+                            console.warn("Could not fetch DEO logs for admin view:", logErr);
+                        }
+
+                        if (foundDemand.quantity) {
+                            const reqQty = Number(foundDemand.quantity) || 0;
+                            let workingDays = 0;
+                            if (foundDemand.start_date && foundDemand.end_date) {
+                                const start = new Date(foundDemand.start_date);
+                                const end = new Date(foundDemand.end_date);
+                                if (start <= end) {
+                                    const current = new Date(start);
+                                    while (current <= end) {
+                                        if (current.getDay() !== 0) workingDays++;
+                                        current.setDate(current.getDate() + 1);
+                                    }
+                                }
+                            }
+                            if (workingDays === 0) workingDays = 25;
+                            const perDay = reqQty > 0 ? (reqQty / workingDays).toFixed(2) : '0';
+
+                            formatted.forEach((row: any) => {
+                                if (!row['PER DAY'] || row['PER DAY'] === '' || row['PER DAY'] === '0') {
+                                    row['PER DAY'] = perDay;
+                                }
+                                if (!row['TOTAL SCHEDULE QTY'] || row['TOTAL SCHEDULE QTY'] === '') {
+                                    row['TOTAL SCHEDULE QTY'] = String(reqQty);
+                                }
+                                const pDay = parseFloat(row['PER DAY']) || 0;
+                                const tStock = parseFloat(row['Todays Stock'] || '0') || 0;
+                                row['Coverage Days'] = pDay > 0 ? (tStock / pDay).toFixed(1) : '0.0';
+                            });
+                        }
+
+                        setRequirements(formatted);
+                    } else {
+                        console.warn(`Demand ${demandId} data missing in response.`);
+                        setDemand(null);
+                    }
                 } else {
                     console.warn(`Demand ${demandId} not found in backend.`);
                     setDemand(null);
@@ -328,7 +320,7 @@ const ProductionPlanningPage = () => {
         setIsSaving(true);
         try {
             const token = getToken();
-            const response = await fetch(`${API_BASE}/master-data/${sapNum}`, {
+            const response = await fetch(`${API_BASE}/manager/master-data/${sapNum}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({
@@ -384,7 +376,7 @@ const ProductionPlanningPage = () => {
         if (type === 'mat') payload.material_headers = updatedHeaders;
 
         try {
-            await fetch(`${API_BASE}/models/${demand.model_name}/schema`, {
+            await fetch(`${API_BASE}/manager/models/${demand.model_name}/schema`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(payload)
@@ -494,7 +486,7 @@ const ProductionPlanningPage = () => {
                     setIsSaving(true);
                     try {
                         const token = getToken();
-                        await fetch(`${API_BASE}/master-data/${sapNum}`, {
+                        await fetch(`${API_BASE}/manager/master-data/${sapNum}`, {
                             method: 'DELETE',
                             headers: { 'Authorization': `Bearer ${token}` }
                         });
@@ -539,7 +531,7 @@ const ProductionPlanningPage = () => {
         setIsSaving(true);
         try {
             const token = getToken();
-            const response = await fetch(`${API_BASE}/production/car-models/${demand.model_id}/ready`, {
+            const response = await fetch(`${API_BASE}/manager/car-models/${demand.model_id}/ready`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

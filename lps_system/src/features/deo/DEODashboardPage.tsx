@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -37,6 +37,8 @@ interface AssignedModel {
     target_quantity?: number;
     verified_at?: string;
     supervisor_comment?: string;
+    planned_qty?: number;
+    actual_qty?: number;
 }
 
 const DEODashboardPage = () => {
@@ -45,22 +47,30 @@ const DEODashboardPage = () => {
     const [assignedModels, setAssignedModels] = useState<AssignedModel[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedModelId, setSelectedModelId] = useState<number | null>(null);
+    const [isEditingPart, setIsEditingPart] = useState(false);
     const [modelFilter, setModelFilter] = useState<'ALL' | 'NEW' | 'ACCEPTED' | 'READY' | 'REJECTED'>('ALL');
     const [submissionHistory, setSubmissionHistory] = useState<any[]>([]);
 
     const entryModels = useMemo(() =>
-        assignedModels.filter(m => m.deo_accepted && m.status !== 'COMPLETED' && m.status !== 'VERIFIED'),
+        assignedModels.filter(m => 
+            // In entry, only show accepted models that are NOT yet finished
+            m.deo_accepted && 
+            m.status?.toUpperCase() !== 'COMPLETED' && 
+            m.status?.toUpperCase() !== 'VERIFIED'
+        ),
         [assignedModels]
     );
 
     const verifyModels = useMemo(() =>
         assignedModels.filter(m => {
-            if (!m.deo_accepted) return false;
+            const isCompleted = m.status?.toUpperCase() === 'COMPLETED' || m.status?.toUpperCase() === 'VERIFIED';
+            if (!isCompleted) return false;
+            
+            // For completed models, don't show them if they are rejected in history
             const hasRejected = submissionHistory.some(s =>
                 (s.car_model_id === m.id || s.model_name === m.name) && s.status === 'REJECTED'
             );
-            if (hasRejected) return false;
-            return m.status === 'COMPLETED' || m.status === 'VERIFIED';
+            return !hasRejected;
         }),
         [assignedModels, submissionHistory]
     );
@@ -86,82 +96,94 @@ const DEODashboardPage = () => {
         onConfirm: () => { }
     });
     const [rejectionModalData, setRejectionModalData] = useState<{ part: string; reason: string } | null>(null);
+    
+    // Sync management: Debounce and sequence control
+    const syncTimeoutRef = useRef<any>(null);
+    const lastSyncTimeRef = useRef<number>(0);
 
-    const handleCellEdit = useCallback(async (rowId: number, colKey: string, value: string) => {
+    const handleCellEdit = useCallback(async (rowId: number, colKeyOrEdits: string | Record<string, any>, value?: any) => {
+        const edits = typeof colKeyOrEdits === 'string' ? { [colKeyOrEdits]: value } : colKeyOrEdits;
+        
+        let finalEdits = { ...edits };
+
         // 1. Update local state first for immediate feedback
         setRequirements(prev => {
-            const updatedRequirements = prev.map(req => {
+            return prev.map(req => {
                 if (req.id === rowId) {
-                    const newReq = { ...req, [colKey]: value };
-
-                    // Auto-calculate Coverage Days: Todays Stock / Per Day
-                    if (['Todays Stock', 'PER DAY'].includes(colKey)) {
-                        const today = parseFloat(newReq['Todays Stock'] || '0') || 0;
-                        const pDay = parseFloat(newReq['PER DAY'] || '0') || 0;
-                        newReq['Coverage Days'] = pDay > 0 ? (today / pDay).toFixed(1) : '0.0';
+                    const tempReq = { ...req, ...edits };
+                    
+                    // Derived: Coverage Days
+                    if (edits['Todays Stock'] !== undefined || edits['PER DAY'] !== undefined) {
+                        const today = parseFloat(tempReq['Todays Stock'] || '0') || 0;
+                        const pDay = parseFloat(tempReq['PER DAY'] || '0') || 0;
+                        const coverage = pDay > 0 ? (today / pDay).toFixed(1) : '0.0';
+                        finalEdits['Coverage Days'] = coverage;
+                        tempReq['Coverage Days'] = coverage;
                     }
 
-                    // Auto-calculate Balance if Target Qty or Today Produced is edited
-                    if (colKey === 'Today Produced' || colKey === 'Target Qty') {
-                        const target = parseFloat(colKey === 'Target Qty' ? value : (req['Target Qty'] || '0').replace(/,/g, '')) || 0;
-                        const produced = parseFloat(colKey === 'Today Produced' ? value : (req['Today Produced'] || '0').replace(/,/g, '')) || 0;
-                        newReq['Remain Qty'] = Math.max(0, target - produced).toString();
+                    // Derived: Remain Qty & Status
+                    if (edits['Today Produced'] !== undefined || edits['Target Qty'] !== undefined) {
+                        const target = parseFloat(tempReq['Target Qty'] || '0') || 0;
+                        const produced = parseFloat(tempReq['Today Produced'] || '0') || 0;
+                        const remain = Math.max(0, target - produced).toString();
+                        
+                        finalEdits['Remain Qty'] = remain;
+                        tempReq['Remain Qty'] = remain;
 
-                        // Auto-transition status to COMPLETE if target met
                         if (produced >= target && target > 0) {
-                            newReq['Production Status'] = 'COMPLETE';
+                            finalEdits['Production Status'] = 'COMPLETE';
+                            tempReq['Production Status'] = 'COMPLETE';
                         } else if (produced > 0) {
-                            newReq['Production Status'] = 'IN PROGRESS';
-                        }
-
-                        // Reset rejection status if producer edits quantities
-                        newReq.row_status = null;
-                        newReq.supervisor_reviewed = false;
-                    }
-
-                    // Reset rejection status if producer edits ANY field while rejected
-                    if (req.row_status === 'REJECTED') {
-                        newReq.row_status = null;
-                        newReq.supervisor_reviewed = false;
-                    }
-
-                    // Auto-calculate RM SIZE if dimensions are edited
-                    if (['RM Thk mm', 'Sheet Width', 'Sheet Length'].includes(colKey)) {
-                        const thk = colKey === 'RM Thk mm' ? value : (newReq['RM Thk mm'] || '');
-                        const width = colKey === 'Sheet Width' ? value : (newReq['Sheet Width'] || '');
-                        const length = colKey === 'Sheet Length' ? value : (newReq['Sheet Length'] || '');
-                        if (thk || width || length) {
-                            newReq['RM SIZE'] = `${thk}X${width}X${length}`.replace(/XX/g, 'X').replace(/^X|X$/g, '');
+                            finalEdits['Production Status'] = 'IN PROGRESS';
+                            tempReq['Production Status'] = 'IN PROGRESS';
                         }
                     }
 
-                    return newReq;
+                    // Reset audit flags on any edit
+                    finalEdits['row_status'] = null;
+                    finalEdits['supervisor_reviewed'] = false;
+                    tempReq.row_status = null;
+                    tempReq.supervisor_reviewed = false;
+
+                    return tempReq;
                 }
                 return req;
             });
-
-            return updatedRequirements;
         });
 
-        // 2. Sync with backend
-        try {
-            const token = getToken();
-            await fetch(`${API_BASE}/production/assigned-work/${rowId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ 
-                    [colKey]: value,
-                    car_model_id: selectedModelId,
-                    demand_id: demand?.id
-                })
-            });
-        } catch (error) {
-            console.error('Cell update failed:', error);
-        }
-    }, [selectedModelId, demand]);
+        // 2. Sync with backend (Debounced)
+        if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+
+        syncTimeoutRef.current = setTimeout(async () => {
+            const syncId = Date.now();
+            lastSyncTimeRef.current = syncId;
+
+            try {
+                const token = getToken();
+                const res = await fetch(`${API_BASE}/deo/sync/${rowId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ 
+                        ...finalEdits,
+                        car_model_id: selectedModelId,
+                        demand_id: demand?.id
+                    })
+                });
+
+                // Ignore this response if a newer sync has already started
+                if (lastSyncTimeRef.current !== syncId) return;
+
+                if (!res.ok) {
+                    console.error('Failed to sync cell update');
+                }
+            } catch (error) {
+                console.error('Sync error:', error);
+            }
+        }, 500); // 500ms debounce
+    }, [selectedModelId, demand?.id]);
 
     const handleHistoryRowUpdate = async (logId: number, rowIndex: number, colKey: string, value: string) => {
         if (!selectedHistoryLog) return;
@@ -171,7 +193,7 @@ const DEODashboardPage = () => {
         setSelectedHistoryLog({ ...selectedHistoryLog, log_data: updatedLogData });
         try {
             const token = getToken();
-            const res = await fetch(`${API_BASE}/production/daily-logs/deo-update-row`, {
+            const res = await fetch(`${API_BASE}/deo/update-history-row`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ log_id: logId, row_index: rowIndex, updated_row_data: { [colKey]: value } })
@@ -179,7 +201,7 @@ const DEODashboardPage = () => {
             if (res.ok) {
                 const result = await res.json();
                 if (result.success) {
-                    const historyRes = await fetch(`${API_BASE}/production/daily-logs`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    const historyRes = await fetch(`${API_BASE}/deo/history`, { headers: { 'Authorization': `Bearer ${token}` } });
                     if (historyRes.ok) {
                         const historyData = await historyRes.json();
                         setSubmissionHistory(historyData.data || []);
@@ -242,7 +264,7 @@ const DEODashboardPage = () => {
                 setIsSubmitting(true);
                 try {
                     const token = getToken();
-                    const response = await fetch(`${API_BASE}/production/daily-logs`, {
+                    const response = await fetch(`${API_BASE}/deo/submit`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                         body: JSON.stringify({
@@ -263,8 +285,8 @@ const DEODashboardPage = () => {
                             onConfirm: () => setModalConfig(prev => ({ ...prev, isOpen: false }))
                         });
                         const [workRes, historyRes] = await Promise.all([
-                            fetch(`${API_BASE}/production/assigned-work`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                            fetch(`${API_BASE}/production/daily-logs`, { headers: { 'Authorization': `Bearer ${token}` } })
+                            fetch(`${API_BASE}/deo/assigned-work`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                            fetch(`${API_BASE}/deo/history`, { headers: { 'Authorization': `Bearer ${token}` } })
                         ]);
                         if (workRes.ok) {
                             const workData = await workRes.json();
@@ -343,9 +365,9 @@ const DEODashboardPage = () => {
         try {
             const token = getToken();
             const [workRes, statusRes, historyRes] = await Promise.all([
-                fetch(`${API_BASE}/production/assigned-work`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch(`${API_BASE}/production/daily-status`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch(`${API_BASE}/production/daily-logs`, { headers: { 'Authorization': `Bearer ${token}` } })
+                fetch(`${API_BASE}/deo/assigned-work`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`${API_BASE}/deo/daily-status`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`${API_BASE}/deo/history`, { headers: { 'Authorization': `Bearer ${token}` } })
             ]);
             if (workRes.ok) {
                 const result = await workRes.json();
@@ -376,15 +398,16 @@ const DEODashboardPage = () => {
         try {
             const token = getToken();
             const [demandRes, schemaRes, bomRes, histRes] = await Promise.all([
-                fetch(`${API_BASE}/production/demands`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch(`${API_BASE}/models/${selectedModel.name}/schema`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch(`${API_BASE}/master-data?model=${selectedModel.name}`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch(`${API_BASE}/production/daily-logs`, { headers: { 'Authorization': `Bearer ${token}` } })
+                fetch(`${API_BASE}/admin/demands`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`${API_BASE}/manager/models/${selectedModel.name}/schema`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`${API_BASE}/manager/master-data?model=${selectedModel.name}`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`${API_BASE}/deo/history`, { headers: { 'Authorization': `Bearer ${token}` } })
             ]);
 
             let modelDemand: any = null;
             if (demandRes.ok) {
-                const demands = await demandRes.json();
+                const result = await demandRes.json();
+                const demands = result.data || [];
                 modelDemand = demands.find((d: any) => d.model_name === selectedModel.name && d.status !== 'COMPLETED') ||
                     demands.find((d: any) => d.model_name === selectedModel.name);
                 if (modelDemand) setDemand(modelDemand);
@@ -448,7 +471,7 @@ const DEODashboardPage = () => {
                 const isNewSession = latestLog && (latestLog.status === 'APPROVED' || latestLog.status === 'VERIFIED' || latestLog.status === 'COMPLETED');
 
                 // Fields that DEO actually types in
-                const DATA_FIELDS = ["SAP Stock", "Opening Stock", "Todays Stock", "Balance Qty", "Defect Count", "Failure Reason", "Remarks"];
+                const DATA_FIELDS = ["SAP Stock", "Opening Stock", "Todays Stock", "Balance Qty", "Defect Count", "Failure Reason", "Remarks", "PER DAY"];
                 const RESET_FIELDS = ["Today Produced", "Remain Qty", "Production Status", "row_status", "rejection_reason", "supervisor_reviewed", "deo_reply"];
 
                 let finalData = formatted;
@@ -530,12 +553,12 @@ const DEODashboardPage = () => {
     // Background polling for dashboard data - pauses during editing
     useEffect(() => {
         const interval = setInterval(() => {
-            if (!modalConfig.isOpen) {
+            if (!modalConfig.isOpen && !isEditingPart) {
                 fetchDashboardData(true);
             }
         }, 20000);
         return () => clearInterval(interval);
-    }, [modalConfig.isOpen]);
+    }, [modalConfig.isOpen, isEditingPart]);
 
     // Fetch BOM when model or tab changes — NOT on isEditing change
     useEffect(() => {
@@ -548,12 +571,12 @@ const DEODashboardPage = () => {
     useEffect(() => {
         if (activeTab !== 'ENTRY' && activeTab !== 'VERIFY') return;
         const interval = setInterval(() => {
-            if (!modalConfig.isOpen) {
+            if (!modalConfig.isOpen && !isEditingPart) {
                 fetchBOM(true);
             }
         }, 45000); // 45 seconds
         return () => clearInterval(interval);
-    }, [activeTab, selectedModelId, modalConfig.isOpen]);
+    }, [activeTab, selectedModelId, modalConfig.isOpen, isEditingPart]);
 
     useEffect(() => {
         if (activeTab === 'REPORTS') {
@@ -561,7 +584,7 @@ const DEODashboardPage = () => {
                 setIsLoadingHistory(true);
                 try {
                     const token = getToken();
-                    const res = await fetch(`${API_BASE}/production/daily-logs`, {
+                    const res = await fetch(`${API_BASE}/deo/history`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     if (res.ok) {
@@ -581,7 +604,7 @@ const DEODashboardPage = () => {
     const handleAccept = async (id: number) => {
         try {
             const token = getToken();
-            const res = await fetch(`${API_BASE}/production/assigned-work/accept/${id}`, {
+            const res = await fetch(`${API_BASE}/deo/accept-assignment/${id}`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -645,10 +668,11 @@ const DEODashboardPage = () => {
                                     handleCellEdit={handleCellEdit}
                                     handleSubmitDailyLog={handleSubmitDailyLog}
                                     isSubmitting={isSubmitting}
+                                    onEditingChange={setIsEditingPart}
                                 />
                             </>
                         ) : (
-                            <div className="bg-white rounded-[2.5rem] border-2 border-dashed border-slate-200 p-20 text-center">
+                            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col h-[700px] relative">
                                 <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
                                     <Box size={32} />
                                 </div>

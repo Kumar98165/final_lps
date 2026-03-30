@@ -57,11 +57,11 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
             // Always load from MasterData rather than CarModel so all vehicle models are available even
             // after demand deletions cycle (CarModel records get cleaned up but MasterData is the 
             // permanent source of truth for all vehicle models).
-            const modelsRes = await fetch(`${API_BASE}/vehicle-models`, { headers: { 'Authorization': `Bearer ${token}` } });
-            if (modelsRes.ok) {
-                const data = await modelsRes.json();
-                if (data.success) setModels(data.data);
-            }
+            const modelsRes = await fetch(`${API_BASE}/manager/vehicle-models`, { headers: { 'Authorization': `Bearer ${token}` } });
+    if (modelsRes.ok) {
+        const data = await modelsRes.json();
+        if (data.success) setModels(data.data);
+    }
         } catch (err) {
             console.error('Failed to fetch modal data', err);
         }
@@ -129,7 +129,7 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
         setIsPreviewLoading(true);
         try {
             const token = getToken();
-            const response = await fetch(`${API_BASE}/master-data?model=${modelName}`, {
+            const response = await fetch(`${API_BASE}/manager/master-data?model=${modelName}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
@@ -199,8 +199,8 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
             };
 
             const url = editingDemand
-                ? `${API_BASE}/production/demands/${editingDemand.id}`
-                : `${API_BASE}/production/demands`;
+                ? `${API_BASE}/admin/demands/${editingDemand.id}`
+                : `${API_BASE}/admin/demands`;
 
             const method = editingDemand ? 'PUT' : 'POST';
 

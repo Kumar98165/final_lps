@@ -402,15 +402,16 @@ const ManagerDemandPage = () => {
 
             // Managers only see demands assigned to them
             const url = user?.role === 'Manager'
-                ? `${API_BASE}/production/demands?manager=${encodeURIComponent(user.name)}`
-                : `${API_BASE}/production/demands`;
+                ? `${API_BASE}/admin/demands?manager=${encodeURIComponent(user.name)}`
+                : `${API_BASE}/admin/demands`;
 
             const response = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
             if (response.ok) {
-                const data = await response.json();
+                const result = await response.json();
+                const data = result.data || [];
                 setDemands(data);
                 calculateStats(data);
             }
@@ -434,7 +435,7 @@ const ManagerDemandPage = () => {
         if (demand) {
             try {
                 const token = getToken();
-                const response = await fetch(`${API_BASE}/production/demands/${id}`, {
+                const response = await fetch(`${API_BASE}/admin/demands/${id}`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',

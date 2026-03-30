@@ -3,7 +3,7 @@ import { getToken } from '../../lib/storage';
 
 export async function getPendingVerifications() {
     const token = getToken();
-    const res = await fetch(`${API_BASE}/production/supervisor/submissions`, {
+    const res = await fetch(`${API_BASE}/supervisor/submissions`, {
         headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!res.ok) return [];
@@ -13,7 +13,7 @@ export async function getPendingVerifications() {
 
 export async function verifyDailyProductionLog(logId: number, status: 'APPROVED' | 'REJECTED', comment: string = "") {
     const token = getToken();
-    const res = await fetch(`${API_BASE}/production/daily-logs/verify`, {
+    const res = await fetch(`${API_BASE}/supervisor/verify`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -30,7 +30,7 @@ export async function verifyDailyProductionLog(logId: number, status: 'APPROVED'
 
 export async function verifyDailyProductionRow(logId: number, rowIndex: number, status: 'VERIFIED' | 'REJECTED', reason: string = "", sap_part_number: string = "") {
     const token = getToken();
-    const res = await fetch(`${API_BASE}/production/daily-logs/verify-row`, {
+    const res = await fetch(`${API_BASE}/supervisor/verify-row`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

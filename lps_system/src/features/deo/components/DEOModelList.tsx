@@ -49,6 +49,7 @@ export const DEOModelList: React.FC<DEOModelListProps> = ({
 }) => {
     const [detailModel, setDetailModel] = useState<AssignedModel | null>(null);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [searchDate, setSearchDate] = useState<string>('');
 
     const openDetails = (model: AssignedModel) => {
         setDetailModel(model);
@@ -56,51 +57,86 @@ export const DEOModelList: React.FC<DEOModelListProps> = ({
     };
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <DEODetailModal 
                 isOpen={isDetailModalOpen} 
                 onClose={() => setIsDetailModalOpen(false)} 
                 model={detailModel} 
             />
 
-            <div className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-sm flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
-                <div className="flex items-center gap-6">
-                    <div className="w-16 h-16 bg-[#F37021] rounded-2xl flex items-center justify-center text-white shadow-xl shadow-orange-500/20">
-                        <Database size={32} />
+            <div className="bg-white rounded-[2.5rem] p-6 border border-slate-100 shadow-sm flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-[#F37021] rounded-xl flex items-center justify-center text-white shadow-xl shadow-orange-500/20 group hover:rotate-6 transition-transform">
+                        <Database size={24} />
                     </div>
                     <div>
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 block">Data Entry Management</span>
-                        <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tight">My Assigned Models</h2>
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1 max-w-xl">
-                            Review and manage production assignments for vehicle models.
-                        </p>
+                        <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5 block">Production Assignments</span>
+                        <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight leading-none">Assignment History</h2>
                     </div>
                 </div>
-                <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200 shadow-inner">
-                    {(['ALL', 'NEW', 'ACCEPTED', 'READY', 'REJECTED'] as const).map((filter) => (
-                        <button
-                            key={filter}
-                            onClick={() => setModelFilter(filter)}
-                            className={`px-6 py-2 rounded-xl text-[10px] font-black tracking-widest transition-all uppercase ${modelFilter === filter ? 'bg-white text-[#F37021] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                        >
-                            {filter}
-                        </button>
-                    ))}
+
+                <div className="flex flex-col md:flex-row items-center gap-3 w-full lg:w-auto">
+                    {/* Date Search Bar */}
+                    <div className="relative group w-full md:w-56">
+                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-[#F37021] transition-colors pointer-events-none">
+                            <Info size={12} />
+                        </span>
+                        <input
+                            type="date"
+                            value={searchDate}
+                            onChange={(e) => setSearchDate(e.target.value)}
+                            className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 pl-10 pr-4 text-[9px] font-black uppercase tracking-widest text-slate-900 focus:bg-white focus:border-orange-200 outline-none transition-all"
+                        />
+                        {searchDate && (
+                            <button 
+                                onClick={() => setSearchDate('')}
+                                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[7px] font-black text-slate-300 hover:text-rose-500 uppercase tracking-widest transition-colors"
+                            >
+                                Clear
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="flex bg-slate-100 p-0.5 rounded-xl border border-slate-200 shadow-inner w-full md:w-auto overflow-x-auto no-scrollbar">
+                        {(['ALL', 'NEW', 'ACCEPTED', 'READY', 'REJECTED'] as const).map((filter) => (
+                            <button
+                                key={filter}
+                                onClick={() => setModelFilter(filter)}
+                                className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-[8px] font-black tracking-widest transition-all uppercase whitespace-nowrap ${modelFilter === filter ? 'bg-white text-[#F37021] shadow-sm ring-1 ring-slate-200' : 'text-slate-400 hover:text-slate-600'}`}
+                            >
+                                {filter}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {assignedModels
                     .filter(m => {
+                        // 1. apply Date Filter if active
+                        if (searchDate) {
+                            const modelDate = m.start_date || (m.verified_at ? m.verified_at.split(' ')[0] : null);
+                            if (modelDate !== searchDate) return false;
+                        }
+
+                        // 2. apply Status Filter
                         const isRejected = submissionHistory.some(s => 
                             (s.car_model_id === m.id || s.model_name === m.name) && s.status === 'REJECTED'
                         );
+                        
+                        const status = m.status?.toUpperCase().trim();
+                        const isCompleted = status === 'COMPLETED' || status === 'VERIFIED';
+                        const isReadyForWork = status === 'READY' || status === 'PENDING' || status === 'NEW';
+                        const isInProgressWork = status === 'IN_PROGRESS' || status === 'WORKING';
 
                         if (modelFilter === 'ALL') return true;
-                        if (modelFilter === 'NEW' && !m.deo_accepted && (m.status === 'READY' || m.status === 'PENDING')) return true;
-                        if (modelFilter === 'ACCEPTED' && m.deo_accepted && !isRejected && (m.status === 'READY' || m.status === 'IN_PROGRESS' || m.status === 'WORKING' || m.status === 'PENDING')) return true;
-                        if (modelFilter === 'READY' && (m.status === 'COMPLETED' || m.status === 'VERIFIED')) return true;
+                        
+                        if (modelFilter === 'NEW' && !m.deo_accepted && !isCompleted && !isRejected) return true;
+                        if (modelFilter === 'ACCEPTED' && m.deo_accepted && !isRejected && !isCompleted && (isInProgressWork || isReadyForWork)) return true;
+                        if (modelFilter === 'READY' && (isCompleted || status === 'READY')) return true;
                         if (modelFilter === 'REJECTED' && isRejected) return true;
+                        
                         return false;
                     })
                     .map((model) => {

@@ -4,7 +4,7 @@ from flask_jwt_extended import jwt_required
 from datetime import datetime, timedelta
 
 audit_bp = Blueprint('audit', __name__)
-@audit_bp.route('/admin/audit/stats', methods=['GET'])
+@audit_bp.route('/audit/stats', methods=['GET'])
 @jwt_required()
 def get_audit_stats():
     """Get role-wise active user statistics."""
@@ -33,7 +33,7 @@ def get_audit_stats():
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
-@audit_bp.route('/admin/audit/list', methods=['GET'])
+@audit_bp.route('/audit/list', methods=['GET'])
 @jwt_required()
 def get_audit_logs():
     """Get recent audit log entries with pagination."""

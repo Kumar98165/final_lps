@@ -47,11 +47,11 @@ const TeamManagementPage = () => {
             const headers = { 'Authorization': `Bearer ${token}` };
 
             // Fetch assigned work (car models assigned to this supervisor)
-            const modelsRes = await fetch(`${API_BASE}/production/assigned-work`, { headers });
+            const modelsRes = await fetch(`${API_BASE}/deo/assigned-work`, { headers });
             const modelsData = await modelsRes.json();
 
             // Fetch DEOs
-            const deoRes = await fetch(`${API_BASE}/identity/staff?role=DEO`, { headers });
+            const deoRes = await fetch(`${API_BASE}/admin/identity/staff?role=DEO`, { headers });
             const deoData = await deoRes.json();
 
             if (modelsData.success) {
@@ -80,19 +80,20 @@ const TeamManagementPage = () => {
         setSaving(true);
         try {
             const token = getAccessToken();
-            const res = await fetch(`${API_BASE}/production/assigned-work/${selectedModel.id}/assign`, {
+            const res = await fetch(`${API_BASE}/supervisor/assign-deo`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    assigned_deo_id: tempDeoId || null
+                    model_id: selectedModel.id,
+                    deo_id: tempDeoId || null
                 })
             });
             const data = await res.json();
             if (data.success) {
-                const refreshedRes = await fetch(`${API_BASE}/production/assigned-work`, {
+                const refreshedRes = await fetch(`${API_BASE}/deo/assigned-work`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const refreshedModels = await refreshedRes.json();

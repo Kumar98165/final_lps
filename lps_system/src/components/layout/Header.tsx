@@ -1,5 +1,4 @@
-import { User, ChevronRight, Menu } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { User, Menu } from 'lucide-react';
 import { getUser } from '../../lib/storage';
 
 interface HeaderProps {
@@ -8,18 +7,12 @@ interface HeaderProps {
 
 export function Header({ onMenuToggle }: HeaderProps) {
     const user = getUser();
-    const location = useLocation();
 
-    // Breadcrumb logic
-    const pathParts = location.pathname.split('/').filter(Boolean);
-    const mainSectionRaw = pathParts[0]?.toUpperCase() || 'SYSTEM';
-    const mainSection = mainSectionRaw === 'MANAGER' ? 'SUPERVISOR' : mainSectionRaw;
-    const subSection = pathParts[1]?.toUpperCase() || 'DASHBOARD';
     const displayRole = user?.role?.toUpperCase() === 'MANAGER' ? 'SUPERVISOR' : (user?.role || 'Restricted');
 
     return (
         <header className="h-14 bg-white/90 backdrop-blur-xl border-b border-slate-200/50 px-6 md:px-10 flex items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,0.02)] sticky top-0 z-50">
-            {/* Navigation Context / Breadcrumbs */}
+            {/* Navigation Context / Breadcrumbs Removed at user request */}
             <div className="flex items-center gap-4 md:gap-6">
                 <button
                     onClick={onMenuToggle}
@@ -27,15 +20,6 @@ export function Header({ onMenuToggle }: HeaderProps) {
                 >
                     <Menu size={24} />
                 </button>
-
-                <div className="flex items-center gap-3">
-                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] hidden sm:inline">{mainSection}</span>
-                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] sm:hidden">APP</span>
-                    <ChevronRight size={14} className="text-slate-200" />
-                    <span className="text-[11px] font-black text-slate-900 uppercase tracking-[0.3em]">{subSection}</span>
-                </div>
-
-                <div className="h-8 w-[1px] bg-slate-100 mx-4 hidden lg:block" />
             </div>
 
             {/* Identity Only */}

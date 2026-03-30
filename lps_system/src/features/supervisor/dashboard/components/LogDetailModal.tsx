@@ -85,7 +85,7 @@ export const LogDetailView = ({
                                 </span>
                             </div>
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] mt-1">
-                                DEO Submission • ID: <span className="text-[#F37021] font-black">{selectedLog.formatted_id || `LOG-${selectedLog.id}`}</span>
+                                DEO Submission • ORDER ID: <span className="text-[#F37021] font-black">{selectedLog.formatted_id || `DEM-${selectedLog.id?.toString().padStart(3, '0')}`}</span>
                             </p>
                         </div>
                     </div>
@@ -122,18 +122,30 @@ export const LogDetailView = ({
                     </div>
                 </div>
 
-                {/* Metadata */}
-                <div className="flex flex-wrap items-center gap-6 mt-4 px-2">
+                {/* Metadata Row */}
+                <div className="flex flex-wrap items-center gap-6 mt-6 pt-6 border-t border-slate-50 px-2">
+                    <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                            Customer: <span className="text-slate-900">{selectedLog.customer_name || 'CIE AUTOMOTIVE'}</span>
+                        </span>
+                    </div>
                     <div className="flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                            Operator: <span className="text-slate-900">{selectedLog.deo_name || 'N/A'}</span>
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#F37021]" />
                         <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
                             Line: <span className="text-slate-900">{selectedLog.line_name || 'N/A'}</span>
                         </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Clock size={12} className="text-[#F37021]" />
+                    <div className="flex items-center gap-2 ml-auto">
+                        <Clock size={12} className="text-slate-400" />
                         <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                            Date: <span className="text-slate-900">{selectedLog.date}</span>
+                            Submission Date: <span className="text-slate-900">{selectedLog.date}</span>
                         </span>
                     </div>
                 </div>

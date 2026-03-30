@@ -1,5 +1,5 @@
-import { 
-    ClipboardCheck, Clock, CheckCircle2, ShieldCheck, ChevronLeft, Database 
+import {
+    ClipboardCheck, Clock, CheckCircle2, ShieldCheck, ChevronLeft, Database
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 
@@ -88,8 +88,8 @@ export const SupervisorVerifyLogs = ({
                 {(() => {
                     // Simply filter the verifications directly into the correct tabs
                     // This perfectly matches the metric counts shown in the UI tabs
-                    let filteredVerifications = verifications.filter((item: any) => 
-                        activeVerifyTab === 'ready' 
+                    let filteredVerifications = verifications.filter((item: any) =>
+                        activeVerifyTab === 'ready'
                             ? (item.status === 'APPROVED' || item.status === 'VERIFIED')
                             : (item.status === 'PENDING' || item.status === 'SUBMITTED' || item.status === 'REJECTED' || !item.status)
                     ).sort((a: any, b: any) => b.id - a.id);
@@ -102,8 +102,8 @@ export const SupervisorVerifyLogs = ({
                                         <div className="flex items-start gap-8">
                                             <div className={cn(
                                                 "w-16 h-16 rounded-[1.5rem] border flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-sm",
-                                                activeVerifyTab === 'ready' 
-                                                    ? "bg-emerald-50 text-emerald-500 border-emerald-100" 
+                                                activeVerifyTab === 'ready'
+                                                    ? "bg-emerald-50 text-emerald-500 border-emerald-100"
                                                     : "bg-orange-50 text-[#F37021] border-orange-100"
                                             )}>
                                                 {activeVerifyTab === 'ready' ? <ShieldCheck size={32} strokeWidth={1.5} /> : <ClipboardCheck size={32} strokeWidth={1.5} />}
@@ -114,20 +114,24 @@ export const SupervisorVerifyLogs = ({
                                                     <span className={cn(
                                                         "px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border",
                                                         (item.status === 'APPROVED' || item.status === 'VERIFIED')
-                                                            ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
+                                                            ? "bg-emerald-50 text-emerald-600 border-emerald-100"
                                                             : item.status === 'REJECTED'
-                                                            ? "bg-red-50 text-red-600 border-red-100"
-                                                            : "bg-orange-50 text-[#F37021] border-orange-100"
+                                                                ? "bg-red-50 text-red-600 border-red-100"
+                                                                : "bg-orange-50 text-[#F37021] border-orange-100"
                                                     )}>
                                                         {item.status || 'PENDING'}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center gap-6 text-xs font-bold text-slate-400">
-                                                    <span className="uppercase tracking-widest font-black text-slate-700">LOG-{item.id}</span>
+                                                    <span className="uppercase tracking-widest font-black text-slate-700">
+                                                        ORDER ID: <span className="text-[#F37021]">{item.formatted_id || `DEM-${item.id?.toString().padStart(3, '0')}`}</span>
+                                                    </span>
                                                     <div className="w-1.5 h-1.5 bg-slate-200 rounded-full" />
                                                     <span className="text-slate-900 font-black uppercase tracking-tight">{item.date}</span>
                                                     <div className="w-1.5 h-1.5 bg-slate-200 rounded-full" />
-                                                    <span className="text-[#F37021] font-black uppercase tracking-widest">DEO ID: {item.deo_id}</span>
+                                                    <span className="text-[#F37021] font-black uppercase tracking-widest whitespace-nowrap">OPERATOR: {item.deo_name || 'N/A'}</span>
+                                                    <div className="w-1.5 h-1.5 bg-slate-200 rounded-full" />
+                                                    <span className="text-indigo-500 font-black uppercase tracking-widest whitespace-nowrap">CUSTOMER: {item.customer_name || 'CIE AUTOMOTIVE'}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -159,8 +163,8 @@ export const SupervisorVerifyLogs = ({
                                 {activeVerifyTab === 'ready' ? 'No Records Found' : 'All Clear!'}
                             </h3>
                             <p className="text-slate-400 font-bold text-xs uppercase tracking-[0.2em] max-w-xs mx-auto">
-                                {activeVerifyTab === 'ready' 
-                                    ? 'You haven\'t verified any production logs for this period yet.' 
+                                {activeVerifyTab === 'ready'
+                                    ? 'You haven\'t verified any production logs for this period yet.'
                                     : 'All DEO daily production logs have been fully reviewed and authorized.'}
                             </p>
                         </div>

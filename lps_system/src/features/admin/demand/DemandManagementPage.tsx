@@ -69,13 +69,14 @@ const DemandManagementPage = () => {
     const loadData = async () => {
         try {
             const token = getToken();
-            const response = await fetch(`${API_BASE}/production/demands`, {
+            const response = await fetch(`${API_BASE}/admin/demands`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
             if (response.ok) {
-                const data = await response.json();
+                const result = await response.json();
+                const data = result.data || [];
                 setDemands(data);
                 calculateStats(data);
             }
@@ -98,7 +99,7 @@ const DemandManagementPage = () => {
         if (demandToDelete) {
             try {
                 const token = getToken();
-                const response = await fetch(`${API_BASE}/production/demands/${demandToDelete.id}`, {
+                const response = await fetch(`${API_BASE}/admin/demands/${demandToDelete.id}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`

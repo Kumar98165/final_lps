@@ -51,11 +51,22 @@ const DEORowManualModal: React.FC<DEORowManualModalProps> = ({
                 }
             }
 
+            // Auto-calculate Coverage Days
+            if (['Todays Stock', 'Target Qty', 'PER DAY'].includes(key)) {
+                const stockValue = parseFloat(key === 'Todays Stock' ? value : (prev['Todays Stock'] || '0'));
+                const perDay = parseFloat(key === 'Target Qty' || key === 'PER DAY' ? value : (prev['PER DAY'] || prev['Target Qty'] || '0'));
+                
+                if (perDay > 0) {
+                    newData['Coverage Days'] = (stockValue / perDay).toFixed(1);
+                } else {
+                    newData['Coverage Days'] = "0.0";
+                }
+            }
+
             return newData;
         });
     };
 
-    const isTargetMet = Number(formData["Today Produced"] || 0) >= Number(formData["Target Qty"] || 0);
 
     const renderReadOnlyField = (label: string, value: any, showErrorBadge: boolean = false) => (
         <div className="space-y-2 flex-1">
@@ -154,7 +165,7 @@ const DEORowManualModal: React.FC<DEORowManualModalProps> = ({
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                                {renderInputField("Today Produced", "Today Produced", "Enter quantity...", "number")}
+                                {renderInputField("Today Produced", "Today Produced", "0", "number")}
                                 {renderReadOnlyField("Remain Qty", Math.max(0, Number(formData["Target Qty"] || 0) - Number(formData["Today Produced"] || 0)).toString())}
                                 <div className="space-y-2 flex-1">
                                     <label className="text-[10px] font-black text-[#A0AEC0] uppercase tracking-wider px-1">
@@ -171,6 +182,27 @@ const DEORowManualModal: React.FC<DEORowManualModalProps> = ({
                                         <option value="COMPLETED">COMPLETED</option>
                                     </select>
                                 </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                {renderInputField("Todays Stock", "Todays Stock", "Enter stock...", "number")}
+                                <div className="space-y-2 flex-1">
+                                    <label className="text-[10px] font-black text-[#A0AEC0] uppercase tracking-wider px-1">
+                                        Coverage Days
+                                    </label>
+                                    <div className={`w-full rounded-[1.5rem] py-4 px-6 font-black text-sm shadow-sm flex items-center justify-between ${
+                                        Number(formData["Coverage Days"] || 0) < 5 ? "bg-red-50 border-2 border-red-100 text-red-600" : "bg-emerald-50 border-2 border-emerald-100 text-emerald-600"
+                                    }`}>
+                                        <span>{formData["Coverage Days"] || "0.0"} DAYS</span>
+                                        {Number(formData["Coverage Days"] || 0) < 5 && (
+                                            <div className="flex items-center gap-1 bg-red-600 text-white px-2 py-0.5 rounded-full text-[8px] animate-pulse">
+                                                <AlertCircle size={10} />
+                                                <span>LOW STOCK</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="space-y-2 flex-1 opacity-0 pointer-events-none md:block hidden" />
                             </div>
                         </div>
 

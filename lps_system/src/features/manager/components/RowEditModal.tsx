@@ -9,6 +9,7 @@ interface RowEditModalProps {
     onDelete: (id: number) => void;
     row: any;
     commonHeaders: string[];
+    productionHeaders: string[];
     materialHeaders: string[];
 }
 
@@ -19,6 +20,7 @@ const RowEditModal: React.FC<RowEditModalProps> = ({
     onDelete,
     row,
     commonHeaders,
+    productionHeaders,
     materialHeaders
 }) => {
     const [formData, setFormData] = useState<any>(null);
@@ -136,6 +138,11 @@ const RowEditModal: React.FC<RowEditModalProps> = ({
                                 <div className="h-px flex-1 bg-slate-100" />
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                                {productionHeaders.map(h => (
+                                    <div key={h}>
+                                        {renderInput(h)}
+                                    </div>
+                                ))}
                                 {["TOTAL SCHEDULE QTY", "PER DAY", "SAP Stock", "Opening Stock", "Todays Stock", "Coverage Days"].map(h => (
                                     <div key={h}>
                                         {renderInput(h)}

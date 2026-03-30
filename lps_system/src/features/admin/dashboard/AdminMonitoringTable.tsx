@@ -17,7 +17,7 @@ export const AdminMonitoringTable = () => {
             try {
                 const token = getToken();
                 // Admin can hit supervisor submissions to see all logs
-                const res = await fetch(`${API_BASE}/production/supervisor/submissions`, {
+                const res = await fetch(`${API_BASE}/supervisor/submissions`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {

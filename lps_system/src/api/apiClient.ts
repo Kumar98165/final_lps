@@ -29,24 +29,14 @@ export const apiClient = {
     admin: {
         getSummary: async (): Promise<AdminSummary> => {
             const token = getToken();
-            try {
-                const response = await fetch(`${API_BASE}/summary`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    return data;
-                }
-            } catch (err) {
-                console.error("Failed to fetch admin summary", err);
+            const response = await fetch(`${API_BASE}/admin/summary`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'System core metrics retrieve failed');
             }
-            // Fallback mock if backend is down or fails
-            return {
-                oee: '84.5%',
-                node_efficiency: '98.2%',
-                production_units: '1,248',
-                security_status: 'Verified'
-            };
+            return response.json();
         }
     }
 };

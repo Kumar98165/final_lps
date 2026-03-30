@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import {
     Database, ClipboardCheck, Target, ChevronDown,
     AlertTriangle, X, CheckCircle2, MessageSquare,
@@ -23,9 +23,10 @@ interface DEOProductionEntryProps {
     setSelectedModelId: (id: number | null) => void;
     requirements: any[];
     demand: any; // Define a proper type for demand if possible
-    handleCellEdit: (rowId: number, colKey: string, value: string) => void;
+    handleCellEdit: (rowId: number, edits: string | Record<string, any>, value?: any) => void;
     handleSubmitDailyLog: () => void;
     isSubmitting: boolean;
+    onEditingChange: (isEditing: boolean) => void;
 }
 
 export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
@@ -36,9 +37,15 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
     demand,
     handleCellEdit,
     handleSubmitDailyLog,
-    isSubmitting
+    isSubmitting,
+    onEditingChange
 }) => {
     const [editingPart, setEditingPart] = React.useState<any>(null);
+
+    // Sync editing state with parent
+    useEffect(() => {
+        onEditingChange(!!editingPart);
+    }, [editingPart, onEditingChange]);
 
     // Validation for final submission
     const isFormValid = useMemo(() => {
@@ -47,11 +54,11 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
         return requirements.every(req => {
             const stockVal = req["Todays Stock"];
             const producedVal = req["Today Produced"];
-            
+
             // Allow 0 (zero), but reject undefined, null, or empty strings
             const hasStock = stockVal !== undefined && stockVal !== null && String(stockVal).trim() !== "";
             const hasProduced = producedVal !== undefined && producedVal !== null && String(producedVal).trim() !== "";
-            
+
             return hasStock && hasProduced;
         });
     }, [requirements]);
@@ -107,7 +114,7 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                 </span>
                             </div>
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                Breakdown for <span className="text-[#F37021]">{vModel.name}</span> <span className="mx-2">•</span> ORDER: <span className="text-slate-900 font-black">{demand?.order_no || 'DEM-049'}</span>
+                                Breakdown for <span className="text-[#F37021]">{vModel.name}</span> <span className="mx-2">•</span> ORDER ID: <span className="text-slate-900 font-black">{demand?.formatted_id || `DEM-${demand?.id?.toString().padStart(3, '0') || '000'}`}</span>
                             </p>
                         </div>
                     </div>
@@ -233,9 +240,6 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                     </div>
                                     <div>
                                         <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight leading-tight">Edit Production Data</h2>
-                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
-                                            Part: <span className="text-[#F37021]">{editingPart["PART NUMBER"] || editingPart["Part Number"]}</span>
-                                        </p>
                                     </div>
                                 </div>
                                 <button
@@ -284,27 +288,27 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                     {/* Read-only Info */}
                                     <div className="col-span-12 grid grid-cols-12 gap-4">
                                         <div className="col-span-2 space-y-1.5">
-                                            <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1 text-center">SN</label>
-                                            <div className="bg-[#F37021]/5 border border-[#F37021]/10 rounded-xl px-4 py-2.5 text-[10px] font-black text-[#F37021] flex items-center justify-center shadow-sm h-[40px]">
+                                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest px-1 text-center">SN</label>
+                                            <div className="bg-[#F37021]/5 border border-[#F37021]/10 rounded-xl px-4 py-2.5 text-sm font-black text-[#F37021] flex items-center justify-center shadow-sm h-[40px]">
                                                 {editingPart.tableIndex}
                                             </div>
                                         </div>
                                         <div className="col-span-5 space-y-1.5">
-                                            <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">SAP Part Number</label>
-                                            <div className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-[10px] font-black text-slate-900 break-all min-h-[40px] flex items-center shadow-sm">
+                                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">SAP Part Number</label>
+                                            <div className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-sm font-black text-slate-900 break-all min-h-[40px] flex items-center shadow-sm">
                                                 {editingPart["SAP PART NUMBER"] ?? editingPart["SAP PART #"] ?? editingPart["SAP Part Number"] ?? "—"}
                                             </div>
                                         </div>
                                         <div className="col-span-5 space-y-1.5">
-                                            <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">PART NUMBER</label>
-                                            <div className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-[10px] font-black text-slate-900 break-all min-h-[40px] flex items-center shadow-sm">
+                                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">PART NUMBER</label>
+                                            <div className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-sm font-black text-slate-900 break-all min-h-[40px] flex items-center shadow-sm">
                                                 {editingPart["PART NUMBER"] ?? editingPart["Part Number"] ?? "—"}
                                             </div>
                                         </div>
                                     </div>
                                     <div className="col-span-12 space-y-1.5">
-                                        <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">PART DESCRIPTION</label>
-                                        <div className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-[10px] font-black text-slate-900 min-h-[40px] flex items-center shadow-sm">
+                                        <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">PART DESCRIPTION</label>
+                                        <div className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-sm font-black text-slate-900 min-h-[40px] flex items-center shadow-sm leading-tight">
                                             {editingPart["PART DESCRIPTION"] ?? editingPart["Description"] ?? "—"}
                                         </div>
                                     </div>
@@ -312,13 +316,13 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                     {/* Editable & Metric Fields */}
                                     <div className="col-span-12 grid grid-cols-4 gap-4 pt-1">
                                         <div className="space-y-1.5">
-                                            <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">PER DAY</label>
-                                            <div className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-[10px] font-black text-slate-900 flex items-center shadow-sm h-[48px] justify-center">
+                                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">PER DAY</label>
+                                            <div className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-sm font-black text-slate-900 flex items-center shadow-sm h-[48px] justify-center">
                                                 {editingPart["PER DAY"] || "0"}
                                             </div>
                                         </div>
                                         <div className="space-y-1.5">
-                                            <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">SAP Stock</label>
+                                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">SAP Stock</label>
                                             <input
                                                 type="number"
                                                 value={editingPart["SAP Stock"] || ""}
@@ -327,11 +331,11 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                                     setEditingPart((prev: any) => ({ ...prev, "SAP Stock": val, row_status: null }));
                                                     handleCellEdit(editingPart.id, "SAP Stock", val);
                                                 }}
-                                                className="w-full bg-white border-2 border-slate-100 focus:border-[#F37021] rounded-xl p-3 text-center text-base font-black text-slate-900 transition-all outline-none shadow-sm h-[48px]"
+                                                className="w-full bg-white border-2 border-slate-100 focus:border-[#F37021] rounded-xl p-3 text-center text-sm font-black text-slate-900 transition-all outline-none shadow-sm h-[48px]"
                                             />
                                         </div>
                                         <div className="space-y-1.5">
-                                            <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">Opening Stock</label>
+                                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">Opening Stock</label>
                                             <input
                                                 type="number"
                                                 value={editingPart["Opening Stock"] || ""}
@@ -340,20 +344,33 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                                     setEditingPart((prev: any) => ({ ...prev, "Opening Stock": val, row_status: null }));
                                                     handleCellEdit(editingPart.id, "Opening Stock", val);
                                                 }}
-                                                className="w-full bg-white border-2 border-slate-100 focus:border-[#F37021] rounded-xl p-3 text-center text-base font-black text-slate-900 transition-all outline-none shadow-sm h-[48px]"
+                                                className="w-full bg-white border-2 border-slate-100 focus:border-[#F37021] rounded-xl p-3 text-center text-sm font-black text-slate-900 transition-all outline-none shadow-sm h-[48px]"
                                             />
                                         </div>
                                         <div className="space-y-1.5">
-                                            <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">Todays Stock</label>
+                                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">Todays Stock</label>
                                             <input
                                                 type="number"
                                                 value={editingPart["Todays Stock"] || ""}
                                                 onChange={(e) => {
                                                     const val = e.target.value;
-                                                    setEditingPart((prev: any) => ({ ...prev, "Todays Stock": val, row_status: null }));
-                                                    handleCellEdit(editingPart.id, "Todays Stock", val);
+                                                    // Live calculate Coverage Days: Stock / Per Day
+                                                    const perDay = parseFloat(editingPart["PER DAY"] || "0");
+                                                    const stockValue = parseFloat(val || "0");
+                                                    const calculatedCoverage = perDay > 0 ? (stockValue / perDay).toFixed(1) : "0.0";
+
+                                                    setEditingPart((prev: any) => ({
+                                                        ...prev,
+                                                        "Todays Stock": val,
+                                                        "Coverage Days": calculatedCoverage,
+                                                        row_status: null
+                                                    }));
+                                                    handleCellEdit(editingPart.id, {
+                                                        "Todays Stock": val,
+                                                        "Coverage Days": calculatedCoverage
+                                                    });
                                                 }}
-                                                className="w-full bg-white border-2 border-slate-100 focus:border-[#F37021] rounded-xl p-3 text-center text-base font-black text-slate-900 transition-all outline-none shadow-sm h-[48px]"
+                                                className="w-full bg-white border-2 border-slate-100 focus:border-[#F37021] rounded-xl p-3 text-center text-sm font-black text-slate-900 transition-all outline-none shadow-sm h-[48px]"
                                             />
                                         </div>
                                     </div>
@@ -361,8 +378,8 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                     {/* Production & Coverage Group */}
                                     <div className="col-span-12 grid grid-cols-3 gap-4">
                                         <div className="space-y-1.5">
-                                            <label className="block text-[8px] font-black text-[#F37021] uppercase tracking-widest px-1 flex items-center gap-1">
-                                                <Target size={10} />
+                                            <label className="block text-[11px] font-black text-[#F37021] uppercase tracking-widest px-1 flex items-center gap-2">
+                                                <Target size={12} strokeWidth={3} />
                                                 Produced
                                             </label>
                                             <input
@@ -378,10 +395,10 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                             />
                                         </div>
                                         <div className="space-y-1.5">
-                                            <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">Coverage Days</label>
-                                            <div className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-[10px] font-black text-slate-900 flex justify-center items-center shadow-inner h-[48px]">
+                                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">Coverage Days</label>
+                                            <div className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-[11px] font-black text-slate-900 flex justify-center items-center shadow-inner h-[48px]">
                                                 <span className={cn(
-                                                    "px-3 py-1 rounded-lg text-[10px]",
+                                                    "px-3 py-1 rounded-lg text-xs",
                                                     parseFloat(editingPart["Coverage Days"] || "0") < 5 ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700"
                                                 )}>
                                                     {editingPart["Coverage Days"] || "0.0"} DAYS
@@ -389,7 +406,7 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                             </div>
                                         </div>
                                         <div className="space-y-1.5">
-                                            <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">Status</label>
+                                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">Status Tracking</label>
                                             <div className="relative">
                                                 <select
                                                     value={editingPart["Production Status"] || "PENDING"}
@@ -399,12 +416,12 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                                         handleCellEdit(editingPart.id, "Production Status", val);
                                                     }}
                                                     className={cn(
-                                                        "w-full h-[48px] rounded-xl px-4 text-[10px] font-black uppercase tracking-widest transition-all border-2 outline-none appearance-none cursor-pointer",
-                                                        (editingPart["Production Status"] || 'PENDING') === 'COMPLETE' 
+                                                        "w-full h-[48px] rounded-xl px-4 text-xs font-black uppercase tracking-widest transition-all border-2 outline-none appearance-none cursor-pointer",
+                                                        (editingPart["Production Status"] || 'PENDING') === 'COMPLETE'
                                                             ? "bg-emerald-50 border-emerald-200 text-emerald-700"
                                                             : (editingPart["Production Status"] || 'PENDING') === 'IN PROGRESS'
-                                                            ? "bg-amber-50 border-amber-200 text-amber-700"
-                                                            : "bg-slate-50 border-slate-200 text-slate-600"
+                                                                ? "bg-amber-50 border-amber-200 text-amber-700"
+                                                                : "bg-slate-50 border-slate-200 text-slate-600"
                                                     )}
                                                 >
                                                     <option value="PENDING">PENDING</option>
@@ -412,233 +429,230 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                                     <option value="COMPLETE">COMPLETE</option>
                                                 </select>
                                                 <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                                                    <ChevronDown size={12} />
+                                                    <ChevronDown size={14} />
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
 
-                                {/* Issue & Reply Section */}
-                                <div className="col-span-12 mt-2 pt-5 border-t border-slate-100">
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <div className="w-6 h-6 rounded-lg bg-[#F37021]/10 flex items-center justify-center">
-                                            <MessageSquare size={12} className="text-[#F37021]" />
-                                        </div>
-                                        <h3 className="text-[9px] font-black text-slate-900 uppercase tracking-widest">Correction Loop</h3>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {/* Supervisor Issue */}
-                                        <div className="space-y-2">
-                                            <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1 flex items-center gap-1.5">
-                                                <AlertTriangle size={8} className="text-red-500" />
-                                                Issue Remark
-                                            </label>
-                                            <div className={cn(
-                                                "w-full rounded-2xl p-4 text-[10px] font-bold leading-relaxed min-h-[80px]",
-                                                editingPart.row_status === 'REJECTED'
-                                                    ? "bg-red-50 text-red-800 border border-red-100 shadow-inner"
-                                                    : "bg-slate-50 text-slate-400 border border-slate-100 italic"
-                                            )}>
-                                                {editingPart.rejection_reason || "No reported issues."}
+                                    {/* Issue & Reply Section */}
+                                    <div className="col-span-12 mt-2 pt-5 border-t border-slate-100">
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="w-8 h-8 rounded-lg bg-[#F37021]/10 flex items-center justify-center">
+                                                <MessageSquare size={16} className="text-[#F37021]" />
                                             </div>
+                                            <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest">Correction Loop</h3>
                                         </div>
 
-                                        {/* DEO Reply */}
-                                        <div className="space-y-2">
-                                            <label className="block text-[8px] font-black text-[#F37021] uppercase tracking-widest px-1 flex items-center gap-1.5">
-                                                <CheckCircle2 size={18} />
-                                                Action Taken
-                                            </label>
-                                            <textarea
-                                                value={editingPart.deo_reply || ""}
-                                                onChange={(e) => {
-                                                    const val = e.target.value;
-                                                    setEditingPart((prev: any) => ({
-                                                        ...prev,
-                                                        deo_reply: val,
-                                                        row_status: null
-                                                    }));
-                                                    handleCellEdit(editingPart.id, "deo_reply", val);
-                                                }}
-                                                placeholder="Briefly describe what was fixed..."
-                                                rows={3}
-                                                className="w-full bg-white border border-[#F37021]/10 focus:border-[#F37021] rounded-2xl p-4 text-[11px] font-bold text-slate-900 placeholder:text-slate-300 outline-none transition-all resize-none shadow-sm"
-                                            />
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {/* Supervisor Issue */}
+                                            <div className="space-y-2">
+                                                <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest px-1 flex items-center gap-2">
+                                                    <AlertTriangle size={12} className="text-red-500" />
+                                                    Issue Remark
+                                                </label>
+                                                <div className={cn(
+                                                    "w-full rounded-2xl p-4 text-xs font-bold leading-relaxed min-h-[80px]",
+                                                    editingPart.row_status === 'REJECTED'
+                                                        ? "bg-red-50 text-red-800 border border-red-100 shadow-inner"
+                                                        : "bg-slate-50 text-slate-400 border border-slate-100 italic"
+                                                )}>
+                                                    {editingPart.rejection_reason || "No reported issues."}
+                                                </div>
+                                            </div>
+
+                                            {/* DEO Reply */}
+                                            <div className="space-y-2">
+                                                <label className="block text-[11px] font-black text-[#F37021] uppercase tracking-widest px-1 flex items-center gap-2">
+                                                    <CheckCircle2 size={16} />
+                                                    Action Taken
+                                                </label>
+                                                <textarea
+                                                    value={editingPart.deo_reply || ""}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        setEditingPart((prev: any) => ({
+                                                            ...prev,
+                                                            deo_reply: val,
+                                                            row_status: null
+                                                        }));
+                                                        handleCellEdit(editingPart.id, { deo_reply: val });
+                                                    }}
+                                                    placeholder="Briefly describe what was fixed..."
+                                                    rows={3}
+                                                    className="w-full bg-white border border-[#F37021]/10 focus:border-[#F37021] rounded-2xl p-4 text-sm font-bold text-slate-900 placeholder:text-slate-300 outline-none transition-all resize-none shadow-sm"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                    </div>
 
                             {/* Modal Footer */}
-                <div className="px-8 py-5 border-t border-slate-50 bg-slate-50/50 shrink-0">
-                    <button
-                        onClick={() => setEditingPart(null)}
-                        className="w-full py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl hover:bg-black transition-all transform active:scale-[0.98]"
-                    >
-                        SAVE & DISMISS VIEW
-                    </button>
-                </div>
-            </motion.div>
-        </div>
-    )
-}
+                            <div className="px-8 py-5 border-t border-slate-50 bg-slate-50/50 shrink-0">
+                                <button
+                                    onClick={() => setEditingPart(null)}
+                                    className="w-full py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl hover:bg-black transition-all transform active:scale-[0.98]"
+                                >
+                                    SAVE & DISMISS VIEW
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )
+                }
             </AnimatePresence >
 
-    {/* Table Area with Fixed Footer for Submit Button */ }
-    < div className = "bg-white rounded-[2.5rem] border border-slate-100 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col h-[700px] relative" >
-        <div className="flex-1 overflow-auto custom-scrollbar">
-            {requirements.length > 0 ? (
-                <table className="min-w-max border-separate border-spacing-0 w-full">
-                    <thead>
-                        <tr className="sticky top-0 z-30 bg-slate-50/50 backdrop-blur-md">
-                            {allColumns.map((h, i) => {
-                                let leftOffset = 0;
-                                if (i === 1) leftOffset = 80;
-                                if (i === 2) leftOffset = 80 + 220;
-
-                                return (
-                                    <th key={h}
-                                        style={{ left: i < 3 ? `${leftOffset}px` : 'auto' }}
-                                        className={cn(
-                                            "py-4 px-4 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] text-center border-b border-slate-100 z-40 bg-slate-50/50 min-w-[140px]",
-                                            i < 3 ? 'sticky shadow-[2px_0_10px_rgba(0,0,0,0.05)] border-r border-slate-100' : '',
-                                            i === 1 ? "min-w-[220px]" : i === 2 ? "min-w-[200px]" : i === 3 ? "min-w-[300px] text-left" : i === 0 ? "min-w-[80px] text-left" : ""
-                                        )}>
-                                        {h}
-                                    </th>
-                                )
-                            })}
-                            <th className="py-4 px-4 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] text-center border-b border-slate-100 bg-slate-50/50 sticky right-0 z-40">STATUS</th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white">
-                        {requirements.map((req, idx) => {
-                            return (
-                                <motion.tr
-                                    key={req.id || idx}
-                                    initial={{ opacity: 0, y: 5 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: idx * 0.02 }}
-                                    onClick={() => setEditingPart({ ...req, tableIndex: idx + 1 })}
-                                    className="group hover:bg-slate-50 transition-all cursor-pointer"
-                                >
+            {/* Table Area with Fixed Footer for Submit Button */}
+            < div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col h-[700px] relative" >
+                <div className="flex-1 overflow-auto custom-scrollbar">
+                    {requirements.length > 0 ? (
+                        <table className="min-w-max border-separate border-spacing-0 w-full">
+                            <thead>
+                                <tr className="sticky top-0 z-30 bg-slate-50/50 backdrop-blur-md">
                                     {allColumns.map((h, i) => {
+                                        const isSticky = i < 2; // Only SN. NO and SAP PART NUMBER sticky
                                         let leftOffset = 0;
                                         if (i === 1) leftOffset = 80;
-                                        if (i === 2) leftOffset = 80 + 220;
-
-                                        const val = req[h] ?? "0";
-                                        const isCode = h === "SAP PART NUMBER" || h === "PART NUMBER" || h === "PART DESCRIPTION";
-                                        const isStat = h === "PER DAY" || h === "SAP Stock" || h === "Opening Stock" || h === "Todays Stock" || h === "Coverage Days";
 
                                         return (
-                                            <td
-                                                key={h}
-                                                style={{ left: i < 3 ? `${leftOffset}px` : 'auto' }}
+                                            <th key={h}
+                                                style={{ left: isSticky ? `${leftOffset}px` : 'auto' }}
                                                 className={cn(
-                                                    "p-2 border-b border-slate-50 transition-colors bg-white group-hover:bg-slate-50",
-                                                    i < 3 ? "sticky z-10 shadow-[2px_0_10px_rgba(0,0,0,0.05)] border-r border-slate-50" : ""
-                                                )}
-                                            >
-                                                <div className={cn(
-                                                    "w-full rounded-2xl p-4 flex items-center justify-center border border-slate-100 shadow-sm transition-all bg-white min-h-[60px]",
-                                                    h === "PART DESCRIPTION" ? "justify-start text-left px-6 min-w-[300px]" :
+                                                    "py-4 px-4 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] text-center border-b border-slate-100 z-40 bg-slate-50/50",
+                                                    isSticky ? 'sticky shadow-[2px_0_10px_rgba(0,0,0,0.05)] border-r border-slate-100' : '',
+                                                    h === "SN. NO" ? "min-w-[80px]" :
                                                         h === "SAP PART NUMBER" ? "min-w-[220px]" :
-                                                            h === "PART NUMBER" ? "min-w-[200px]" : "min-w-[100px]"
+                                                            h === "PART DESCRIPTION" ? "min-w-[300px] text-left" : "min-w-[150px]"
                                                 )}>
-                                                    {h === "SN. NO" ? (
-                                                        <span className="text-sm font-black text-slate-900">{idx + 1}</span>
-                                                    ) : isCode ? (
-                                                        <span className="text-[10px] font-black uppercase tracking-tight text-center leading-tight text-slate-900">
-                                                            {val}
-                                                        </span>
-                                                    ) : isStat ? (
-                                                        <span className={cn(
-                                                            "text-sm font-black transition-colors",
-                                                            h === "Coverage Days" && parseFloat(val) < 5
-                                                                ? "text-rose-500 underline decoration-rose-200"
-                                                                : "text-slate-900"
+                                                {h}
+                                            </th>
+                                        )
+                                    })}
+                                    <th className="py-4 px-4 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] text-center border-b border-slate-100 bg-slate-50/50 sticky right-0 z-40">STATUS</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white">
+                                {requirements.map((req, idx) => {
+                                    return (
+                                        <motion.tr
+                                            key={req.id || idx}
+                                            initial={{ opacity: 0, y: 5 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: idx * 0.02 }}
+                                            onClick={() => setEditingPart({ ...req, tableIndex: idx + 1 })}
+                                            className="group hover:bg-slate-50 transition-all cursor-pointer"
+                                        >
+                                            {allColumns.map((h, i) => {
+                                                const isSticky = i < 2;
+                                                let leftOffset = 0;
+                                                if (i === 1) leftOffset = 80;
+
+                                                const val = req[h] ?? "0";
+                                                const isCode = h === "SAP PART NUMBER" || h === "PART NUMBER" || h === "PART DESCRIPTION";
+                                                const isStat = h === "PER DAY" || h === "SAP Stock" || h === "Opening Stock" || h === "Todays Stock" || h === "Coverage Days";
+
+                                                return (
+                                                    <td
+                                                        key={h}
+                                                        style={{ left: isSticky ? `${leftOffset}px` : 'auto' }}
+                                                        className={cn(
+                                                            "p-2 border-b border-slate-50 transition-colors bg-white group-hover:bg-slate-50",
+                                                            isSticky ? "sticky z-10 shadow-[2px_0_10px_rgba(0,0,0,0.05)] border-r border-slate-50" : ""
+                                                        )}
+                                                    >
+                                                        <div className={cn(
+                                                            "w-full rounded-2xl p-4 flex items-center justify-center border border-slate-100 shadow-sm transition-all bg-white min-h-[60px]",
+                                                            h === "PART DESCRIPTION" ? "justify-start text-left px-6 min-w-[300px]" :
+                                                                h === "SAP PART NUMBER" ? "min-w-[220px]" :
+                                                                    h === "PART NUMBER" ? "min-w-[200px]" : "min-w-[100px]"
                                                         )}>
-                                                            {val}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="text-[10px] font-black uppercase tracking-tight text-center leading-tight text-slate-600">
-                                                            {val}
-                                                        </span>
-                                                    )}
+                                                            {h === "SN. NO" ? (
+                                                                <span className="text-sm font-black text-slate-900">{idx + 1}</span>
+                                                            ) : isCode ? (
+                                                                <span className="text-[10px] font-black uppercase tracking-tight text-center leading-tight text-slate-900">
+                                                                    {val}
+                                                                </span>
+                                                            ) : isStat ? (
+                                                                <span className={cn(
+                                                                    "text-sm font-black transition-colors",
+                                                                    h === "Coverage Days" && parseFloat(val) < 5
+                                                                        ? "text-rose-500 underline decoration-rose-200"
+                                                                        : "text-slate-900"
+                                                                )}>
+                                                                    {val}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-xs font-bold text-slate-600">{val}</span>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                );
+                                            })}
+                                            {/* PRODUCTION STATUS Column */}
+                                            <td className="p-2 border-b border-slate-50 sticky right-0 z-20 bg-white group-hover:bg-slate-50">
+                                                <div className="flex justify-center items-center h-[60px]">
+                                                    <div className="flex flex-col gap-1 items-center">
+                                                        <div className={cn(
+                                                            "px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest text-center min-w-[80px]",
+                                                            req["Production Status"] === "COMPLETE" ? "bg-emerald-50 text-emerald-600 border border-emerald-100" :
+                                                                req.row_status === "REJECTED" ? "bg-rose-500 text-white shadow-lg shadow-rose-200" :
+                                                                    req["Production Status"] === "IN PROGRESS" ? "bg-amber-50 text-amber-600 border border-amber-100" :
+                                                                        "bg-slate-50 text-slate-400 border border-slate-100"
+                                                        )}>
+                                                            {req.row_status === "REJECTED" && req["Production Status"] !== "COMPLETE" ? "REJECTED" : (req["Production Status"] || "PENDING")}
+                                                        </div>
+                                                        {req.row_status === "REJECTED" && req["Production Status"] !== "COMPLETE" && (
+                                                            <span className="text-[7px] font-black text-rose-500 animate-pulse">RE-ENTRY REQUIRED</span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </td>
-                                        );
-                                    })}
-                                    {/* PRODUCTION STATUS Column */}
-                                    <td className="p-2 border-b border-slate-50 text-center sticky right-0 bg-white group-hover:bg-slate-50 z-10 shadow-[-10px_0_15px_-5px_rgba(0,0,0,0.02)]">
-                                        <div className="bg-white rounded-2xl border border-slate-100 p-4 flex items-center justify-center min-h-[60px] shadow-sm min-w-[140px]">
-                                            <div className="flex flex-col gap-1.5">
-                                                <div className={cn(
-                                                    "px-4 py-1.5 rounded-lg text-[9px] font-black border uppercase tracking-widest transition-all",
-                                                    req["Production Status"] === 'COMPLETE' ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
-                                                        req["Production Status"] === 'IN PROGRESS' ? "bg-amber-50 text-amber-600 border-amber-100" :
-                                                            "bg-slate-50 text-slate-400 border-slate-100"
-                                                )}>
-                                                    {req["Production Status"] || "PENDING"}
-                                                </div>
-                                                
-                                                {req.row_status === "REJECTED" && (
-                                                    <div className="px-3 py-1 bg-red-600 text-white rounded-md text-[8px] font-black uppercase tracking-widest animate-pulse flex items-center justify-center gap-1.5 shadow-lg shadow-red-500/20">
-                                                        <AlertTriangle size={10} />
-                                                        NOT VERIFIED
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </td>
-                                </motion.tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            ) : (
-                <div className="py-32 text-center">
-                    <Database size={56} className="text-slate-100 mx-auto mb-6" />
-                    <h3 className="text-xl font-black text-slate-300 uppercase tracking-tight">No Components Found</h3>
+                                        </motion.tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    ) : (
+                        <div className="py-32 text-center">
+                            <Database size={56} className="text-slate-100 mx-auto mb-6" />
+                            <h3 className="text-xl font-black text-slate-300 uppercase tracking-tight">No Components Found</h3>
+                        </div>
+                    )}
                 </div>
-            )}
-        </div>
 
-{/* Fixed Footer with Submission Button - Synchronized with Header */ }
-<div className="p-8 bg-slate-50 border-t border-slate-100 flex justify-end items-center gap-8 relative z-50">
-    {!isFormValid && (
-        <div className="flex items-center gap-3 text-slate-400 font-bold text-[10px] uppercase tracking-widest animate-pulse">
-            <AlertTriangle size={14} />
-            Please fill all stock & production data to finalize
-        </div>
-    )}
-    <button
-        onClick={handleSubmitDailyLog}
-        disabled={isSubmitting || !isFormValid}
-        className={cn(
-            "px-12 py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] shadow-2xl transition-all flex items-center gap-4 z-20 hover:-translate-y-1 active:translate-y-0",
-            vModel.deo_accepted
-                ? "bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-900/20"
-                : "bg-slate-900 text-white hover:bg-black shadow-slate-900/30 disabled:opacity-20 disabled:cursor-not-allowed border-2 border-white/5"
-        )}
-    >
-        {isSubmitting ? (
-            <>
-                <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                SUBMITTING...
-            </>
-        ) : (
-            <>
-                <ShieldCheck size={20} className={cn(isFormValid ? "text-emerald-400" : "text-slate-500")} />
-                <span>FINALIZE & UPDATE SUBMISSION</span>
-            </>
-        )}
-    </button>
-</div>
+                {/* Fixed Footer with Submission Button - Synchronized with Header */}
+                <div className="p-8 bg-slate-50 border-t border-slate-100 flex justify-end items-center gap-8 relative z-50">
+                    {!isFormValid && (
+                        <div className="flex items-center gap-3 text-slate-400 font-bold text-[10px] uppercase tracking-widest animate-pulse">
+                            <AlertTriangle size={14} />
+                            Please fill all stock & production data to finalize
+                        </div>
+                    )}
+                    <button
+                        onClick={handleSubmitDailyLog}
+                        disabled={isSubmitting || !isFormValid}
+                        className={cn(
+                            "px-12 py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] shadow-2xl transition-all flex items-center gap-4 z-20 hover:-translate-y-1 active:translate-y-0",
+                            vModel.deo_accepted
+                                ? "bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-900/20"
+                                : "bg-slate-900 text-white hover:bg-black shadow-slate-900/30 disabled:opacity-20 disabled:cursor-not-allowed border-2 border-white/5"
+                        )}
+                    >
+                        {isSubmitting ? (
+                            <>
+                                <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                                SUBMITTING...
+                            </>
+                        ) : (
+                            <>
+                                <ShieldCheck size={20} className={cn(isFormValid ? "text-emerald-400" : "text-slate-500")} />
+                                <span>FINALIZE & UPDATE SUBMISSION</span>
+                            </>
+                        )}
+                    </button>
+                </div>
             </div >
         </div >
     );

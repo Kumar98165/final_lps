@@ -43,7 +43,7 @@ const UserAccountsPage = () => {
 
     // Edit Mode State
     const [isEditMode, setIsEditMode] = useState(false);
-    const [editingUserId, setEditingUserId] = useState<number | null>(null);
+
 
     // Filter State
     const currentUser = getUser();
@@ -74,7 +74,7 @@ const UserAccountsPage = () => {
         setIsLoading(true);
         try {
             const token = getToken();
-            const response = await fetch(`${API_BASE}/identity/users`, {
+            const response = await fetch(`${API_BASE}/admin/identity/users`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -99,7 +99,7 @@ const UserAccountsPage = () => {
 
     const handleOpenCreateModal = () => {
         setIsEditMode(false);
-        setEditingUserId(null);
+
         setFormData({
             username: '',
             role: '',
@@ -113,7 +113,7 @@ const UserAccountsPage = () => {
 
     const handleOpenEditModal = (user: any) => {
         setIsEditMode(true);
-        setEditingUserId(user.id);
+
         setFormData({
             username: user.username,
             role: user.role,
@@ -145,7 +145,7 @@ const UserAccountsPage = () => {
                     updates.password = formData.password;
                 }
 
-                const response = await fetch(`${API_BASE}/identity/users/${formData.username}`, {
+                const response = await fetch(`${API_BASE}/admin/identity/users/${formData.username}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -174,7 +174,7 @@ const UserAccountsPage = () => {
                     isActive: formData.isActive
                 };
 
-                const response = await fetch(`${API_BASE}/identity/users`, {
+                const response = await fetch(`${API_BASE}/admin/identity/users`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -218,7 +218,7 @@ const UserAccountsPage = () => {
             try {
                 const token = getToken();
 
-                const response = await fetch(`${API_BASE}/identity/users/${deleteConfirmation.username}`, {
+                const response = await fetch(`${API_BASE}/admin/identity/users/${deleteConfirmation.username}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -546,7 +546,7 @@ const UserAccountsPage = () => {
                                             <option value="" disabled>Grant Access Level</option>
                                             {Object.values(UserRole).filter(role => {
                                                 if (isManager) {
-                                                    return role === UserRole.SUPERVISOR || role === UserRole.OPERATOR;
+                                                    return role === UserRole.SUPERVISOR || role === UserRole.DEO;
                                                 }
                                                 return true;
                                             }).map(role => (

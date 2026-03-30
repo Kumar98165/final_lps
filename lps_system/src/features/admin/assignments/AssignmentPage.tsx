@@ -61,19 +61,19 @@ const AssignmentPage = () => {
             const headers = { 'Authorization': `Bearer ${token}` };
 
             // Fetch assignments (car models)
-            const modelsRes = await fetch(`${API_BASE}/assignments`, { headers });
+            const modelsRes = await fetch(`${API_BASE}/admin/assignments`, { headers });
             const modelsData = await modelsRes.json();
 
             // Fetch supervisors
-            const supRes = await fetch(`${API_BASE}/identity/staff?role=Supervisor`, { headers });
+            const supRes = await fetch(`${API_BASE}/admin/identity/staff?role=Supervisor`, { headers });
             const supData = await supRes.json();
 
             // Fetch DEOs
-            const deoRes = await fetch(`${API_BASE}/identity/staff?role=DEO`, { headers });
+            const deoRes = await fetch(`${API_BASE}/admin/identity/staff?role=DEO`, { headers });
             const deoData = await deoRes.json();
 
             // Fetch Lines
-            const linesRes = await fetch(`${API_BASE}/lines`, { headers });
+            const linesRes = await fetch(`${API_BASE}/admin/lines`, { headers });
             const linesData = await linesRes.json();
 
             if (modelsData.success) {
@@ -111,7 +111,7 @@ const AssignmentPage = () => {
         setSaving(true);
         try {
             const token = getAccessToken();
-            const res = await fetch(`${API_BASE}/assignments/${selectedModel.id}`, {
+            const res = await fetch(`${API_BASE}/admin/assignments/${selectedModel.id}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -180,8 +180,8 @@ const AssignmentPage = () => {
                             </div>
                             <div className="space-y-0.5">
                                 <span className="block text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Team Management</span>
-                                <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex flex-col">
-                                    CAR MODELS ASSIGNMENT
+                                <h1 className="text-sm font-black text-slate-800 tracking-tight flex flex-col">
+                                    MODEL ASSIGNMENT
                                 </h1>
                                 <p className="text-[11px] font-bold text-slate-400 max-w-lg leading-relaxed">
                                     Map Supervisors, DEOs and Production Lines for optimized workflow tracking.
@@ -438,16 +438,12 @@ const AssignmentPage = () => {
                                         <UserCog size={32} strokeWidth={2.2} />
                                     </div>
                                     <div className="space-y-1">
-                                        <h2 className="text-3xl font-black text-slate-900 tracking-tight leading-tight">
-                                            Manage Roster
+                                        <h2 className="text-xl font-black text-slate-900 tracking-tight leading-tight uppercase">
+                                            Model Assignment
                                         </h2>
                                         <div className="flex flex-wrap items-center gap-2 pt-1">
                                             <span className="text-[10px] font-black text-orange-600 bg-orange-50 px-3 py-1.5 rounded-xl border border-orange-100/50 shadow-sm uppercase tracking-wider">
                                                 {tempName}
-                                            </span>
-                                            <div className="w-1 h-1 rounded-full bg-slate-200" />
-                                            <span className="text-[10px] font-black text-slate-400 bg-white px-3 py-1.5 rounded-xl border border-slate-100 shadow-sm uppercase tracking-widest">
-                                                {tempCode}
                                             </span>
                                         </div>
                                     </div>

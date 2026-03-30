@@ -9,6 +9,7 @@ from flask_jwt_extended import jwt_required
 from app.models import MasterData, db
 from app.services.db_service import MasterDataDBService
 from app.middleware.auth_middleware import role_required
+from datetime import datetime
 
 manager_bp = Blueprint('manager', __name__)
 
@@ -134,6 +135,25 @@ def update_model_schema(model_name):
     
     db.session.commit()
     return jsonify({"success": True, "message": f"Schema for {model_name} updated successfully"})
+
+@manager_bp.route('/car-models/<int:model_id>/ready', methods=['PATCH'])
+@jwt_required()
+@role_required(['Manager', 'Admin'])
+def mark_model_ready(model_id):
+    from app.models import CarModel, Demand
+    model = CarModel.query.get(model_id)
+    if not model:
+        return jsonify({"success": False, "message": "Car Model not found"}), 404
+        
+    model.status = 'READY'
+    
+    # Also update the associated demand if it exists
+    demand = Demand.query.filter_by(model_id=model_id).first()
+    if demand:
+        demand.status = 'IN_PROGRESS'
+        
+    db.session.commit()
+    return jsonify({"success": True, "message": f"Model {model.name} is now ready for assignment"})
 
 @manager_bp.route('/summary', methods=['GET'])
 @jwt_required()

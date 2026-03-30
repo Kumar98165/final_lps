@@ -40,7 +40,7 @@ const ProductionLinesPage = () => {
         setIsLoading(true);
         try {
             const token = getToken();
-            const response = await fetch(`${API_BASE}/lines`, {
+            const response = await fetch(`${API_BASE}/admin/lines`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
@@ -85,7 +85,7 @@ const ProductionLinesPage = () => {
         e.preventDefault();
         try {
             const token = getToken();
-            const url = isEditing ? `${API_BASE}/lines/${selectedLine?.id}` : `${API_BASE}/lines`;
+            const url = isEditing ? `${API_BASE}/admin/lines/${selectedLine?.id}` : `${API_BASE}/admin/lines`;
             const method = isEditing ? 'PUT' : 'POST';
 
             const response = await fetch(url, {
@@ -110,7 +110,7 @@ const ProductionLinesPage = () => {
         if (!confirm('Are you sure you want to delete this production line?')) return;
         try {
             const token = getToken();
-            const response = await fetch(`${API_BASE}/lines/${id}`, {
+            const response = await fetch(`${API_BASE}/admin/lines/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
