@@ -8,6 +8,33 @@
   --color-sidebar: #FFFFFF;
   --color-sidebar-foreground: #64748b;
   --font-sans: "Inter", "sans-serif";
+  --font-outfit: "Outfit", "sans-serif";
+  --font-mono-jet: "JetBrains Mono", "monospace";
+
+  /* Admin Production Design Palette - High Fidelity */
+  --color-ind-primary: #F37021;
+  --color-ind-bg: #f1f5f9; /* Cool targeted light gray-blue */
+  --color-ind-bg2: #ffffff;
+  --color-ind-card: #ffffff;
+  --color-ind-card2: #ffffff;
+  --color-ind-card3: #f8fafc;
+  --color-ind-border: #e2e8f0;
+  --color-ind-border2: #cbd5e1;
+  --color-ind-border3: #94a3b8;
+  --color-ind-g1: #F37021; 
+  --color-ind-g2: #e0651d;
+  --color-ind-g3: #cd5a19;
+  --color-ind-g4: #8b3e11;
+  --color-ind-teal: #0ea5e9;
+  --color-ind-yellow: #f59e0b;
+  --color-ind-red: #ef4444;
+  --color-ind-orange: #f97316;
+  --color-ind-blue: #2563eb; /* Target Blue */
+  --color-ind-emerald: #10b981; /* Target Green */
+  --color-ind-indigo: #6366f1; /* Target Purple/Indigo */
+  --color-ind-text: #0f172a; /* Deep Navy/Black */
+  --color-ind-text2: #475569;
+  --color-ind-text3: #64748b;
 }
 
 @layer base {

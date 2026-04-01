@@ -63,12 +63,24 @@ def create_app(config_name="dev"):
         return wrapped()
 
     @app.route('/api/orders/fetch-emails', methods=['GET'])
-    def get_incoming_emails():
+    def get_tracked_emails():
         from flask_jwt_extended import jwt_required
         @jwt_required()
         def wrapped():
+            # FAST: Only returns what is already in DB
+            from .models import EmailRequest
+            all_tracked = EmailRequest.query.order_by(EmailRequest.received_at.desc()).all()
+            return jsonify({"success": True, "data": [e.to_dict() for e in all_tracked]})
+        return wrapped()
+
+    @app.route('/api/orders/sync-emails', methods=['POST'])
+    def sync_incoming_emails():
+        from flask_jwt_extended import jwt_required
+        @jwt_required()
+        def wrapped():
+            # SLOW: Performs the actual IMAP connection - always succeeds (falls back to DB on IMAP errors)
             result = fetch_unread_emails()
-            return jsonify(result), (200 if result.get("success") else 500)
+            return jsonify(result), 200
         return wrapped()
 
     @app.route('/api/orders/emails/<string:email_id>', methods=['DELETE'])
@@ -78,6 +90,30 @@ def create_app(config_name="dev"):
         def wrapped():
             result = delete_email(email_id)
             return jsonify(result), (200 if result.get("success") else 500)
+        return wrapped()
+
+    @app.route('/api/orders/bulk-delete', methods=['POST'])
+    def bulk_delete_order_emails():
+        from flask_jwt_extended import jwt_required
+        @jwt_required()
+        def wrapped():
+            data = request.json or {}
+            email_ids = data.get('email_ids', [])
+            if not email_ids:
+                return jsonify({"success": False, "message": "No email IDs provided"}), 400
+            
+            from .services.fetch_emails import delete_email
+            results = []
+            for email_id in email_ids:
+                res = delete_email(email_id)
+                results.append(res)
+            
+            success_count = sum(1 for r in results if r.get('success'))
+            return jsonify({
+                "success": True, 
+                "message": f"Successfully deleted {success_count} emails",
+                "results": results
+            })
         return wrapped()
 
     @app.route("/api/health", methods=["GET"])

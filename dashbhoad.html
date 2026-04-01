@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIE Automotive | Command Center v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#0a0e0b;--bg2:#0d1410;--card:#111a12;--card2:#131f14;--card3:#0f1910;
+  --border:rgba(74,222,128,0.07);--border2:rgba(74,222,128,0.18);--border3:rgba(74,222,128,0.30);
+  --g1:#4ade80;--g2:#22c55e;--g3:#16a34a;--g4:#14532d;
+  --teal:#2dd4bf;--yellow:#facc15;--red:#f43f5e;--orange:#fb923c;--blue:#60a5fa;--purple:#a78bfa;
+  --text:#dff0e1;--text2:#7a9e7e;--text3:#334d38;
+  --font:'Outfit',sans-serif;--mono:'JetBrains Mono',monospace;
+  --r:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse 80% 50% at 5% 0%,rgba(34,197,94,0.07) 0%,transparent 55%),
+  radial-gradient(ellipse 50% 50% at 95% 100%,rgba(45,212,191,0.04) 0%,transparent 55%);
+  pointer-events:none;z-index:0;}
+.wrap{max-width:1760px;margin:0 auto;padding:18px 22px;position:relative;z-index:1;}
+
+/* ── TOP BAR ── */
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+.logo{display:flex;align-items:center;gap:11px;}
+.logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--g2),var(--teal));border-radius:9px;
+  display:flex;align-items:center;justify-content:center;font-size:1rem;color:#fff;}
+.logo-name{font-size:1.35rem;font-weight:800;letter-spacing:-0.3px;}
+.logo-sub{font-family:var(--mono);font-size:0.56rem;color:var(--text3);letter-spacing:0.14em;text-transform:uppercase;}
+.hdr-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.live-pill{display:flex;align-items:center;gap:5px;background:rgba(74,222,128,0.07);
+  border:1px solid rgba(74,222,128,0.18);color:var(--g1);font-family:var(--mono);font-size:0.62rem;
+  padding:5px 12px;border-radius:40px;letter-spacing:0.12em;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--g1);animation:blink 1.4s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.15;}}
+.clock{font-family:var(--mono);font-size:0.65rem;color:var(--text3);}
+.notif-bell{position:relative;cursor:pointer;background:var(--bg2);border:1px solid var(--border);
+  width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text2);transition:all 0.15s;}
+.notif-bell:hover{border-color:var(--border2);color:var(--g1);}
+.notif-badge{position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:var(--red);
+  border-radius:50%;font-size:0.55rem;font-family:var(--mono);color:#fff;display:flex;align-items:center;justify-content:center;}
+
+/* ── FILTER BAR ── */
+.filter-bar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:11px 16px;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);margin-bottom:16px;}
+.flabel{font-family:var(--mono);font-size:0.58rem;letter-spacing:0.14em;color:var(--text3);text-transform:uppercase;white-space:nowrap;}
+select{background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);
+  font-size:0.72rem;padding:6px 28px 6px 11px;border-radius:8px;outline:none;cursor:pointer;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234ade80'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 9px center;}
+select:focus{border-color:var(--g2);}
+.sep{width:1px;height:20px;background:var(--border);}
+.btn{font-family:var(--font);font-weight:600;font-size:0.78rem;padding:6px 14px;border-radius:8px;border:none;cursor:pointer;transition:all 0.15s;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--text2);}
+.btn-ghost:hover{border-color:var(--g2);color:var(--g1);}
+.btn-green{background:linear-gradient(135deg,var(--g3),var(--g2));color:#fff;}
+.btn-green:hover{opacity:0.85;}
+.btn-red{background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.25);color:var(--red);}
+.btn-red:hover{background:rgba(244,63,94,0.2);}
+.btn-teal{background:rgba(45,212,191,0.1);border:1px solid rgba(45,212,191,0.25);color:var(--teal);}
+.btn-teal:hover{background:rgba(45,212,191,0.18);}
+.btn-yellow{background:rgba(250,204,21,0.1);border:1px solid rgba(250,204,21,0.25);color:var(--yellow);}
+.btn-yellow:hover{background:rgba(250,204,21,0.18);}
+
+/* ── KPI ROW ── */
+.kpi-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px;}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;
+  position:relative;overflow:hidden;cursor:default;transition:transform 0.2s,border-color 0.2s;}
+.kpi-card:hover{transform:translateY(-2px);border-color:var(--border2);}
+.kpi-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--g2),transparent);opacity:0.35;}
+.kpi-label{font-family:var(--mono);font-size:0.56rem;letter-spacing:0.16em;color:var(--text3);text-transform:uppercase;margin-bottom:7px;}
+.kpi-val{font-size:2.3rem;font-weight:800;line-height:1;letter-spacing:-1px;}
+.kpi-sub{font-family:var(--mono);font-size:0.58rem;color:var(--text3);margin-top:5px;}
+.kpi-b{display:inline-block;font-family:var(--mono);font-size:0.56rem;padding:2px 7px;border-radius:20px;}
+.up{background:rgba(74,222,128,0.1);color:var(--g1);}
+.dn{background:rgba(244,63,94,0.1);color:var(--red);}
+.yw{background:rgba(250,204,21,0.1);color:var(--yellow);}
+
+/* ── LAYOUT ── */
+.grid{display:grid;gap:14px;margin-bottom:14px;}
+.g3{grid-template-columns:1fr 1fr 1fr;}
+.g2{grid-template-columns:1fr 1fr;}
+.g4{grid-template-columns:1fr 1fr 1fr 1fr;}
+.g32{grid-template-columns:2fr 1fr;}
+.g23{grid-template-columns:1fr 2fr;}
+.span2{grid-column:span 2;}
+
+/* ── PANEL ── */
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.phdr{display:flex;align-items:center;justify-content:space-between;padding:13px 17px;border-bottom:1px solid var(--border);}
+.ptitle{font-size:0.88rem;font-weight:700;letter-spacing:0.02em;display:flex;align-items:center;gap:7px;}
+.ptitle i{color:var(--g2);font-size:0.8em;}
+.pbody{padding:14px 17px;}
+
+/* ── CHART CARD ── */
+.cc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:15px 17px;}
+.ctitle{font-size:0.78rem;font-weight:700;color:var(--text2);letter-spacing:0.04em;margin-bottom:12px;
+  display:flex;align-items:center;justify-content:space-between;}
+.ctitle .cl{display:flex;align-items:center;gap:6px;}
+.cpill{font-family:var(--mono);font-size:0.56rem;background:var(--bg2);border:1px solid var(--border);
+  color:var(--text3);padding:2px 7px;border-radius:20px;}
+canvas{width:100%!important;max-height:185px;}
+
+/* ── MAIL ORDER INBOX ── */
+.mail-item{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;
+  margin-bottom:10px;transition:border-color 0.2s;}
+.mail-item:hover{border-color:var(--border2);}
+.mail-item.unread{border-left:3px solid var(--g1);}
+.mail-item.pending{border-left:3px solid var(--yellow);}
+.mail-item.accepted{border-left:3px solid var(--teal);opacity:0.7;}
+.mail-item.rejected-order{border-left:3px solid var(--red);opacity:0.7;}
+.mail-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px;}
+.mail-from{display:flex;align-items:center;gap:9px;}
+.mail-avatar{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:0.8rem;color:#fff;flex-shrink:0;}
+.mail-company{font-size:0.85rem;font-weight:700;color:var(--text);}
+.mail-email{font-family:var(--mono);font-size:0.6rem;color:var(--text3);margin-top:1px;}
+.mail-date{font-family:var(--mono);font-size:0.6rem;color:var(--text3);white-space:nowrap;}
+.mail-body-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:9px;}
+.mail-model-tag{background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);
+  color:var(--g1);font-family:var(--mono);font-size:0.65rem;padding:3px 9px;border-radius:6px;font-weight:600;}
+.mail-qty{font-family:var(--mono);font-size:0.68rem;color:var(--text2);}
+.mail-msg{font-size:0.75rem;color:var(--text3);font-style:italic;margin-bottom:9px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.mail-actions{display:flex;gap:8px;}
+.mail-status-badge{font-family:var(--mono);font-size:0.6rem;padding:3px 10px;border-radius:20px;letter-spacing:0.08em;}
+.ms-pend{background:rgba(250,204,21,0.1);color:var(--yellow);border:1px solid rgba(250,204,21,0.2);}
+.ms-acc{background:rgba(45,212,191,0.1);color:var(--teal);border:1px solid rgba(45,212,191,0.2);}
+.ms-rej{background:rgba(244,63,94,0.1);color:var(--red);border:1px solid rgba(244,63,94,0.2);}
+.ms-read{background:rgba(74,222,128,0.1);color:var(--g1);border:1px solid rgba(74,222,128,0.2);}
+
+/* ── TRANSFER READY SECTION ── */
+.transfer-card{background:var(--bg2);border:1px solid rgba(45,212,191,0.15);border-radius:10px;
+  padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;}
+.transfer-card:hover{border-color:rgba(45,212,191,0.3);}
+.tc-model-badge{background:linear-gradient(135deg,rgba(45,212,191,0.15),rgba(74,222,128,0.1));
+  border:1px solid rgba(45,212,191,0.25);border-radius:10px;padding:10px 14px;text-align:center;min-width:90px;flex-shrink:0;}
+.tc-model-name{font-size:0.85rem;font-weight:800;color:var(--teal);letter-spacing:0.04em;}
+.tc-qty-big{font-size:1.8rem;font-weight:900;line-height:1;color:var(--text);}
+.tc-qty-lbl{font-family:var(--mono);font-size:0.56rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;}
+.tc-info{flex:1;}
+.tc-customer{font-size:0.85rem;font-weight:700;color:var(--text);}
+.tc-detail{font-family:var(--mono);font-size:0.62rem;color:var(--text3);margin-top:3px;}
+.tc-prog{margin-top:8px;}
+.tc-prog-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:0.58rem;color:var(--text3);margin-bottom:4px;}
+.prog-track{height:5px;background:rgba(255,255,255,0.04);border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--g3),var(--g1));transition:width 0.6s ease;}
+.prog-fill-teal{background:linear-gradient(90deg,var(--teal),var(--g1));}
+.tc-actions{display:flex;flex-direction:column;gap:6px;flex-shrink:0;}
+
+/* ── MATERIALS SECTION ── */
+.mat-model-selector{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.mat-btn{font-family:var(--mono);font-size:0.7rem;padding:6px 14px;border-radius:8px;cursor:pointer;
+  border:1px solid var(--border);background:var(--bg2);color:var(--text2);transition:all 0.15s;}
+.mat-btn.active{background:rgba(74,222,128,0.1);border-color:var(--border2);color:var(--g1);}
+.mat-btn:hover{border-color:var(--border2);}
+.mat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:14px;}
+.mat-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;
+  transition:border-color 0.2s;text-align:center;}
+.mat-card:hover{border-color:var(--border2);}
+.mat-icon{font-size:1.4rem;margin-bottom:6px;}
+.mat-name{font-family:var(--mono);font-size:0.62rem;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;}
+.mat-val{font-size:1.4rem;font-weight:800;color:var(--text);}
+.mat-unit{font-family:var(--mono);font-size:0.58rem;color:var(--text3);}
+.mat-used-bar{height:3px;background:rgba(255,255,255,0.05);border-radius:2px;margin-top:7px;overflow:hidden;}
+.mat-used-fill{height:100%;border-radius:2px;transition:width 0.5s ease;}
+
+/* ── PERSON CARDS ── */
+.person-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px;}
+.person-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;
+  text-align:center;transition:border-color 0.2s,transform 0.2s;position:relative;}
+.person-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+.person-avatar{width:40px;height:40px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;
+  justify-content:center;font-size:1rem;font-weight:800;color:#fff;}
+.av-g{background:linear-gradient(135deg,#16a34a,#4ade80);}
+.av-t{background:linear-gradient(135deg,#0d9488,#2dd4bf);}
+.av-b{background:linear-gradient(135deg,#2563eb,#60a5fa);}
+.av-p{background:linear-gradient(135deg,#7c3aed,#a78bfa);}
+.status-dot{position:absolute;top:9px;right:9px;width:7px;height:7px;border-radius:50%;}
+.dot-on{background:var(--g1);box-shadow:0 0 0 3px rgba(74,222,128,0.12);animation:blink 2s infinite;}
+.dot-off{background:var(--text3);}
+.p-name{font-size:0.8rem;font-weight:700;}
+.p-role{font-family:var(--mono);font-size:0.55rem;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-top:1px;}
+.p-line{font-family:var(--mono);font-size:0.58rem;color:var(--teal);margin-top:3px;}
+.p-stats{display:flex;justify-content:center;gap:10px;margin-top:7px;}
+.ps{text-align:center;}
+.ps-val{font-size:0.8rem;font-weight:700;}
+.ps-lbl{font-family:var(--mono);font-size:0.5rem;color:var(--text3);}
+
+/* ── TABLES ── */
+table{width:100%;border-collapse:collapse;}
+thead th{font-family:var(--mono);font-size:0.56rem;letter-spacing:0.14em;color:var(--text3);text-transform:uppercase;
+  padding:0 0 8px 0;text-align:left;border-bottom:1px solid var(--border);}
+tbody td{font-family:var(--mono);font-size:0.7rem;color:var(--text2);padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.02);}
+tbody tr:hover td{color:var(--text);background:rgba(74,222,128,0.015);}
+.tb{font-family:var(--mono);font-size:0.56rem;padding:2px 8px;border-radius:20px;letter-spacing:0.08em;text-transform:uppercase;}
+.tb-g{background:rgba(74,222,128,0.1);color:var(--g1);border:1px solid rgba(74,222,128,0.2);}
+.tb-y{background:rgba(250,204,21,0.1);color:var(--yellow);border:1px solid rgba(250,204,21,0.2);}
+.tb-r{background:rgba(244,63,94,0.1);color:var(--red);border:1px solid rgba(244,63,94,0.2);}
+.tb-t{background:rgba(45,212,191,0.1);color:var(--teal);border:1px solid rgba(45,212,191,0.2);}
+
+/* ── MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.78);backdrop-filter:blur(8px);
+  z-index:200;display:none;align-items:center;justify-content:center;padding:16px;}
+.overlay.open{display:flex;}
+.modal{background:var(--card2);border:1px solid var(--border2);border-radius:16px;
+  width:100%;max-width:700px;max-height:90vh;overflow-y:auto;animation:su 0.22s ease;}
+@keyframes su{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+.mhdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);}
+.mtitle{font-size:1rem;font-weight:700;display:flex;align-items:center;gap:7px;}
+.xbtn{width:28px;height:28px;border-radius:7px;background:transparent;border:1px solid var(--border);
+  color:var(--text2);cursor:pointer;font-size:0.8rem;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.xbtn:hover{border-color:var(--red);color:var(--red);}
+.mbody{padding:18px 20px;}
+.dl-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.dl-btn{display:flex;align-items:center;gap:7px;background:rgba(74,222,128,0.07);border:1px solid var(--border2);
+  color:var(--g1);font-family:var(--font);font-weight:600;font-size:0.75rem;padding:8px 16px;
+  border-radius:9px;cursor:pointer;transition:all 0.15s;flex:1;justify-content:center;}
+.dl-btn:hover{background:rgba(74,222,128,0.14);}
+.dl-btn.teal{color:var(--teal);border-color:rgba(45,212,191,0.3);background:rgba(45,212,191,0.07);}
+.dl-btn.teal:hover{background:rgba(45,212,191,0.14);}
+.rej-detail-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;}
+.rdc-row{display:flex;gap:8px;margin-bottom:7px;align-items:flex-start;}
+.rdc-key{font-family:var(--mono);font-size:0.6rem;color:var(--text3);width:100px;flex-shrink:0;padding-top:2px;letter-spacing:0.08em;text-transform:uppercase;}
+.rdc-val{font-size:0.8rem;font-weight:600;color:var(--text);}
+.rdc-g{color:var(--g1);}
+.rdc-r{color:var(--red);}
+.rdc-t{color:var(--teal);}
+
+/* ── LINE ITEMS ── */
+.line-item{padding:11px 0;border-bottom:1px solid rgba(255,255,255,0.025);}
+.line-item:last-child{border-bottom:none;}
+.li-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.li-name{font-size:0.85rem;font-weight:700;letter-spacing:0.03em;}
+.li-model{font-family:var(--mono);font-size:0.58rem;color:var(--teal);margin-top:1px;}
+.li-nums{font-family:var(--mono);font-size:0.7rem;color:var(--text2);text-align:right;}
+.li-nums strong{color:var(--g1);}
+
+/* ── REJECTION LOG ── */
+.rej-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.025);}
+.rej-item:last-child{border-bottom:none;}
+.rej-ico{width:28px;height:28px;border-radius:7px;background:rgba(244,63,94,0.09);border:1px solid rgba(244,63,94,0.18);
+  display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:var(--red);flex-shrink:0;}
+.rej-body{flex:1;min-width:0;}
+.rej-model{font-size:0.8rem;font-weight:700;}
+.rej-det{font-family:var(--mono);font-size:0.6rem;color:var(--text3);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.rej-meta{font-family:var(--mono);font-size:0.58rem;color:var(--teal);margin-top:2px;}
+.rej-right{text-align:right;flex-shrink:0;}
+.rej-date{font-family:var(--mono);font-size:0.58rem;color:var(--text3);}
+.rej-sup{font-family:var(--mono);font-size:0.6rem;color:var(--g1);margin-top:1px;}
+
+.scroll{max-height:280px;overflow-y:auto;}
+.scroll::-webkit-scrollbar{width:3px;}
+.scroll::-webkit-scrollbar-track{background:transparent;}
+.scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* form */
+input[type=text]{background:var(--bg2);border:1px solid var(--border);color:var(--text);
+  font-family:var(--mono);font-size:0.72rem;padding:8px 11px;border-radius:8px;outline:none;width:100%;}
+input:focus{border-color:var(--g2);}
+input::placeholder{color:var(--text3);}
+.fg label{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.12em;color:var(--text3);
+  text-transform:uppercase;display:block;margin-bottom:4px;}
+.form2{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px;}
+
+/* order stat pill */
+.ord-stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.ord-stat{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:11px 13px;text-align:center;}
+.ord-stat-val{font-size:1.6rem;font-weight:800;line-height:1;}
+.ord-stat-lbl{font-family:var(--mono);font-size:0.56rem;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-top:4px;}
+
+/* anim */
+@keyframes fadeUp{from{opacity:0;transform:translateY(9px);}to{opacity:1;transform:translateY(0);}}
+.kpi-card,.cc,.panel{animation:fadeUp 0.4s ease both;}
+.kpi-card:nth-child(1){animation-delay:.04s}.kpi-card:nth-child(2){animation-delay:.08s}
+.kpi-card:nth-child(3){animation-delay:.12s}.kpi-card:nth-child(4){animation-delay:.16s}
+.kpi-card:nth-child(5){animation-delay:.20s}.kpi-card:nth-child(6){animation-delay:.24s}
+
+@media(max-width:1300px){.kpi-strip{grid-template-columns:repeat(3,1fr);}.g4{grid-template-columns:1fr 1fr;}.g3{grid-template-columns:1fr 1fr;}.g32,.g23{grid-template-columns:1fr;}}
+@media(max-width:800px){.g3,.g2,.g4,.g32,.g23{grid-template-columns:1fr;}.kpi-strip{grid-template-columns:repeat(2,1fr);}.wrap{padding:10px 12px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="logo">
+    <div class="logo-icon"><i class="fas fa-charging-station"></i></div>
+    <div>
+      <div class="logo-name">CIE Automotive</div>
+      <div class="logo-sub">Command Intelligence Platform</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="clock" id="clockEl">—</div>
+    <div class="notif-bell" id="bellBtn" title="Mail Orders"><i class="fas fa-envelope"></i><div class="notif-badge" id="notifCount">0</div></div>
+    <div class="live-pill"><div class="live-dot"></div> LIVE</div>
+  </div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <span class="flabel">Line</span>
+  <select id="lineFilter"></select>
+  <span class="flabel">Model</span>
+  <select id="modelFilter">
+    <option value="all">All Models</option>
+    <option value="xuv">XUV</option>
+    <option value="ev">EV</option>
+    <option value="suv">SUV</option>
+    <option value="sedan">Sedan</option>
+  </select>
+  <span class="flabel">Period</span>
+  <select id="timeFilter">
+    <option value="now">Now</option>
+    <option value="day">Today</option>
+    <option value="week">This Week</option>
+    <option value="month">This Month</option>
+    <option value="custom">Custom Date</option>
+  </select>
+  <input type="date" id="datePicker" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:0.72rem;padding:6px 11px;border-radius:8px;outline:none;display:none;">
+    <span class="flabel">From</span>
+    <input type="date" id="startDatePicker" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:0.72rem;padding:6px 11px;border-radius:8px;outline:none;display:none;">
+    <span class="flabel">To</span>
+    <input type="date" id="endDatePicker" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:0.72rem;padding:6px 11px;border-radius:8px;outline:none;display:none;">
+    <span class="flabel">Year</span>
+    <select id="yearFilter" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:0.72rem;padding:6px 11px;border-radius:8px;outline:none;">
+      <option value="all">All Years</option>
+      <option value="2026">2026</option>
+      <option value="2025">2025</option>
+      <option value="2024">2024</option>
+      <option value="2023">2023</option>
+    </select>
+  <button class="btn btn-ghost" id="applyBtn"><i class="fas fa-sync-alt"></i> Apply</button>
+  <div class="sep"></div>
+  <button class="btn btn-ghost" id="addLineBtn"><i class="fas fa-plus"></i> Add Line</button>
+  <button class="btn btn-green" id="simOrderBtn"><i class="fas fa-envelope-open-text"></i> Simulate Mail Order</button>
+  <button class="btn btn-red" id="simRejBtn"><i class="fas fa-ban"></i> Simulate Rejection</button>
+  <button class="btn btn-teal" id="openRejBtn"><i class="fas fa-eye"></i> Rejection Log</button>
+</div>
+
+<!-- KPI -->
+<div class="kpi-strip" id="kpiGrid"></div>
+
+<!-- ROW A: Mail Orders (big) + Transfer Ready -->
+<div class="grid g32" style="margin-bottom:14px;">
+  <!-- MAIL ORDER INBOX -->
+  <div class="panel">
+    <div class="phdr">
+      <div class="ptitle"><i class="fas fa-envelope-open-text" style="color:var(--yellow)"></i> Mail Order Requests</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <select id="mailStatusFilter" style="font-size:0.65rem;padding:4px 24px 4px 8px;">
+          <option value="all">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="accepted">Accepted</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        <span class="tb tb-y" id="pendingMailCount">0 Pending</span>
+      </div>
+    </div>
+    <div class="pbody">
+      <!-- Order summary stats -->
+        <div class="ord-stat-row" id="orderStatRow"></div>
+        <div style="margin:10px 0 18px 0;">
+          <canvas id="mailOrderChart" height="80"></canvas>
+        </div>
+        <div class="scroll" id="mailInbox" style="max-height:340px;"></div>
+        <div style="margin:10px 0 18px 0;">
+          <canvas id="allOrdersChart" height="80"></canvas>
+        </div>
+    </div>
+  </div>
+
+  <!-- TRANSFER READY -->
+  <div class="panel">
+    <div class="phdr">
+      <div class="ptitle"><i class="fas fa-truck-fast" style="color:var(--teal)"></i> Ready for Transfer</div>
+      <span class="tb tb-t" id="transferCount">0</span>
+    </div>
+    <div class="pbody scroll" id="transferList" style="max-height:400px;"></div>
+  </div>
+</div>
+
+<!-- ROW B: Charts row 1 -->
+<div class="grid g4" style="margin-bottom:14px;">
+  <div class="cc">
+    <div class="ctitle"><div class="cl"><i class="fas fa-chart-bar" style="color:var(--g2)"></i> Orders by Model</div></div>
+    <canvas id="ordModelChart"></canvas>
+  </div>
+  <div class="cc">
+    <div class="ctitle"><div class="cl"><i class="fas fa-chart-pie" style="color:var(--yellow)"></i> Order Status Mix</div></div>
+    <canvas id="ordStatusChart"></canvas>
+  </div>
+  <div class="cc">
+    <div class="ctitle"><div class="cl"><i class="fas fa-chart-line" style="color:var(--teal)"></i> Order Trend</div><span class="cpill">30 days</span></div>
+    <canvas id="ordTrendChart"></canvas>
+  </div>
+  <div class="cc">
+    <div class="ctitle"><div class="cl"><i class="fas fa-building" style="color:var(--blue)"></i> Orders by Company</div></div>
+    <canvas id="companyChart"></canvas>
+  </div>
+</div>
+
+<!-- ROW C: MATERIALS STATS (full width section) -->
+<div class="panel" style="margin-bottom:14px;">
+  <div class="phdr">
+    <div class="ptitle"><i class="fas fa-boxes-stacking" style="color:var(--orange)"></i> Materials Usage — Per Model Statistics</div>
+    <div class="mat-model-selector" id="matModelSelector" style="margin:0;"></div>
+  </div>
+  <div class="pbody">
+    <div class="mat-grid" id="matGrid"></div>
+    <div class="grid g2">
+      <div class="cc" style="padding:0;background:none;border:none;">
+        <div class="ctitle" style="padding:0 0 10px 0;"><div class="cl"><i class="fas fa-chart-bar" style="color:var(--orange)"></i> Material Consumption (units)</div></div>
+        <canvas id="matBarChart"></canvas>
+      </div>
+      <div class="cc" style="padding:0;background:none;border:none;">
+        <div class="ctitle" style="padding:0 0 10px 0;"><div class="cl"><i class="fas fa-chart-pie" style="color:var(--purple)"></i> Material Cost Distribution</div></div>
+        <canvas id="matPieChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ROW D: Production charts -->
+<div class="grid g4" style="margin-bottom:14px;">
+  <div class="cc">
+    <div class="ctitle"><div class="cl"><i class="fas fa-chart-bar" style="color:var(--g2)"></i> Production vs Target</div></div>
+    <canvas id="prodChart"></canvas>
+  </div>
+  <div class="cc">
+    <div class="ctitle"><div class="cl"><i class="fas fa-chart-line" style="color:var(--red)"></i> Rejection Trend</div><span class="cpill">7d</span></div>
+    <canvas id="rejTrendChart"></canvas>
+  </div>
+  <div class="cc">
+    <div class="ctitle"><div class="cl"><i class="fas fa-gauge-high" style="color:var(--teal)"></i> OEE by Line</div></div>
+    <canvas id="oeeChart"></canvas>
+  </div>
+  <div class="cc">
+    <div class="ctitle"><div class="cl"><i class="fas fa-chart-pie" style="color:var(--blue)"></i> Model-wise Prod</div></div>
+    <canvas id="modelProdChart"></canvas>
+  </div>
+</div>
+
+<!-- ROW E: More charts -->
+<div class="grid g4" style="margin-bottom:14px;">
+  <div class="cc">
+    <div class="ctitle"><div class="cl"><i class="fas fa-chart-bar" style="color:var(--red)"></i> Supervisor Rejections</div></div>
+    <canvas id="supRejChart"></canvas>
+  </div>
+  <div class="cc">
+    <div class="ctitle"><div class="cl"><i class="fas fa-percent" style="color:var(--orange)"></i> Rejection Rate %</div></div>
+    <canvas id="rejRateChart"></canvas>
+  </div>
+  <div class="cc">
+    <div class="ctitle"><div class="cl"><i class="fas fa-chart-line" style="color:var(--g1)"></i> Daily Production</div></div>
+    <canvas id="dailyChart"></canvas>
+  </div>
+  <div class="cc">
+    <div class="ctitle"><div class="cl"><i class="fas fa-chart-bar" style="color:var(--purple)"></i> Rejection by Part</div></div>
+    <canvas id="rejPartChart"></canvas>
+  </div>
+</div>
+
+<!-- ROW F: DEO + Supervisor cards -->
+<div class="grid g2" style="margin-bottom:14px;">
+  <div class="panel">
+    <div class="phdr">
+      <div class="ptitle"><i class="fas fa-user-cog"></i> DEO Operators</div>
+      <span style="font-family:var(--mono);font-size:0.6rem;color:var(--text3)" id="deoLbl">—</span>
+    </div>
+    <div class="pbody"><div class="person-grid" id="deoGrid"></div></div>
+  </div>
+  <div class="panel">
+    <div class="phdr">
+      <div class="ptitle"><i class="fas fa-user-tie"></i> Supervisors</div>
+      <span style="font-family:var(--mono);font-size:0.6rem;color:var(--text3)" id="supLbl">—</span>
+    </div>
+    <div class="pbody"><div class="person-grid" id="supGrid"></div></div>
+  </div>
+</div>
+
+<!-- ROW G: Lines + Assignments + Orders Table + Rejection Log -->
+<div class="grid g4" style="margin-bottom:14px;">
+  <div class="panel">
+    <div class="phdr">
+      <div class="ptitle"><i class="fas fa-industry"></i> Production Lines</div>
+      <button class="btn btn-ghost" style="font-size:0.65rem;padding:3px 9px" id="addLineSm">+ Add</button>
+    </div>
+    <div class="pbody scroll" id="linesContainer"></div>
+  </div>
+  <div class="panel">
+    <div class="phdr">
+      <div class="ptitle"><i class="fas fa-user-check"></i> Assignments</div>
+      <button class="btn btn-ghost" style="font-size:0.65rem;padding:3px 9px" id="assignBtn">+ Assign</button>
+    </div>
+    <div class="pbody">
+      <div style="margin:10px 0 18px 0;">
+        <canvas id="assignmentsChart" height="80"></canvas>
+      </div>
+      <div class="scroll" id="assignTable"></div>
+      <div id="assignForm" style="display:none;margin-top:10px;background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:12px;">
+        <div class="form2">
+          <div class="fg"><label>Model</label><select id="aModel" style="width:100%;"></select></div>
+          <div class="fg"><label>Line</label><select id="aLine" style="width:100%;"></select></div>
+          <div class="fg"><label>DEO</label><input type="text" id="aDeo" placeholder="DEO name"></div>
+          <div class="fg"><label>Supervisor</label><input type="text" id="aSup" placeholder="Supervisor"></div>
+        </div>
+        <button class="btn btn-green" id="saveAssign" style="width:100%">Save</button>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="phdr">
+      <div class="ptitle"><i class="fas fa-box-open"></i> All Orders</div>
+    </div>
+    <div class="pbody">
+      <div style="margin:10px 0 18px 0;">
+        <canvas id="allOrdersChart" height="80"></canvas>
+      </div>
+      <div class="scroll" id="ordersTable"></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="phdr">
+      <div class="ptitle"><i class="fas fa-times-circle"></i> Rejection Log</div>
+      <span class="tb tb-r" id="rejCount">0</span>
+    </div>
+    <div class="pbody scroll" id="rejLog"></div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<!-- REJECTION MODAL -->
+<div class="overlay" id="rejModal">
+  <div class="modal">
+    <div class="mhdr">
+      <div class="mtitle"><i class="fas fa-exclamation-triangle" style="color:var(--red)"></i> Admin — Rejection Details</div>
+      <button class="xbtn" id="closeRej"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="mbody">
+      <div class="dl-row">
+        <button class="dl-btn" id="dlCsv"><i class="fas fa-download"></i> Download CSV</button>
+        <button class="dl-btn teal" id="dlReport"><i class="fas fa-file-alt"></i> Download Report</button>
+      </div>
+      <div id="rejDetailList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIL ORDER DETAIL MODAL -->
+<div class="overlay" id="mailModal">
+  <div class="modal">
+    <div class="mhdr">
+      <div class="mtitle"><i class="fas fa-envelope-open" style="color:var(--yellow)"></i> Mail Order — <span id="modalMailTitle">—</span></div>
+      <button class="xbtn" id="closeMailModal"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="mbody" id="mailModalBody"></div>
+  </div>
+</div>
+
+<script>
+// ── CLOCK ──
+function tick(){document.getElementById('clockEl').textContent=new Date().toLocaleString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit',day:'2-digit',month:'short'});}
+tick();setInterval(tick,1000);
+
+// ── BASE DATA ──
+let lines=[
+  {id:"L01",name:"LINE 01",target:130,completed:78,model:"EV-S186"},
+  {id:"L02",name:"LINE 02",target:110,completed:44,model:"EV-X90"},
+  {id:"L03",name:"LINE 03",target:95,completed:90,model:"ICE-2000"}
+];
+let assignments=[
+  {id:1,model:"EV-S186",lineId:"L01",deo:"Manoj",supervisor:"Ramesh"},
+  {id:2,model:"EV-X90",lineId:"L02",deo:"Priya",supervisor:"Anil"},
+  {id:3,model:"ICE-2000",lineId:"L03",deo:"Kiran",supervisor:"Suresh"}
+];
+let rejections=[
+  {id:1,lineId:"L01",model:"EV-S186",part:"Battery Pack",reason:"Voltage fluctuation",date:"2026-03-29",rejectedBy:"Ramesh",deo:"Manoj"},
+  {id:2,lineId:"L01",model:"EV-S186",part:"Motor Controller",reason:"Firmware mismatch",date:"2026-03-30",rejectedBy:"Ramesh",deo:"Manoj"},
+  {id:3,lineId:"L02",model:"EV-X90",part:"Chassis",reason:"Weld defect",date:"2026-03-28",rejectedBy:"Anil",deo:"Priya"},
+  {id:4,lineId:"L03",model:"ICE-2000",part:"Exhaust",reason:"Crack",date:"2026-03-27",rejectedBy:"Suresh",deo:"Kiran"},
+  {id:5,lineId:"L01",model:"EV-S186",part:"Cooling System",reason:"Leak",date:"2026-03-30",rejectedBy:"Ramesh",deo:"Manoj"}
+];
+let productionEvents=[];
+
+// ── MAIL ORDERS (orders received by email) ──
+let mailOrders=[
+  {id:"MO001",company:"GreenMotors Ltd",customer:"Rajesh Sharma",email:"rajesh@greenmotors.in",model:"EV-S186",qty:15,status:"pending",date:"2026-03-28",msg:"Urgent — require delivery by April 15.",produced:15,transferred:0},
+  {id:"MO002",company:"AutoCorp India",customer:"Sunita Verma",email:"sunita@autocorp.in",model:"EV-X90",qty:22,status:"accepted",date:"2026-03-27",msg:"Please confirm assembly timeline.",produced:22,transferred:0},
+  {id:"MO003",company:"HybridFleet Co",customer:"Arvind Nair",email:"arvind@hybridfleet.com",model:"ICE-2000",qty:10,status:"accepted",date:"2026-03-26",msg:"We need full spec sheet along with delivery.",produced:10,transferred:10},
+  {id:"MO004",company:"EcoTransport PVT",customer:"Meena Patel",email:"meena@ecotrans.in",model:"EV-S186",qty:8,status:"pending",date:"2026-03-30",msg:"Requesting priority slot for EV-S186.",produced:5,transferred:0},
+  {id:"MO005",company:"CityRide Motors",customer:"Vijay Kumar",email:"vijay@cityride.com",model:"EV-X90",qty:30,status:"rejected",date:"2026-03-25",msg:"Bulk order — negotiable on price.",produced:0,transferred:0},
+  {id:"MO006",company:"FutureAuto Tech",customer:"Deepa Iyer",email:"deepa@futureauto.in",model:"ICE-2000",qty:18,status:"pending",date:"2026-03-31",msg:"New client — first order, please prioritize.",produced:6,transferred:0},
+];
+
+// ── MATERIALS DATA per model ──
+const materialsDB={
+  "EV-S186":[
+    {name:"Li-Ion Cells",icon:"🔋",unit:"pcs",used:2480,total:3000,color:"#4ade80",cost:45},
+    {name:"Copper Wire",icon:"🔌",unit:"m",used:1200,total:1500,color:"#facc15",cost:12},
+    {name:"Steel Frame",icon:"⚙️",unit:"kg",used:860,total:1000,color:"#60a5fa",cost:8},
+    {name:"BMS Units",icon:"💡",unit:"pcs",used:78,total:90,color:"#a78bfa",cost:120},
+    {name:"Cooling Fluid",icon:"💧",unit:"L",used:340,total:400,color:"#2dd4bf",cost:5},
+    {name:"Motor Coils",icon:"🔧",unit:"pcs",used:156,total:200,color:"#fb923c",cost:65},
+  ],
+  "EV-X90":[
+    {name:"Li-Ion Cells",icon:"🔋",unit:"pcs",used:1920,total:2500,color:"#4ade80",cost:45},
+    {name:"Aluminium Body",icon:"🏗️",unit:"kg",used:640,total:800,color:"#60a5fa",cost:15},
+    {name:"Copper Wire",icon:"🔌",unit:"m",used:980,total:1200,color:"#facc15",cost:12},
+    {name:"Inverter PCB",icon:"🖥️",unit:"pcs",used:44,total:60,color:"#f43f5e",cost:220},
+    {name:"Brake Pads",icon:"🛞",unit:"sets",used:88,total:120,color:"#2dd4bf",cost:35},
+    {name:"Seat Foam",icon:"🪑",unit:"kg",used:290,total:350,color:"#fb923c",cost:9},
+  ],
+  "ICE-2000":[
+    {name:"Engine Block",icon:"⚙️",unit:"pcs",used:90,total:100,color:"#fb923c",cost:1800},
+    {name:"Exhaust Pipe",icon:"💨",unit:"pcs",used:88,total:100,color:"#60a5fa",cost:85},
+    {name:"Fuel Injector",icon:"⛽",unit:"pcs",used:360,total:400,color:"#facc15",cost:45},
+    {name:"Steel Sheet",icon:"🏗️",unit:"kg",used:1100,total:1300,color:"#4ade80",cost:7},
+    {name:"Gasket Kit",icon:"🔧",unit:"sets",used:90,total:100,color:"#a78bfa",cost:28},
+    {name:"Coolant",icon:"💧",unit:"L",used:280,total:320,color:"#2dd4bf",cost:4},
+  ]
+};
+let activeMaterial="EV-S186";
+
+let productionEventsList=[];
+function genProduction(){
+  const models=["EV-S186","EV-X90","ICE-2000"];
+  for(let i=0;i<120;i++){
+    const d=new Date();d.setDate(d.getDate()-Math.floor(Math.random()*30));
+    const line=lines[Math.floor(Math.random()*lines.length)];
+    productionEventsList.push({id:i,lineId:line.id,model:models[Math.floor(Math.random()*models.length)],quantity:Math.floor(Math.random()*15)+1,date:d.toISOString().slice(0,10)});
+  }
+  lines.forEach(l=>{let s=productionEventsList.filter(e=>e.lineId===l.id).reduce((a,e)=>a+e.quantity,0);l.completed=Math.min(l.target,s);});
+}
+genProduction();
+
+let curLine="all",curTime="day",curModel="all",curDate=null,curStartDate=null,curEndDate=null,curYear="all";
+function filtProd(){
+  let f=productionEventsList;
+  if(curLine!=="all")f=f.filter(e=>e.lineId===curLine);
+  if(curModel!=="all")f=f.filter(e=>e.model===curModel);
+  const now=new Date();
+  if(curTime==="now"){f=f.filter(e=>e.date===now.toISOString().slice(0,10));}
+  else if(curTime==="day"){const t=now.toISOString().slice(0,10);f=f.filter(e=>e.date===t);}
+  else if(curTime==="week"){const ws=new Date(now);ws.setDate(now.getDate()-now.getDay());f=f.filter(e=>e.date>=ws.toISOString().slice(0,10));}
+  else if(curTime==="month"){const ms=new Date(now.getFullYear(),now.getMonth(),1);f=f.filter(e=>e.date>=ms.toISOString().slice(0,10));}
+  else if(curTime==="custom"&&curDate){f=f.filter(e=>e.date===curDate);}
+  if(curStartDate&&curEndDate){f=f.filter(e=>e.date>=curStartDate&&e.date<=curEndDate);}
+  if(curYear!=="all"){f=f.filter(e=>e.date.startsWith(curYear));}
+  return f;
+}
+function filtRej(){
+  let f=rejections;
+  if(curLine!=="all")f=f.filter(r=>r.lineId===curLine);
+  if(curModel!=="all")f=f.filter(r=>r.model===curModel);
+  const now=new Date();
+  if(curTime==="now"){f=f.filter(r=>r.date===now.toISOString().slice(0,10));}
+  else if(curTime==="day"){const t=now.toISOString().slice(0,10);f=f.filter(r=>r.date===t);}
+  else if(curTime==="week"){const ws=new Date(now);ws.setDate(now.getDate()-now.getDay());f=f.filter(r=>r.date>=ws.toISOString().slice(0,10));}
+  else if(curTime==="month"){const ms=new Date(now.getFullYear(),now.getMonth(),1);f=f.filter(r=>r.date>=ms.toISOString().slice(0,10));}
+  else if(curTime==="custom"&&curDate){f=f.filter(r=>r.date===curDate);}
+  if(curStartDate&&curEndDate){f=f.filter(r=>r.date>=curStartDate&&r.date<=curEndDate);}
+  if(curYear!=="all"){f=f.filter(r=>r.date.startsWith(curYear));}
+  return f;
+}
+
+// ── CHART.JS DEFAULTS ──
+Chart.defaults.color='#334d38';
+Chart.defaults.borderColor='rgba(74,222,128,0.06)';
+Chart.defaults.font.family="'JetBrains Mono',monospace";
+Chart.defaults.font.size=10;
+const PAL=['#4ade80','#2dd4bf','#60a5fa','#facc15','#f43f5e','#fb923c','#a78bfa','#34d399','#f472b6','#38bdf8'];
+
+let CH={};
+function dc(k){if(CH[k]){CH[k].destroy();delete CH[k];}}
+
+// Company avatars color
+const compColors=['#22c55e','#0d9488','#2563eb','#7c3aed','#ca8a04','#dc2626','#0891b2','#be185d'];
+
+// ── RENDER MAIL INBOX ──
+function renderMailInbox(){
+  const filter=document.getElementById('mailStatusFilter').value;
+  let filtered=filter==="all"?mailOrders:mailOrders.filter(o=>o.status===filter);
+  if(curModel!=="all")filtered=filtered.filter(o=>o.model===curModel);
+  const pending=mailOrders.filter(o=>o.status==="pending").length;
+  document.getElementById('pendingMailCount').textContent=pending+' Pending';
+  document.getElementById('notifCount').textContent=pending;
+
+  // Stats row
+  const total=mailOrders.length;
+  const accepted=mailOrders.filter(o=>o.status==="accepted").length;
+  const rejected=mailOrders.filter(o=>o.status==="rejected").length;
+  const totalUnits=mailOrders.reduce((s,o)=>s+o.qty,0);
+  document.getElementById('orderStatRow').innerHTML=[
+    {l:'Total Orders',v:total,c:'var(--text)'},
+    {l:'Accepted',v:accepted,c:'var(--teal)'},
+    {l:'Pending',v:pending,c:'var(--yellow)'},
+    {l:'Total Units',v:totalUnits,c:'var(--g1)'},
+  ].map(s=>`<div class="ord-stat"><div class="ord-stat-val" style="color:${s.c}">${s.v}</div><div class="ord-stat-lbl">${s.l}</div></div>`).join('');
+
+  if(!filtered.length){
+    document.getElementById('mailInbox').innerHTML='<div style="font-family:var(--mono);font-size:0.72rem;color:var(--text3);padding:12px 0">No orders found.</div>';
+    return;
+  }
+
+  document.getElementById('mailInbox').innerHTML=filtered.map((o,i)=>{
+    const av=o.company.slice(0,2).toUpperCase();
+    const avCol=compColors[i%compColors.length];
+    const isPending=o.status==="pending";
+    const isAccepted=o.status==="accepted";
+    const isRej=o.status==="rejected";
+    const statusCls=isPending?'pending':isAccepted?'accepted':'rejected-order';
+    const statusBadge=isPending?`<span class="mail-status-badge ms-pend">Pending</span>`:isAccepted?`<span class="mail-status-badge ms-acc">Accepted</span>`:`<span class="mail-status-badge ms-rej">Rejected</span>`;
+    const actions=isPending?`
+      <button class="btn btn-green" onclick="acceptOrder('${o.id}')" style="font-size:0.7rem;padding:5px 12px"><i class="fas fa-check"></i> Accept</button>
+      <button class="btn btn-red" onclick="rejectOrder('${o.id}')" style="font-size:0.7rem;padding:5px 12px"><i class="fas fa-times"></i> Reject</button>
+      <button class="btn btn-ghost" onclick="viewMailDetail('${o.id}')" style="font-size:0.7rem;padding:5px 12px"><i class="fas fa-eye"></i></button>
+    `:`<button class="btn btn-ghost" onclick="viewMailDetail('${o.id}')" style="font-size:0.7rem;padding:5px 10px"><i class="fas fa-eye"></i> View</button>`;
+    return `
+      <div class="mail-item ${statusCls}" id="mail-${o.id}">
+        <div class="mail-head">
+          <div class="mail-from">
+            <div class="mail-avatar" style="background:${avCol}">${av}</div>
+            <div>
+              <div class="mail-company">${o.company}</div>
+              <div class="mail-email">${o.customer} · ${o.email}</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+            <div class="mail-date">${o.date}</div>
+            ${statusBadge}
+          </div>
+        </div>
+        <div class="mail-body-row">
+          <span class="mail-model-tag">${o.model}</span>
+          <span class="mail-qty"><i class="fas fa-car"></i> ${o.qty} units requested</span>
+          <span class="mail-qty" style="color:var(--g1)"><i class="fas fa-industry"></i> ${o.produced} produced</span>
+          <span class="mail-qty" style="color:var(--teal)"><i class="fas fa-truck"></i> ${o.transferred} transferred</span>
+        </div>
+        <div class="mail-msg">"${o.msg}"</div>
+        <div class="mail-actions">${actions}</div>
+      </div>`;
+  }).join('');
+}
+
+function acceptOrder(id){
+  const o=mailOrders.find(x=>x.id===id);
+  if(o){o.status="accepted";}
+  refreshAll();
+}
+function rejectOrder(id){
+  const o=mailOrders.find(x=>x.id===id);
+  if(o){o.status="rejected";}
+  refreshAll();
+}
+
+let currentMailId=null;
+function viewMailDetail(id){
+  const o=mailOrders.find(x=>x.id===id);
+  if(!o)return;
+  currentMailId=id;
+  document.getElementById('modalMailTitle').textContent=o.company;
+  const pct=o.qty>0?Math.round((o.produced/o.qty)*100):0;
+  const tpct=o.qty>0?Math.round((o.transferred/o.qty)*100):0;
+  const mats=materialsDB[o.model]||[];
+  document.getElementById('mailModalBody').innerHTML=`
+    <div class="rej-detail-card">
+      <div class="rdc-row"><div class="rdc-key">Order ID</div><div class="rdc-val rdc-t">${o.id}</div></div>
+      <div class="rdc-row"><div class="rdc-key">Company</div><div class="rdc-val">${o.company}</div></div>
+      <div class="rdc-row"><div class="rdc-key">Customer</div><div class="rdc-val">${o.customer}</div></div>
+      <div class="rdc-row"><div class="rdc-key">Email</div><div class="rdc-val">${o.email}</div></div>
+      <div class="rdc-row"><div class="rdc-key">Car Model</div><div class="rdc-val rdc-g">${o.model}</div></div>
+      <div class="rdc-row"><div class="rdc-key">Qty Ordered</div><div class="rdc-val">${o.qty} units</div></div>
+      <div class="rdc-row"><div class="rdc-key">Produced</div><div class="rdc-val rdc-g">${o.produced} units</div></div>
+      <div class="rdc-row"><div class="rdc-key">Transferred</div><div class="rdc-val rdc-t">${o.transferred} units</div></div>
+      <div class="rdc-row"><div class="rdc-key">Status</div><div class="rdc-val ${o.status==='accepted'?'rdc-t':o.status==='rejected'?'rdc-r':''}">${o.status.toUpperCase()}</div></div>
+      <div class="rdc-row"><div class="rdc-key">Date</div><div class="rdc-val">${o.date}</div></div>
+      <div class="rdc-row"><div class="rdc-key">Message</div><div class="rdc-val" style="font-style:italic;color:var(--text2)">"${o.msg}"</div></div>
+    </div>
+    <div style="font-family:var(--mono);font-size:0.62rem;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">PRODUCTION PROGRESS</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:13px;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:0.62rem;color:var(--text3);margin-bottom:5px;">
+        <span>Produced</span><span style="color:var(--g1)">${o.produced}/${o.qty}</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:0.62rem;color:var(--text3);margin-top:10px;margin-bottom:5px;">
+        <span>Transferred</span><span style="color:var(--teal)">${o.transferred}/${o.qty}</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill prog-fill-teal" style="width:${tpct}%"></div></div>
+    </div>
+    <div style="font-family:var(--mono);font-size:0.62rem;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">MATERIALS USED FOR ${o.model}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+      ${mats.map(m=>`
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px;">
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px;">
+            <span style="font-size:1rem">${m.icon}</span>
+            <div>
+              <div style="font-size:0.75rem;font-weight:700;">${m.name}</div>
+              <div style="font-family:var(--mono);font-size:0.58rem;color:var(--text3);">${m.used} / ${m.total} ${m.unit}</div>
+            </div>
+          </div>
+          <div class="prog-track"><div class="prog-fill" style="width:${Math.round(m.used/m.total*100)}%;background:${m.color}"></div></div>
+        </div>`).join('')}
+    </div>
+    ${o.status==='pending'?`
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-green" onclick="acceptOrder('${o.id}');closeMailModal();refreshAll();" style="flex:1;justify-content:center;"><i class="fas fa-check"></i> Accept Order</button>
+      <button class="btn btn-red" onclick="rejectOrder('${o.id}');closeMailModal();refreshAll();" style="flex:1;justify-content:center;"><i class="fas fa-times"></i> Reject Order</button>
+    </div>`:''}
+  `;
+  document.getElementById('mailModal').classList.add('open');
+}
+function closeMailModal(){document.getElementById('mailModal').classList.remove('open');}
+
+// ── TRANSFER READY ──
+function renderTransfer(){
+  const ready=mailOrders.filter(o=>o.status==="accepted"&&o.produced>=o.qty&&o.transferred<o.qty);
+  const inProgress=mailOrders.filter(o=>o.status==="accepted"&&o.produced>0&&o.produced<o.qty);
+  const all=[...ready,...inProgress];
+  document.getElementById('transferCount').textContent=ready.length+' Ready';
+  if(!all.length){
+    document.getElementById('transferList').innerHTML='<div style="font-family:var(--mono);font-size:0.7rem;color:var(--text3);padding:8px 0">No active transfers.</div>';
+    return;
+  }
+  document.getElementById('transferList').innerHTML=all.map(o=>{
+    const pct=Math.round((o.produced/o.qty)*100);
+    const tpct=o.qty>0?Math.round((o.transferred/o.qty)*100):0;
+    const isReady=o.produced>=o.qty;
+    return `
+      <div class="transfer-card">
+        <div class="tc-model-badge">
+          <div class="tc-model-name">${o.model}</div>
+          <div class="tc-qty-big">${o.qty}</div>
+          <div class="tc-qty-lbl">units</div>
+        </div>
+        <div class="tc-info">
+          <div class="tc-customer">${o.company}</div>
+          <div class="tc-detail">${o.customer} · ${o.id}</div>
+          <div class="tc-prog">
+            <div class="tc-prog-label"><span>Production</span><span style="color:var(--g1)">${o.produced}/${o.qty}</span></div>
+            <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
+            <div class="tc-prog-label" style="margin-top:6px;"><span>Transferred</span><span style="color:var(--teal)">${o.transferred}/${o.qty}</span></div>
+            <div class="prog-track"><div class="prog-fill prog-fill-teal" style="width:${tpct}%"></div></div>
+          </div>
+        </div>
+        <div class="tc-actions">
+          ${isReady&&o.transferred<o.qty?`<button class="btn btn-teal" onclick="markTransferred('${o.id}')" style="font-size:0.68rem;padding:5px 10px;justify-content:center"><i class="fas fa-truck-fast"></i> Transfer</button>`:''}
+          <span class="tb ${isReady?'tb-g':'tb-y'}" style="text-align:center">${isReady?'Ready':'In Prod'}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+function markTransferred(id){
+  const o=mailOrders.find(x=>x.id===id);
+  if(o){o.transferred=o.qty;}
+  refreshAll();
+}
+
+// ── MATERIALS ──
+function renderMaterials(){
+  const mats=materialsDB[activeMaterial]||[];
+  // Selector buttons
+  const models=Object.keys(materialsDB);
+  document.getElementById('matModelSelector').innerHTML=models.map(m=>
+    `<button class="mat-btn ${m===activeMaterial?'active':''}" onclick="setMat('${m}')">${m}</button>`).join('');
+  // Stat cards
+  document.getElementById('matGrid').innerHTML=mats.map(m=>`
+    <div class="mat-card">
+      <div class="mat-icon">${m.icon}</div>
+      <div class="mat-name">${m.name}</div>
+      <div class="mat-val">${m.used.toLocaleString()}</div>
+      <div class="mat-unit">${m.unit} used · ₹${m.cost}/unit</div>
+      <div class="mat-used-bar"><div class="mat-used-fill" style="width:${Math.round(m.used/m.total*100)}%;background:${m.color}"></div></div>
+    </div>`).join('');
+  // Bar chart
+  dc('mb');
+  CH.mb=new Chart(document.getElementById('matBarChart'),{type:'bar',data:{labels:mats.map(m=>m.name),datasets:[
+    {label:'Used',data:mats.map(m=>m.used),backgroundColor:mats.map(m=>m.color+'cc'),borderRadius:5},
+    {label:'Total',data:mats.map(m=>m.total),backgroundColor:mats.map(m=>m.color+'22'),borderRadius:5}
+  ]},options:{responsive:true,plugins:{legend:{labels:{boxWidth:7,padding:10}}},scales:{x:{grid:{color:'rgba(74,222,128,0.04)'},ticks:{maxRotation:30}},y:{grid:{color:'rgba(74,222,128,0.04)'},beginAtZero:true}}}});
+  // Pie chart
+  dc('mp2');
+  const costs=mats.map(m=>m.used*m.cost);
+  CH.mp2=new Chart(document.getElementById('matPieChart'),{type:'doughnut',data:{labels:mats.map(m=>m.name),datasets:[{data:costs,backgroundColor:mats.map(m=>m.color),borderWidth:0,hoverOffset:5,cutout:'65%'}]},options:{responsive:true,plugins:{legend:{position:'right',labels:{boxWidth:8,padding:8}}}}});
+}
+function setMat(m){activeMaterial=m;renderMaterials();}
+
+// ── ALL CHARTS ──
+function updateCharts(){
+  // Orders by model
+  dc('om');
+  const omMap={};mailOrders.forEach(o=>omMap[o.model]=(omMap[o.model]||0)+o.qty);
+  CH.om=new Chart(document.getElementById('ordModelChart'),{type:'bar',data:{labels:Object.keys(omMap),datasets:[{label:'Units',data:Object.values(omMap),backgroundColor:PAL,borderRadius:5}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(74,222,128,0.04)'}},y:{grid:{color:'rgba(74,222,128,0.04)'},beginAtZero:true}}}});
+  // Order status
+  dc('os');
+  const acc=mailOrders.filter(o=>o.status==='accepted').length;
+  const pnd=mailOrders.filter(o=>o.status==='pending').length;
+  const rjd=mailOrders.filter(o=>o.status==='rejected').length;
+  CH.os=new Chart(document.getElementById('ordStatusChart'),{type:'doughnut',data:{labels:['Accepted','Pending','Rejected'],datasets:[{data:[acc,pnd,rjd],backgroundColor:['#2dd4bf','#facc15','#f43f5e'],borderWidth:0,hoverOffset:5,cutout:'68%'}]},options:{responsive:true,plugins:{legend:{position:'right',labels:{boxWidth:7,padding:8}}}}});
+  // Order trend (last 14 days)
+  dc('ot');
+  const trendDays=[];for(let i=13;i>=0;i--){let d=new Date();d.setDate(d.getDate()-i);trendDays.push(d.toISOString().slice(0,10));}
+  const trendCounts=trendDays.map(dt=>mailOrders.filter(o=>o.date===dt).length);
+  CH.ot=new Chart(document.getElementById('ordTrendChart'),{type:'line',data:{labels:trendDays.map(d=>d.slice(5)),datasets:[{label:'Orders',data:trendCounts,borderColor:'#2dd4bf',backgroundColor:'rgba(45,212,191,0.07)',fill:true,tension:0.4,pointRadius:3,pointBackgroundColor:'#2dd4bf'}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(74,222,128,0.04)'},ticks:{maxTicksLimit:7}},y:{grid:{color:'rgba(74,222,128,0.04)'},beginAtZero:true,ticks:{stepSize:1}}}}});
+  // Orders by company
+  dc('co');
+  const coMap={};mailOrders.forEach(o=>coMap[o.company]=(coMap[o.company]||0)+o.qty);
+  CH.co=new Chart(document.getElementById('companyChart'),{type:'bar',data:{labels:Object.keys(coMap).map(c=>c.split(' ')[0]),datasets:[{label:'Units',data:Object.values(coMap),backgroundColor:PAL.slice(2),borderRadius:5}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(74,222,128,0.04)'}},y:{grid:{color:'rgba(74,222,128,0.04)'},beginAtZero:true}}}});
+  // Production vs target
+  dc('pt');
+  const fl=curLine==="all"?lines:lines.filter(l=>l.id===curLine);
+  CH.pt=new Chart(document.getElementById('prodChart'),{type:'bar',data:{labels:fl.map(l=>l.name),datasets:[
+    {label:'Done',data:fl.map(l=>l.completed),backgroundColor:'#22c55e',borderRadius:4},
+    {label:'Target',data:fl.map(l=>l.target),backgroundColor:'rgba(74,222,128,0.1)',borderRadius:4}
+  ]},options:{responsive:true,plugins:{legend:{labels:{boxWidth:7,padding:8}}},scales:{x:{grid:{color:'rgba(74,222,128,0.04)'}},y:{grid:{color:'rgba(74,222,128,0.04)'},beginAtZero:true}}}});
+  // Rejection trend
+  dc('rt');
+  const rl=[];for(let i=6;i>=0;i--){let d=new Date();d.setDate(d.getDate()-i);let ds=d.toISOString().slice(0,10);rl.push(rejections.filter(r=>r.date===ds&&(curLine==="all"||r.lineId===curLine)).length);}
+  CH.rt=new Chart(document.getElementById('rejTrendChart'),{type:'line',data:{labels:['-6','-5','-4','-3','-2','-1','Today'],datasets:[{label:'Rej',data:rl,borderColor:'#f43f5e',backgroundColor:'rgba(244,63,94,0.07)',fill:true,tension:0.4,pointRadius:3,pointBackgroundColor:'#f43f5e'}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(74,222,128,0.04)'}},y:{grid:{color:'rgba(74,222,128,0.04)'},beginAtZero:true}}}});
+  // OEE
+  dc('oee');
+  CH.oee=new Chart(document.getElementById('oeeChart'),{type:'radar',data:{labels:lines.map(l=>l.name),datasets:[{label:'OEE%',data:lines.map(l=>parseFloat(((l.completed/l.target)*100).toFixed(1))),backgroundColor:'rgba(74,222,128,0.09)',borderColor:'#4ade80',pointBackgroundColor:'#4ade80',pointRadius:3}]},options:{responsive:true,scales:{r:{min:0,max:100,grid:{color:'rgba(74,222,128,0.07)'},ticks:{backdropColor:'transparent',color:'#334d38'},angleLines:{color:'rgba(74,222,128,0.05)'}}},plugins:{legend:{display:false}}}});
+  // Model prod
+  dc('mprod');
+  const mm={};filtProd().forEach(p=>mm[p.model]=(mm[p.model]||0)+p.quantity);
+  if(!Object.keys(mm).length)mm['No Data']=1;
+  CH.mprod=new Chart(document.getElementById('modelProdChart'),{type:'doughnut',data:{labels:Object.keys(mm),datasets:[{data:Object.values(mm),backgroundColor:PAL.slice(1),borderWidth:0,hoverOffset:5,cutout:'65%'}]},options:{responsive:true,plugins:{legend:{position:'right',labels:{boxWidth:7,padding:7}}}}});
+  // Supervisor rejections
+  dc('sr');
+  const sm={};filtRej().forEach(r=>sm[r.rejectedBy]=(sm[r.rejectedBy]||0)+1);
+  CH.sr=new Chart(document.getElementById('supRejChart'),{type:'bar',data:{labels:Object.keys(sm)||['—'],datasets:[{label:'Rej',data:Object.values(sm)||[0],backgroundColor:'#f43f5e',borderRadius:5}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(74,222,128,0.04)'}},y:{grid:{color:'rgba(74,222,128,0.04)'},beginAtZero:true}}}});
+  // Rejection rate
+  dc('rrate');
+  const pt2=filtProd().reduce((s,p)=>s+p.quantity,0);
+  const rt2=filtRej().length;
+  const rate=pt2?parseFloat(((rt2/pt2)*100).toFixed(2)):0;
+  CH.rrate=new Chart(document.getElementById('rejRateChart'),{type:'bar',data:{labels:['Rejection Rate'],datasets:[{label:'%',data:[rate],backgroundColor:rate>5?'#f43f5e':'#22c55e',borderRadius:8}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(74,222,128,0.04)'}},y:{grid:{color:'rgba(74,222,128,0.04)'},max:20,beginAtZero:true}}}});
+  // Daily prod
+  dc('dp');
+  const dm={};filtProd().forEach(p=>dm[p.date]=(dm[p.date]||0)+p.quantity);
+  const sorted=Object.keys(dm).sort();
+  CH.dp=new Chart(document.getElementById('dailyChart'),{type:'line',data:{labels:sorted.length?sorted:['No data'],datasets:[{label:'Units',data:sorted.map(d=>dm[d]),borderColor:'#4ade80',backgroundColor:'rgba(74,222,128,0.06)',fill:true,tension:0.4,pointRadius:2,pointBackgroundColor:'#4ade80'}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(74,222,128,0.04)'},ticks:{maxTicksLimit:6}},y:{grid:{color:'rgba(74,222,128,0.04)'},beginAtZero:true}}}});
+  // Rej by part
+  dc('rp');
+  const pp={};filtRej().forEach(r=>pp[r.part]=(pp[r.part]||0)+1);
+  if(!Object.keys(pp).length)pp['None']=1;
+  CH.rp=new Chart(document.getElementById('rejPartChart'),{type:'bar',data:{labels:Object.keys(pp),datasets:[{label:'Count',data:Object.values(pp),backgroundColor:'#fb923c',borderRadius:5}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(74,222,128,0.04)'},ticks:{maxRotation:30}},y:{grid:{color:'rgba(74,222,128,0.04)'},beginAtZero:true}}}});
+}
+
+// ── KPIs ──
+function updateKPIs(){
+  const pt=filtProd().reduce((s,e)=>s+e.quantity,0);
+  const rt=filtRej().length;
+  const oee=lines.length?(lines.reduce((s,l)=>s+(l.completed/l.target),0)/lines.length*100):0;
+  const accepted=mailOrders.filter(o=>o.status==="accepted").length;
+  const pending=mailOrders.filter(o=>o.status==="pending").length;
+  const readyTransfer=mailOrders.filter(o=>o.status==="accepted"&&o.produced>=o.qty&&o.transferred<o.qty).length;
+  document.getElementById('kpiGrid').innerHTML=[
+    {l:'PRODUCTION',v:pt,s:'units produced',b:'',bc:''},
+    {l:'REJECTIONS',v:rt,s:'defects',b:rt>3?'↑ High':'↓ Low',bc:rt>3?'dn':'up'},
+    {l:'OEE RATE',v:oee.toFixed(1)+'%',s:'equipment eff',b:'▲ 12.5%',bc:'up'},
+    {l:'MAIL ORDERS',v:mailOrders.length,s:'total orders',b:pending+' Pending',bc:'yw'},
+    {l:'ACCEPTED',v:accepted,s:'orders confirmed',b:'',bc:''},
+    {l:'READY TRANSFER',v:readyTransfer,s:'models ready',b:'',bc:''},
+  ].map((k,i)=>`
+    <div class="kpi-card" style="animation-delay:${i*.05}s">
+      <div class="kpi-label">${k.l}</div>
+      <div class="kpi-val">${k.v}</div>
+      <div class="kpi-sub">${k.s} ${k.b?`<span class="kpi-b ${k.bc}">${k.b}</span>`:''}</div>
+    </div>`).join('');
+}
+
+// ── DEO / SUPERVISOR ──
+const avCls=['av-g','av-t','av-b','av-p'];
+function renderPersons(){
+  const deos=[...new Map(assignments.map(a=>[a.deo,a])).values()];
+  const sups=[...new Map(assignments.map(a=>[a.supervisor,a])).values()];
+  document.getElementById('deoLbl').textContent=deos.length+' operators';
+  document.getElementById('supLbl').textContent=sups.length+' supervisors';
+  const rejByDeo={},rejBySup={},prodByLine={};
+  rejections.forEach(r=>{rejByDeo[r.deo]=(rejByDeo[r.deo]||0)+1;rejBySup[r.rejectedBy]=(rejBySup[r.rejectedBy]||0)+1;});
+  productionEventsList.forEach(e=>prodByLine[e.lineId]=(prodByLine[e.lineId]||0)+e.quantity);
+  document.getElementById('deoGrid').innerHTML=deos.map((a,i)=>`
+    <div class="person-card">
+      <div class="status-dot ${i<2?'dot-on':'dot-off'}"></div>
+      <div class="person-avatar ${avCls[i%avCls.length]}">${a.deo.slice(0,2).toUpperCase()}</div>
+      <div class="p-name">${a.deo}</div>
+      <div class="p-role">DEO</div>
+      <div class="p-line">${lines.find(l=>l.id===a.lineId)?.name||a.lineId}</div>
+      <div class="p-stats">
+        <div class="ps"><div class="ps-val" style="color:var(--g1)">${prodByLine[a.lineId]||0}</div><div class="ps-lbl">Units</div></div>
+        <div class="ps"><div class="ps-val" style="color:var(--red)">${rejByDeo[a.deo]||0}</div><div class="ps-lbl">Rej</div></div>
+      </div>
+    </div>`).join('');
+  document.getElementById('supGrid').innerHTML=sups.map((a,i)=>`
+    <div class="person-card">
+      <div class="status-dot dot-on"></div>
+      <div class="person-avatar ${avCls[(i+1)%avCls.length]}">${a.supervisor.slice(0,2).toUpperCase()}</div>
+      <div class="p-name">${a.supervisor}</div>
+      <div class="p-role">Supervisor</div>
+      <div class="p-line">${lines.find(l=>l.id===a.lineId)?.name||a.lineId}</div>
+      <div class="p-stats">
+        <div class="ps"><div class="ps-val" style="color:var(--orange)">${rejBySup[a.supervisor]||0}</div><div class="ps-lbl">Rej</div></div>
+        <div class="ps"><div class="ps-val">${lines.find(l=>l.id===a.lineId)?.completed||0}</div><div class="ps-lbl">Prod</div></div>
+      </div>
+    </div>`).join('');
+}
+
+// ── LINES ──
+function renderLines(){
+  document.getElementById('linesContainer').innerHTML=lines.map(l=>{
+    const pct=Math.min(100,Math.round((l.completed/l.target)*100));
+    return `
+      <div class="line-item">
+        <div class="li-head">
+          <div><div class="li-name">${l.name}</div><div class="li-model">${l.model}</div></div>
+          <div class="li-nums"><strong>${l.completed}</strong>/${l.target}</div>
+        </div>
+        <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:5px;">
+          <span style="font-family:var(--mono);font-size:0.56rem;color:var(--text3)">${pct}%</span>
+          <button class="btn btn-ghost" data-lid="${l.id}" style="font-size:0.62rem;padding:2px 9px">+ Record</button>
+        </div>
+      </div>`;
+  }).join('');
+  document.querySelectorAll('[data-lid]').forEach(btn=>{
+    btn.onclick=()=>{
+      const l=lines.find(x=>x.id===btn.getAttribute('data-lid'));
+      if(!l||l.completed>=l.target){alert('Target reached!');return;}
+      const inc=Math.min(l.target-l.completed,Math.floor(Math.random()*10)+2);
+      l.completed+=inc;
+      productionEventsList.push({id:Date.now(),lineId:l.id,model:l.model,quantity:inc,date:new Date().toISOString().slice(0,10)});
+      // Also update mail order produced count
+      mailOrders.filter(o=>o.model===l.model&&o.status==='accepted'&&o.produced<o.qty).forEach(o=>{o.produced=Math.min(o.qty,o.produced+inc);});
+      refreshAll();
+    };
+  });
+}
+
+function renderAssignments(){
+  document.getElementById('assignTable').innerHTML=`
+    <table><thead><tr><th>Model</th><th>Line</th><th>DEO</th><th>Sup</th></tr></thead>
+    <tbody>${assignments.map(a=>`<tr><td>${a.model}</td><td>${lines.find(l=>l.id===a.lineId)?.name||a.lineId}</td><td>${a.deo}</td><td>${a.supervisor}</td></tr>`).join('')}</tbody></table>`;
+}
+
+function renderOrdersTable(){
+  document.getElementById('ordersTable').innerHTML=`
+    <table><thead><tr><th>Company</th><th>Model</th><th>Qty</th><th>Status</th></tr></thead>
+    <tbody>${mailOrders.map(o=>`
+      <tr>
+        <td style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.company.split(' ')[0]}</td>
+        <td>${o.model}</td><td>${o.qty}</td>
+        <td><span class="tb ${o.status==='accepted'?'tb-t':o.status==='rejected'?'tb-r':'tb-y'}">${o.status}</span></td>
+      </tr>`).join('')}</tbody></table>`;
+}
+
+function renderRejLog(){
+  const f=filtRej();
+  document.getElementById('rejCount').textContent=f.length;
+  if(!f.length){document.getElementById('rejLog').innerHTML='<div style="font-family:var(--mono);font-size:0.68rem;color:var(--text3);padding:8px 0">No rejections.</div>';return;}
+  document.getElementById('rejLog').innerHTML=[...f].reverse().map(r=>`
+    <div class="rej-item">
+      <div class="rej-ico"><i class="fas fa-ban"></i></div>
+      <div class="rej-body">
+        <div class="rej-model">${r.model}</div>
+        <div class="rej-det">${r.part} · ${r.reason}</div>
+        <div class="rej-meta">DEO: ${r.deo||'—'} · ${r.lineId}</div>
+      </div>
+      <div class="rej-right">
+        <div class="rej-date">${r.date}</div>
+        <div class="rej-sup">${r.rejectedBy}</div>
+      </div>
+    </div>`).join('');
+}
+
+function updateDropdowns(){
+  const ls=document.getElementById('lineFilter');
+  ls.innerHTML='<option value="all">All Lines</option>'+lines.map(l=>`<option value="${l.id}">${l.name}</option>`).join('');
+  ls.value=curLine;
+  const ms=document.getElementById('modelFilter');
+  ms.innerHTML='<option value="all">All Models</option>'+[...new Set(lines.map(l=>l.model))].map(m=>`<option value="${m}">${m}</option>`).join('');
+  ms.value=curModel;
+  document.getElementById('aModel').innerHTML='<option value="">— Model —</option>'+[...new Set(lines.map(l=>l.model))].map(m=>`<option value="${m}">${m}</option>`).join('');
+  document.getElementById('aLine').innerHTML=lines.map(l=>`<option value="${l.id}">${l.name}</option>`).join('');
+}
+
+// ── REJECTION MODAL ──
+function openRejModal(){
+  document.getElementById('rejModal').classList.add('open');
+  document.getElementById('rejDetailList').innerHTML=[...rejections].reverse().map(r=>`
+    <div class="rej-detail-card">
+      <div class="rdc-row"><div class="rdc-key">Car Model</div><div class="rdc-val rdc-g">${r.model}</div></div>
+      <div class="rdc-row"><div class="rdc-key">Part</div><div class="rdc-val">${r.part}</div></div>
+      <div class="rdc-row"><div class="rdc-key">Reason</div><div class="rdc-val rdc-r">${r.reason}</div></div>
+      <div class="rdc-row"><div class="rdc-key">DEO</div><div class="rdc-val">${r.deo||'—'}</div></div>
+      <div class="rdc-row"><div class="rdc-key">Supervisor</div><div class="rdc-val">${r.rejectedBy}</div></div>
+      <div class="rdc-row"><div class="rdc-key">Line</div><div class="rdc-val">${r.lineId}</div></div>
+      <div class="rdc-row"><div class="rdc-key">Date</div><div class="rdc-val">${r.date}</div></div>
+    </div>`).join('');
+}
+
+function dlCsv(){
+  const h=['ID','Model','Part','Reason','DEO','Supervisor','Line','Date'];
+  const rows=rejections.map(r=>[r.id,r.model,r.part,r.reason,r.deo||'—',r.rejectedBy,r.lineId,r.date]);
+  const csv=[h,...rows].map(r=>r.map(c=>`"${c}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='CIE_Rejections.csv';a.click();
+}
+function dlReport(){
+  let txt='CIE AUTOMOTIVE — REJECTION REPORT\n';
+  txt+='Generated: '+new Date().toLocaleString('en-IN')+'\n'+'='.repeat(50)+'\n\n';
+  rejections.forEach((r,i)=>{txt+=`REJECTION #${i+1}\n  Model: ${r.model}\n  Part: ${r.part}\n  Reason: ${r.reason}\n  DEO: ${r.deo||'—'}\n  Supervisor: ${r.rejectedBy}\n  Line: ${r.lineId}\n  Date: ${r.date}\n\n`;});
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));a.download='CIE_Report.txt';a.click();
+}
+
+// ── SIMULATE MAIL ORDER ──
+const companies=[
+  {name:'SkyAuto Ltd',email:'orders@skyauto.in',customer:'Rohit Mehta'},
+  {name:'BoltEV Corp',email:'buy@boltev.com',customer:'Ananya Singh'},
+  {name:'FleetMaster',email:'fleet@fmaster.co',customer:'Suresh Rao'},
+  {name:'NexaDrive',email:'nexadrive@bd.in',customer:'Pooja Nair'},
+  {name:'VoltWheels',email:'vw@voltwheels.io',customer:'Kartik Joshi'},
+];
+const msgs=[
+  'Please confirm production schedule.',
+  'Urgent delivery needed this month.',
+  'First order — please prioritize.',
+  'Can you accommodate partial delivery?',
+  'Requesting quality certification along with units.',
+];
+function simulateMailOrder(){
+  const co=companies[Math.floor(Math.random()*companies.length)];
+  const model=lines[Math.floor(Math.random()*lines.length)].model;
+  const qty=Math.floor(Math.random()*25)+5;
+  mailOrders.push({
+    id:'MO'+String(Date.now()).slice(-5),
+    company:co.name,customer:co.customer,email:co.email,
+    model,qty,status:'pending',
+    date:new Date().toISOString().slice(0,10),
+    msg:msgs[Math.floor(Math.random()*msgs.length)],
+    produced:0,transferred:0
+  });
+  refreshAll();
+}
+
+// ── SIMULATE REJECTION ──
+function simulateRejection(){
+  const rl=lines[Math.floor(Math.random()*lines.length)];
+  const parts=['Battery Pack','Motor Controller','Chassis','Electronics','Cooling System','Exhaust','Wiring'];
+  const reasons=['Voltage issue','Weld defect','Crack','Firmware mismatch','Leak','Calibration error'];
+  const asgn=assignments.find(a=>a.lineId===rl.id);
+  rejections.push({id:Date.now(),lineId:rl.id,model:rl.model,part:parts[Math.floor(Math.random()*parts.length)],reason:reasons[Math.floor(Math.random()*reasons.length)],date:new Date().toISOString().slice(0,10),rejectedBy:asgn?.supervisor||'Admin',deo:asgn?.deo||'—'});
+  refreshAll();
+}
+
+// ── FULL REFRESH ──
+function refreshAll(){
+  updateKPIs();
+  updateCharts();
+  renderMaterials();
+  renderMailInbox();
+  renderTransfer();
+  renderLines();
+  renderAssignments();
+  renderOrdersTable();
+  renderRejLog();
+  renderPersons();
+  updateDropdowns();
+  updateMailOrderChart();
+  updateAllOrdersChart();
+  updateAssignmentsChart();
+}
+
+// ── EVENTS ──
+document.getElementById('applyBtn').onclick=()=>{
+  curLine=document.getElementById('lineFilter').value;
+  curModel=document.getElementById('modelFilter').value;
+  curTime=document.getElementById('timeFilter').value;
+  curDate=document.getElementById('datePicker').value;
+  curStartDate=document.getElementById('startDatePicker').value;
+  curEndDate=document.getElementById('endDatePicker').value;
+  curYear=document.getElementById('yearFilter').value;
+  refreshAll();
+};
+document.getElementById('addLineBtn').onclick=document.getElementById('addLineSm').onclick=()=>{
+  const n=lines.length+1;
+  lines.push({id:`L${String(n).padStart(2,'0')}`,name:`LINE ${String(n).padStart(2,'0')}`,target:100,completed:0,model:lines[0].model});
+  refreshAll();
+};
+document.getElementById('assignBtn').onclick=()=>{const f=document.getElementById('assignForm');f.style.display=f.style.display==='none'?'block':'none';};
+document.getElementById('saveAssign').onclick=()=>{
+  const model=document.getElementById('aModel').value,lineId=document.getElementById('aLine').value,deo=document.getElementById('aDeo').value.trim(),sup=document.getElementById('aSup').value.trim();
+  if(!model||!lineId||!deo||!sup){alert('Fill all fields');return;}
+  assignments.push({id:Date.now(),model,lineId,deo,supervisor:sup});
+  document.getElementById('assignForm').style.display='none';
+  refreshAll();
+};
+document.getElementById('simOrderBtn').onclick=simulateMailOrder;
+document.getElementById('simRejBtn').onclick=simulateRejection;
+document.getElementById('openRejBtn').onclick=openRejModal;
+document.getElementById('bellBtn').onclick=()=>{document.getElementById('mailInbox').scrollIntoView({behavior:'smooth'});};
+document.getElementById('closeRej').onclick=()=>document.getElementById('rejModal').classList.remove('open');
+document.getElementById('closeMailModal').onclick=closeMailModal;
+document.getElementById('rejModal').onclick=e=>{if(e.target===document.getElementById('rejModal'))document.getElementById('rejModal').classList.remove('open');};
+document.getElementById('mailModal').onclick=e=>{if(e.target===document.getElementById('mailModal'))closeMailModal();};
+document.getElementById('timeFilter').onchange=()=>{
+  const dp=document.getElementById('datePicker');
+  const sdp=document.getElementById('startDatePicker');
+  const edp=document.getElementById('endDatePicker');
+  if(document.getElementById('timeFilter').value==='custom'){
+    dp.style.display='inline-block';
+    sdp.style.display='inline-block';
+    edp.style.display='inline-block';
+  }else{
+    dp.style.display='none';
+    sdp.style.display='none';
+    edp.style.display='none';
+  }
+};
+document.getElementById('mailStatusFilter').onchange=renderMailInbox;
+document.getElementById('dlCsv').onclick=dlCsv;
+document.getElementById('dlReport').onclick=dlReport;
+
+// ── INIT ──
+document.getElementById('datePicker').style.display='none';
+refreshAll();
+
+// ── INTERACTIVE CHARTS ──
+let mailOrderChartInst, allOrdersChartInst, assignmentsChartInst;
+function updateMailOrderChart() {
+  const ctx = document.getElementById('mailOrderChart').getContext('2d');
+  if (mailOrderChartInst) { mailOrderChartInst.destroy(); }
+  // Pie chart: status distribution
+  const statusCounts = ['pending','accepted','rejected'].map(s => mailOrders.filter(o => o.status === s).length);
+  mailOrderChartInst = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: ['Pending', 'Accepted', 'Rejected'],
+      datasets: [{
+        data: statusCounts,
+        backgroundColor: ['#facc15','#2dd4bf','#f43f5e'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom', labels: { color: '#dff0e1', boxWidth: 12 } } }
+    }
+  });
+}
+
+function updateAllOrdersChart() {
+  const canvas = document.getElementById('allOrdersChart');
+  const ctx = canvas.getContext('2d');
+  if (allOrdersChartInst) { allOrdersChartInst.destroy(); }
+  // Bar chart: orders per model
+  const modelMap = {};
+  mailOrders.forEach(o => { modelMap[o.model] = (modelMap[o.model]||0) + o.qty; });
+  const labels = Object.keys(modelMap);
+  const data = Object.values(modelMap);
+  // Fallback: if no data, show dummy bar
+  if (labels.length === 0) {
+    canvas.style.display = 'none';
+    if (!document.getElementById('allOrdersChartFallback')) {
+      const fallback = document.createElement('div');
+      fallback.id = 'allOrdersChartFallback';
+      fallback.style = 'color:#dff0e1;text-align:center;font-size:0.9rem;padding:18px 0;';
+      fallback.textContent = 'No order data to display.';
+      canvas.parentNode.appendChild(fallback);
+    }
+    return;
+  } else {
+    canvas.style.display = 'block';
+    const fallback = document.getElementById('allOrdersChartFallback');
+    if (fallback) fallback.remove();
+  }
+  allOrdersChartInst = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Units',
+        data: data,
+        backgroundColor: '#4ade80',
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { x: { ticks: { color: '#dff0e1' } }, y: { ticks: { color: '#dff0e1' }, beginAtZero: true } }
+    }
+  });
+}
+
+function updateAssignmentsChart() {
+  const ctx = document.getElementById('assignmentsChart').getContext('2d');
+  if (assignmentsChartInst) { assignmentsChartInst.destroy(); }
+  // Pie chart: assignments per model
+  const modelMap = {};
+  assignments.forEach(a => { modelMap[a.model] = (modelMap[a.model]||0) + 1; });
+  assignmentsChartInst = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(modelMap),
+      datasets: [{
+        data: Object.values(modelMap),
+        backgroundColor: ['#4ade80','#2dd4bf','#60a5fa','#facc15','#f43f5e','#fb923c','#a78bfa'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom', labels: { color: '#dff0e1', boxWidth: 12 } } }
+    }
+  });
+}
+</script>
+</body>
+</html>

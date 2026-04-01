@@ -1,9 +1,13 @@
 import imaplib
 import email
 from email.header import decode_header
+import email.utils
 import os
 import json
+import socket
 from datetime import datetime
+from app.extensions import db
+from app.models.models import EmailRequest, Status
 
 # Load env in case this is run independently
 from dotenv import load_dotenv
@@ -13,95 +17,165 @@ def fetch_unread_emails():
     username = os.getenv("SMTP_EMAIL")
     password = os.getenv("SMTP_PASSWORD")
     
-    # Connecting to Gmail IMAP
-    imap_server = "imap.gmail.com"
-    mail = imaplib.IMAP4_SSL(imap_server)
+    print(f"[SYNC] Starting IMAP sync for {username}")
     
+    if not username or not password:
+        print("[SYNC] ERROR: Missing SMTP credentials in environment")
+        return {"success": False, "error": "Missing credentials"}
+    
+    # Connecting to Gmail IMAP with socket timeout (compatible with all Python versions)
+    imap_server = "imap.gmail.com"
+    old_timeout = socket.getdefaulttimeout()
+    socket.setdefaulttimeout(20)
+    mail = None
     try:
+        print(f"[SYNC] Connecting to {imap_server}...")
+        mail = imaplib.IMAP4_SSL(imap_server)
         mail.login(username, password)
+        print("[SYNC] Login successful. Selecting inbox...")
         mail.select("inbox")
         
-        # Use ALL so we don't miss an email if it was accidentally opened/read in Gmail
-        status, response = mail.search(None, 'ALL')
-        email_ids = response[0].split()
-        
-        # Get the latest 30 emails (Fetching enough to not miss requests, but keeping it snappy)
-        latest_email_ids = email_ids[-30:] if len(email_ids) > 30 else email_ids
-        
-        parsed_emails = []
-        if latest_email_ids:
-            # Fetch all 30 emails in one single IMAP request for speed
-            fetch_ids = b','.join(latest_email_ids)
-            status, msg_data = mail.fetch(fetch_ids, '(RFC822)')
+        # Use UID to get permanent identifiers for each email
+        # Search for ALL mails to ensure we don't miss anything
+        status, response = mail.uid('search', None, 'ALL')
+        if status != 'OK':
+            print("[SYNC] ERROR: Search failed")
+            return {"success": False, "error": "Search failed"}
             
-            # msg_data contains tuples of header/body + some closing tags
-            for response_part in msg_data:
-                if isinstance(response_part, tuple):
-                    # extract the original ID if possible, but we'll assign one dynamically if needed
-                    e_id = response_part[0].split()[0]
-                    msg = email.message_from_bytes(response_part[1])
+        uids = response[0].split()
+        print(f"[SYNC] Found {len(uids)} total emails in inbox")
+        
+        # Process the latest 100 UIDs, reverse to start with newest
+        latest_uids = list(uids[-100:]) if len(uids) > 100 else list(uids)
+        latest_uids.reverse()
+        
+        new_count = 0
+        if latest_uids:
+            for uid_bytes in latest_uids:
+                uid = uid_bytes.decode()
+                
+                # Check if we already have this UID in our database
+                existing = EmailRequest.query.filter_by(imap_uid=uid).first()
+                if existing:
+                    continue
+                
+                status, msg_data = mail.uid('fetch', uid, '(RFC822)')
+                if status != 'OK' or not msg_data:
+                    continue
                     
-                    # Decode email subject
-                    subject, encoding = decode_header(msg["Subject"])[0]
-                    if isinstance(subject, bytes):
-                        subject = subject.decode(encoding if encoding else "utf-8")
+                for response_part in msg_data:
+                    if isinstance(response_part, tuple):
+                        msg = email.message_from_bytes(response_part[1])
                         
-                    # Get Sender
-                    sender = msg.get("From")
-                    
-                    # Get Date
-                    date_ = msg.get("Date")
-                    
-                    # Extract body
-                    body = ""
-                    if msg.is_multipart():
-                        for part in msg.walk():
-                            content_type = part.get_content_type()
-                            content_disposition = str(part.get("Content-Disposition"))
+                        # Extract Metadata
+                        message_id = msg.get("Message-ID")
+                        subject, encoding = decode_header(msg.get("Subject", ""))[0]
+                        if isinstance(subject, bytes):
+                            subject = subject.decode(encoding if encoding else "utf-8")
                             
+                        sender_full = msg.get("From", "")
+                        sender_parsed = email.utils.parseaddr(sender_full)
+                        sender_name = sender_parsed[0]
+                        sender_email = sender_parsed[1]
+                        
+                        date_str = msg.get("Date")
+                        received_at = datetime.now()
+                        if date_str:
                             try:
-                                body = part.get_payload(decode=True).decode()
-                                if content_type == "text/plain":
-                                    break
+                                received_at = datetime.fromtimestamp(email.utils.mktime_tz(email.utils.parsedate_tz(date_str)))
                             except:
                                 pass
-                    else:
-                        body = msg.get_payload(decode=True).decode()
                         
-                    parsed_email = {
-                        "id": str(e_id.decode()),
-                        "subject": subject,
-                        "sender": sender,
-                        "date": date_,
-                        "body": body[:500] # truncate
-                    }
-                    
-                    # Filter out non-order system emails (like spam from GeeksforGeeks, promotions, etc.)
-                    subject_body = (subject + ' ' + body).lower()
-                    
-                    is_valid_sender = any(domain in sender.lower() for domain in ['lps admin', '98165mkm@gmail.com', 'ritindia', 'ritinida', '.edu', 'gmail.com', 'yahoo.com', 'outlook.com'])
-                    is_explicitly_car_order = any(kw in subject_body for kw in ['car model', 'kuv', 'xuv', 'thar', 'mpv', 'units', 'order', 'request', 'urgent', 'production', 'requirement', 'demand'])
-                    is_spam_sender = any(spam in sender.lower() for spam in ['geeks', 'robin', 'day1x', 'promo', 'news', 'noreply', 'no-reply', 'substack', 'linkedin', 'github', 'instagram', 'facebook', 'twitter', 'kling', 'user-service', 'marketing'])
-                    
-                    if not is_spam_sender and (is_valid_sender or is_explicitly_car_order):
-                        parsed_emails.append(parsed_email)
+                        # Extract body
+                        body = ""
+                        if msg.is_multipart():
+                            for part in msg.walk():
+                                if part.get_content_type() == "text/plain":
+                                    try:
+                                        body = part.get_payload(decode=True).decode()
+                                        break
+                                    except: pass
+                        else:
+                            try:
+                                body = msg.get_payload(decode=True).decode()
+                            except: pass
+
+                        # Filter: Detect Production Order emails
+                        subject_body = (subject + ' ' + body).lower()
+                        
+                        # Broad order/demand keywords
+                        order_keywords = [
+                            'car model', 'production order', 'order request', 'new model order',
+                            'requirement', 'demand', 'quantity', 'units', 'manufacturing',
+                            'vehicle', 'order', 'request', 'mahindra', 'tata', 'toyota'
+                        ]
+                        # Specific model names we track
+                        model_keywords = [
+                            'kuv', 'xuv', 'thar', 'mpv', 'tml', 'winger', 'curvv',
+                            'marazzo', 'scorpio', 'bolero', 'arjun', 'ev model', 'electric'
+                        ]
+                        
+                        has_order_keyword = any(kw in subject_body for kw in order_keywords)
+                        has_model_mention = any(m in subject_body for m in model_keywords)
+                        
+                        is_relevant = has_order_keyword or has_model_mention
+                        
+                        # Spam detection: ONLY check the sender address, not body content
+                        # (body keywords like 'update', 'notification' often appear in real orders too)
+                        spam_sender_patterns = [
+                            'noreply', 'no-reply', 'mailer-daemon', 'newsletter@', 
+                            'substack', 'linkedin.com', 'github.com', 'geeks', 
+                            'donotreply', 'automated@', 'bounce@'
+                        ]
+                        is_spam = any(spam in sender_full.lower() for spam in spam_sender_patterns)
+                        
+                        # Only save if it looks like a real customer order and NOT spam
+                        print(f"[SYNC]   UID {uid}: relevant={is_relevant}, spam={is_spam}, subject='{subject[:60]}'")
+                        if is_relevant and not is_spam:
+                            # Truncate fields to prevent VARCHAR(255) overflow
+                            safe_subject = (subject or '').strip()[:250]
+                            safe_message_id = (message_id or '')[:250]
+                            new_request = EmailRequest(
+                                imap_uid=uid,
+                                message_id=safe_message_id,
+                                sender=(sender_name or "External Customer")[:250],
+                                sender_email=(sender_email or '')[:250],
+                                subject=safe_subject,
+                                body=body[:3000],
+                                received_at=received_at,
+                                status=Status.UNREAD
+                            )
+                            db.session.add(new_request)
+                            new_count += 1
+                            print(f"[SYNC]   ✓ SAVED new email: {safe_subject[:60]}")
             
-            # Reverse to show latest first
-            parsed_emails.reverse()
+            db.session.commit()
+            print(f"[SYNC] Done. {new_count} new email(s) saved.")
                     
+        # Return all tracked emails from database ordered by date
+        all_tracked = EmailRequest.query.order_by(EmailRequest.received_at.desc()).all()
         return {
             "success": True, 
-            "data": parsed_emails
+            "data": [e.to_dict() for e in all_tracked]
         }
     except Exception as e:
-        return {"success": False, "error": str(e)}
-    finally:
+        print(f"[SYNC] EXCEPTION: {type(e).__name__}: {e}")
+        # Even if IMAP fails, return what we have in DB so the UI doesn't break
         try:
-            mail.logout()
+            all_tracked = EmailRequest.query.order_by(EmailRequest.received_at.desc()).all()
+            return {"success": True, "data": [em.to_dict() for em in all_tracked], "warning": str(e)}
+        except:
+            return {"success": False, "error": str(e)}
+    finally:
+        socket.setdefaulttimeout(old_timeout)
+        try:
+            if mail:
+                mail.logout()
         except:
             pass
 
 def delete_email(email_id):
+    """Note: email_id here represents the internal database ID or imap_uid"""
     username = os.getenv("SMTP_EMAIL")
     password = os.getenv("SMTP_PASSWORD")
     
@@ -112,15 +186,25 @@ def delete_email(email_id):
         mail.login(username, password)
         mail.select("inbox")
         
-        # Move to Trash (Gmail specific [Gmail]/Trash)
-        status, response = mail.copy(email_id, '[Gmail]/Trash')
+        # Locate the request in our DB to get its UID
+        req = EmailRequest.query.get(email_id)
+        if not req:
+            return {"success": False, "error": "Order request not found in database"}
+            
+        uid = req.imap_uid
+        
+        # Move to Trash (Gmail specific)
+        status, response = mail.uid('copy', uid, '[Gmail]/Trash')
         if status == 'OK':
-            # Delete from inbox after copy
-            mail.store(email_id, '+FLAGS', '\\Deleted')
+            mail.uid('store', uid, '+FLAGS', '\\Deleted')
             mail.expunge()
-            return {"success": True, "message": "Email moved to Trash"}
+            
+            # Remove from our database too so it's truly deleted
+            db.session.delete(req)
+            db.session.commit()
+            return {"success": True, "message": "Email moved to Trash and removed from database"}
         else:
-            return {"success": False, "error": f"Failed to copy email: {response}"}
+            return {"success": False, "error": f"Failed to delete from Gmail: {response}"}
             
     except Exception as e:
         return {"success": False, "error": str(e)}
@@ -129,3 +213,4 @@ def delete_email(email_id):
             mail.logout()
         except:
             pass
+

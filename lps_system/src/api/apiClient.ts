@@ -24,6 +24,13 @@ export const apiClient = {
             });
             if (!response.ok) throw new Error('G-Chart fetch failed');
             return response.json();
+        },
+        getVehicleModels: async () => {
+            const token = getToken();
+            const response = await fetch(`${API_BASE}/manager/vehicle-models`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            return response.json();
         }
     },
     admin: {
@@ -37,6 +44,61 @@ export const apiClient = {
                 throw new Error(errorData.message || 'System core metrics retrieve failed');
             }
             return response.json();
+        },
+        getLines: async () => {
+            const token = getToken();
+            const res = await fetch(`${API_BASE}/admin/lines`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            return res.json();
+        },
+        getAssignments: async () => {
+            const token = getToken();
+            const res = await fetch(`${API_BASE}/admin/assignments`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            return res.json();
+        },
+        getDemands: async () => {
+            const token = getToken();
+            const res = await fetch(`${API_BASE}/admin/demands`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            return res.json();
+        },
+        getModels: async () => {
+            const token = getToken();
+            const res = await fetch(`${API_BASE}/admin/models`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            return res.json();
+        },
+        getStaff: async (role?: string) => {
+            const token = getToken();
+            const url = role ? `${API_BASE}/admin/identity/staff?role=${role}` : `${API_BASE}/admin/identity/staff`;
+            const res = await fetch(url, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            return res.json();
+        },
+        getVelocityTrend: async () => {
+            const token = getToken();
+            const res = await fetch(`${API_BASE}/admin/analytics/velocity`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            return res.json();
+        },
+        recordProduction: async (lineName: string, increment: number = 1) => {
+            const token = getToken();
+            const res = await fetch(`${API_BASE}/admin/production/record`, {
+                method: 'POST',
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ lineName, increment })
+            });
+            return res.json();
         }
     }
 };

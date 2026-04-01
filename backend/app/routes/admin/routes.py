@@ -7,11 +7,12 @@ prefix.
 
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.models import User, ProductionLine, CarModel, Demand, db, DailyWorkStatus, DailyProductionLog
+from app.models import User, ProductionLine, CarModel, Demand, db, DailyWorkStatus, DailyProductionLog, EmailRequest, Status
 from app.services.db_service import IdentityDBService
 from app.middleware.auth_middleware import role_required
 from app.utils.audit_logger import log_audit
 import time as time_module
+import datetime
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -208,6 +209,7 @@ def create_demand():
         line=data.get('line'),
         manager=data.get('manager'),
         customer=data.get('customer'),
+        company=data.get('company'),
         status='PENDING'
     )
     db.session.add(new_demand)
@@ -232,6 +234,7 @@ def handle_demand_by_id(id):
     if 'line' in data: demand.line = data['line']
     if 'manager' in data: demand.manager = data['manager']
     if 'customer' in data: demand.customer = data['customer']
+    if 'company' in data: demand.company = data['company']
     if 'start_date' in data: demand.start_date = data['start_date']
     if 'end_date' in data: demand.end_date = data['end_date']
     
@@ -317,6 +320,94 @@ def get_admin_summary():
     })
 
 
+@admin_bp.route('/analytics/velocity', methods=['GET'])
+@jwt_required()
+@role_required(['Admin', 'Manager'])
+def get_velocity_trend():
+    from sqlalchemy import func
+    import datetime
+    
+    # Aggregation for the last 6 months
+    six_months_ago = datetime.date.today() - datetime.timedelta(days=180)
+    
+    # Using PostgreSQL date_trunc for monthly grouping
+    results = db.session.query(
+        func.date_trunc('month', DailyWorkStatus.date).label('month_date'),
+        func.sum(DailyWorkStatus.actual_qty).label('actual'),
+        func.sum(DailyWorkStatus.planned_qty).label('target')
+    ).filter(
+        DailyWorkStatus.date >= six_months_ago
+    ).group_by(
+        'month_date'
+    ).order_by(
+        'month_date'
+    ).all()
+    
+    # Format into JAN, FEB... sequence for Recharts
+    formatted_data = []
+    for r in results:
+        if r.month_date:
+            formatted_data.append({
+                "name": r.month_date.strftime('%b').upper(),
+                "actual": int(r.actual or 0),
+                "target": int(r.target or 0)
+            })
+    
+    # If no historical data exists, return an empty but successful array
+    # (frontend will handle fallback to ensure 'perfect' visual state)
+    return jsonify({
+        "success": True,
+        "data": formatted_data
+    })
+
+
+@admin_bp.route('/production/record', methods=['POST'])
+@jwt_required()
+@role_required(['Admin', 'Manager'])
+def record_production():
+    from flask import request
+    data = request.json or {}
+    line_name = data.get('lineName')
+    inc = data.get('increment', 1)
+    
+    # Simple logic to find today's work status for this line
+    # (In real scenario, we'd look for active assignment)
+    from app.models.models import DailyWorkStatus, CarModel, ProductionLine
+    
+    line = ProductionLine.query.filter_by(name=line_name).first()
+    if not line:
+        return jsonify({"success": False, "message": "Line not found"}), 404
+        
+    model = CarModel.query.filter_by(production_line_id=line.id).first()
+    if not model:
+        return jsonify({"success": False, "message": "No model assigned to this line"}), 404
+        
+    today = datetime.date.today()
+    status = DailyWorkStatus.query.filter_by(date=today, car_model_id=model.id).first()
+    
+    if not status:
+        # Create today's entry if missing
+        status = DailyWorkStatus(
+            date=today,
+            car_model_id=model.id,
+            deo_id=model.assigned_deo_id or 1,
+            planned_qty=100,
+            actual_qty=inc,
+            status='IN_PROGRESS'
+        )
+        db.session.add(status)
+    else:
+        status.actual_qty += inc
+        
+    db.session.commit()
+    
+    return jsonify({
+        "success": True,
+        "message": f"Successfully recorded {inc} units for {line_name}",
+        "new_actual": status.actual_qty
+    })
+
+
 @admin_bp.route('/identity/users', methods=['GET'])
 @jwt_required()
 @role_required(['Admin'])
@@ -394,3 +485,87 @@ def delete_user(username):
     db.session.delete(user)
     db.session.commit()
     return jsonify({"success": True, "message": f"User {username} deleted"})
+
+# ---------------------------------------------------------------------------
+# Order Email Tracking Endpoints
+# ---------------------------------------------------------------------------
+
+@admin_bp.route('/orders/emails/<int:id>/status', methods=['PATCH'])
+@jwt_required()
+@role_required(['Admin', 'Manager'])
+def update_email_status(id):
+    req = EmailRequest.query.get(id)
+    if not req:
+        return jsonify({"success": False, "message": "Order request not found"}), 404
+    
+    data = request.json or {}
+    new_status = data.get('status')
+    if new_status not in [Status.UNREAD, Status.READ, Status.REJECTED, Status.PROCESSED]:
+        return jsonify({"success": False, "message": "Invalid status"}), 400
+        
+    req.status = new_status
+    db.session.commit()
+    return jsonify({"success": True, "message": f"Status updated to {new_status}", "data": req.to_dict()})
+
+@admin_bp.route('/orders/emails/<int:id>/authorize', methods=['POST'])
+@jwt_required()
+@role_required(['Admin', 'Manager'])
+def authorize_email_production(id):
+    """Bridge a mail request to a formal Production Demand"""
+    req = EmailRequest.query.get(id)
+    if not req:
+        return jsonify({"success": False, "message": "Order request not found"}), 404
+    
+    if req.status == Status.PROCESSED:
+        return jsonify({"success": False, "message": "This request has already been authorized"}), 400
+
+    data = request.json or {}
+    # Validation logic same as create_demand but uses req data as base
+    model_name = data.get('model_name') or req.subject # Fallback
+    quantity = int(data.get('quantity') or 1)
+    
+    # Normalize model name
+    model_name_str = str(model_name).upper().strip()
+    
+    # 1. Always create a NEW CarModel for each authorized email
+    #    so that Demand Management and Car Models Assignment always stay in sync (1 demand = 1 car card)
+    import time as time_module_inner
+    new_model = CarModel(
+        name=model_name_str,
+        model_code=f"{model_name_str[:3]}-{str(int(time_module.time()))[-4:]}",
+        type='Standard',
+        status=Status.PENDING
+    )
+    db.session.add(new_model)
+    db.session.flush()
+
+    # 2. Always Create a Separate Demand Card (Unique DEM-ID)
+    from sqlalchemy import func
+    max_id = db.session.query(func.max(Demand.id)).scalar() or 0
+    formatted_id = f"DEM-{(max_id + 1):03d}"
+    
+    new_demand = Demand(
+        formatted_id=formatted_id,
+        model_id=new_model.id,
+        model_name=model_name_str,
+        quantity=quantity,
+        start_date=data.get('start_date', datetime.date.today().isoformat()),
+        customer=req.sender,
+        company=data.get('company'),
+        status=Status.PENDING
+    )
+    db.session.add(new_demand)
+    
+    # 3. Mark Email as PROCESSED
+    req.status = Status.PROCESSED
+    
+    db.session.commit()
+    log_audit("AUTHORIZE_MAIL_PRODUCTION")
+    
+    return jsonify({
+        "success": True, 
+        "message": f"Demand {formatted_id} created for {model_name_str}.",
+        "demand": new_demand.to_dict(),
+        "email": req.to_dict()
+    })
+

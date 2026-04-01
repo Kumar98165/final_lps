@@ -18,7 +18,7 @@ import { API_BASE } from '../../../lib/apiConfig';
 interface DemandFormModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSuccess: () => void;
+    onSuccess: (data?: any) => void;
     initialData?: {
         model_name?: string;
         quantity?: number;
@@ -35,6 +35,7 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
     const [loading, setLoading] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [models, setModels] = useState<any[]>([]);
+    const [lastSubmittedData, setLastSubmittedData] = useState<any>(null);
 
     const [masterDataPreview, setMasterDataPreview] = useState<any[]>([]);
     const [isPreviewLoading, setIsPreviewLoading] = useState(false);
@@ -50,6 +51,7 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
     const [supervisorId, setSupervisorId] = useState<number | ''>('');
     const [customer, setCustomer] = useState('');
     const [customerEmail, setCustomerEmail] = useState('');
+    const [companyName, setCompanyName] = useState('');
 
     const fetchInitialData = async () => {
         const token = getToken();
@@ -79,6 +81,7 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
                 setLine(editingDemand.line || '');
                 setManager(editingDemand.manager || '');
                 setCustomer(editingDemand.customer || '');
+                setCompanyName(editingDemand.company || '');
                 // supervisorId might not be returned in demand, we can try to find it by name or model assignment
                 const assignedModel = models.find(m => m.name === editingDemand.model_name);
                 if (assignedModel?.supervisor_id) setSupervisorId(assignedModel.supervisor_id);
@@ -152,21 +155,24 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
         setEndDate('');
         setCustomer('');
         setCustomerEmail('');
+        setCompanyName('');
         setLine('');
     };
 
     const handleFinalClose = () => {
         if (showSuccess) {
-            onSuccess();
+            onSuccess(lastSubmittedData);
         } else {
             onClose();
         }
         resetForm();
+        setLastSubmittedData(null);
         setShowSuccess(false);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (loading) return; // Guard against double-submit
         setLoading(true);
         setErrorMessage('');
 
@@ -195,9 +201,25 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
                 start_date: startDate,
                 end_date: endDate || startDate,
                 customer,
+                company: companyName,
                 status: editingDemand ? editingDemand.status : 'PENDING',
             };
 
+            // --- KEY FIX ---
+            // If this modal was opened from an email (initialData present), 
+            // do NOT create a demand here. The /authorize endpoint in OrderInboxPage
+            // will create the demand. Just mark success and pass data up.
+            if (initialData && !editingDemand) {
+                setLastSubmittedData({
+                    ...demandData,
+                    customer_email: customerEmail // Ensure email is passed back
+                });
+                setErrorMessage('');
+                setShowSuccess(true);
+                return;
+            }
+
+            // For standalone demand creation (no email), POST directly
             const url = editingDemand
                 ? `${API_BASE}/admin/demands/${editingDemand.id}`
                 : `${API_BASE}/admin/demands`;
@@ -220,7 +242,7 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
                         const originalSubject = initialData?.subject || 'Order';
                         const subject = `Re: ${originalSubject} - Authorized Successfully`;
                         const formattedEndDate = new Date(endDate || startDate).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
-                        const body = `Dear Customer,\n\nThank you for choosing LPS.\n\nWe are pleased to inform you that your model order has been successfully received and approved by our team.\n\n### 📦 Order Details:\n\n* Model: ${model.name}\n* Quantity: ${quantity}\n* Expected Completion Date: ${formattedEndDate}\n\nYour order is now under process, and our production team has already initiated the work to ensure timely completion and delivery.\n\nIf you have any questions or require further assistance, please feel free to contact us at any time.\n\nThank you for trusting LPS.\n\nWarm regards,\nLPS Production Team\nThank you from LPS`;
+                        const body = `Dear Customer,\n\nThank you for choosing LPS.\n\nWe are pleased to inform you that your model order has been successfully received and approved by our team.\n\n### 📦 Order Details:\n\n* Model: ${finalModelName}\n* Quantity: ${quantity}\n* Expected Completion Date: ${formattedEndDate}\n\nYour order is now under process, and our production team has already initiated the work to ensure timely completion and delivery.\n\nIf you have any questions or require further assistance, please feel free to contact us at any time.\n\nThank you for trusting LPS.\n\nWarm regards,\nLPS Production Team\nThank you from LPS`;
 
                         await fetch(`${API_BASE}/orders/send-email`, {
                             method: 'POST',
@@ -239,6 +261,7 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
                     }
                 }
 
+                setLastSubmittedData(demandData);
                 setErrorMessage(''); // Clear error on success
                 setShowSuccess(true);
                 // Wait for user to click OK to call onSuccess and close
@@ -299,7 +322,9 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
                                     </div>
                                     <div className="space-y-1 pb-2">
                                         <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Model Authorized Successfully!</h2>
-                                        <p className="text-slate-500 font-bold text-xs underline underline-offset-4 decoration-emerald-500/30">Target registered & Confirmation sent to customer.</p>
+                                        <p className="text-slate-500 font-bold text-xs underline underline-offset-4 decoration-emerald-500/30">
+                                            {initialData ? "Parameters confirmed & ready for system authorization." : "Target registered & Confirmation sent to customer."}
+                                        </p>
                                     </div>
 
                                     <button
@@ -517,8 +542,19 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
                                                     </div>
                                                 </div>
 
-                                                {/* Customer */}
+                                                {/* Customer & Company Details */}
                                                 <div className="grid grid-cols-2 gap-6">
+                                                    <div className="space-y-3">
+                                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">COMPANY NAME</label>
+                                                        <input
+                                                            type="text"
+                                                            value={companyName}
+                                                            onChange={(e) => setCompanyName(e.target.value)}
+                                                            className="w-full bg-white border border-slate-100 rounded-2xl py-4 px-6 text-slate-700 font-black text-sm outline-none focus:border-[#F37021] transition-all"
+                                                            placeholder="e.g. Mahindra, Tesla"
+                                                            required
+                                                        />
+                                                    </div>
                                                     <div className="space-y-3">
                                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">CUSTOMER NAME</label>
                                                         <input
@@ -529,16 +565,17 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
                                                             required
                                                         />
                                                     </div>
-                                                    <div className="space-y-3">
-                                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">CUSTOMER EMAIL</label>
-                                                        <input
-                                                            type="email"
-                                                            value={customerEmail}
-                                                            onChange={(e) => setCustomerEmail(e.target.value)}
-                                                            className="w-full bg-white border border-slate-100 rounded-2xl py-4 px-6 text-slate-700 font-black text-sm outline-none focus:border-[#F37021] transition-all"
-                                                            placeholder="for automated notifications"
-                                                        />
-                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-3">
+                                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">CUSTOMER EMAIL</label>
+                                                    <input
+                                                        type="email"
+                                                        value={customerEmail}
+                                                        onChange={(e) => setCustomerEmail(e.target.value)}
+                                                        className="w-full bg-white border border-slate-100 rounded-2xl py-4 px-6 text-slate-700 font-black text-sm outline-none focus:border-[#F37021] transition-all"
+                                                        placeholder="for automated notifications"
+                                                    />
                                                 </div>
 
 

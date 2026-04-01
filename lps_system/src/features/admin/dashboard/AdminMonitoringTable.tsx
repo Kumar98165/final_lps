@@ -5,12 +5,8 @@ import { API_BASE } from '../../../lib/apiConfig';
 import { getToken } from '../../../lib/storage';
 
 export const AdminMonitoringTable = () => {
-    const [logs, setLogs] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-
-    // Filter states
-    const [selectedModel, setSelectedModel] = useState<string>('');
-    const [selectedSAP, setSelectedSAP] = useState<string>('');
+    const [logs, setLogs] = useState<any[]>([]);
 
     useEffect(() => {
         const fetchLogs = async () => {
@@ -60,21 +56,7 @@ export const AdminMonitoringTable = () => {
         return allRows;
     }, [logs]);
 
-    // Unique options for slicers
-    const modelOptions = useMemo(() => Array.from(new Set(flattenedData.map(d => d.modelName))).filter(Boolean).sort(), [flattenedData]);
-    const sapOptions = useMemo(() => {
-        const data = selectedModel ? flattenedData.filter(d => d.modelName === selectedModel) : flattenedData;
-        return Array.from(new Set(data.map(d => d.sapPartNumber))).filter(Boolean).sort();
-    }, [flattenedData, selectedModel]);
 
-    // Apply filters
-    const filteredData = useMemo(() => {
-        return flattenedData.filter(d => {
-            const matchModel = selectedModel ? d.modelName === selectedModel : true;
-            const matchSAP = selectedSAP ? d.sapPartNumber === selectedSAP : true;
-            return matchModel && matchSAP;
-        });
-    }, [flattenedData, selectedModel, selectedSAP]);
 
     if (isLoading) {
         return (
@@ -94,32 +76,6 @@ export const AdminMonitoringTable = () => {
                     <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight mb-2">Production Monitoring</h2>
                     <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Track Rejected and Approved Components</p>
                 </div>
-                
-                <div className="flex flex-wrap gap-4 mt-4 md:mt-0">
-                    <div className="flex flex-col">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Model Slicer</label>
-                        <select 
-                            value={selectedModel} 
-                            onChange={e => { setSelectedModel(e.target.value); setSelectedSAP(''); }}
-                            className="bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 rounded-xl px-4 py-3 min-w-[150px] outline-none focus:ring-2 focus:ring-slate-900"
-                        >
-                            <option value="">ALL MODELS</option>
-                            {modelOptions.map(m => <option key={m} value={m}>{m}</option>)}
-                        </select>
-                    </div>
-
-                    <div className="flex flex-col">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">SAP Part Slicer</label>
-                        <select 
-                            value={selectedSAP} 
-                            onChange={e => setSelectedSAP(e.target.value)}
-                            className="bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 rounded-xl px-4 py-3 min-w-[150px] outline-none focus:ring-2 focus:ring-slate-900"
-                        >
-                            <option value="">ALL PARTS</option>
-                            {sapOptions.map(sap => <option key={sap} value={sap}>{sap}</option>)}
-                        </select>
-                    </div>
-                </div>
             </div>
 
             <div className="overflow-x-auto">
@@ -127,25 +83,25 @@ export const AdminMonitoringTable = () => {
                     <thead>
                         <tr>
                             <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Date & Model</th>
-                            <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Part Details</th>
+                            <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Part Description</th>
                             <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-right">Production</th>
                             <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 table-cell">Status</th>
                             <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Comment</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredData.length === 0 ? (
+                        {flattenedData.length === 0 ? (
                             <tr>
                                 <td colSpan={5} className="py-12 text-center text-slate-400 font-bold uppercase text-xs">
-                                    No records found matching current filters
+                                    No records found
                                 </td>
                             </tr>
-                        ) : filteredData.map((row, idx) => (
+                        ) : flattenedData.map((row, idx) => (
                             <motion.tr 
                                 initial={{ opacity: 0, y: 10 }} 
                                 animate={{ opacity: 1, y: 0 }} 
                                 transition={{ delay: Math.min(idx * 0.05, 0.5) }}
-                                key={`${row.logId}-${row.sapPartNumber}-${idx}`}
+                                key={`${row.logId}-${idx}`}
                                 className="bg-white border border-slate-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] rounded-2xl transition-all hover:scale-[1.01]"
                             >
                                 <td className="p-4 rounded-l-2xl border-y border-l border-slate-100">
@@ -162,8 +118,7 @@ export const AdminMonitoringTable = () => {
                                     </div>
                                 </td>
                                 <td className="p-4 border-y border-slate-100">
-                                    <p className="font-black text-xs text-slate-900 uppercase">{row.sapPartNumber}</p>
-                                    <p className="text-[10px] font-bold text-slate-500 max-w-[200px] truncate">{row.partDescription}</p>
+                                    <p className="text-[11px] font-bold text-slate-700 max-w-[250px] uppercase leading-tight">{row.partDescription}</p>
                                 </td>
                                 <td className="p-4 border-y border-slate-100 text-right">
                                     <div className="flex flex-col items-end">

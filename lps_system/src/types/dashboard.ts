@@ -22,6 +22,7 @@ export interface GChartData {
 }
 
 export interface AdminSummary {
+    success?: boolean;
     oee: string;
     production_units: string;
     stats: {

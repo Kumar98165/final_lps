@@ -11,6 +11,9 @@ class Status:
     REJECTED = 'REJECTED'
     DONE = 'DONE'
     VERIFIED = 'VERIFIED'
+    UNREAD = 'UNREAD'
+    READ = 'READ'
+    PROCESSED = 'PROCESSED'
 
 # ----------------------------- MasterData -----------------------------
 class MasterData(db.Model):
@@ -247,6 +250,7 @@ class Demand(db.Model):
     line = db.Column(db.String(50))
     manager = db.Column(db.String(100))
     customer = db.Column(db.String(100))
+    company = db.Column(db.String(100))
     created_at = db.Column(db.DateTime, default=db.func.now(), index=True)
 
     # Relationship
@@ -305,6 +309,7 @@ class Demand(db.Model):
             "supervisor_name": self.supervisor_name,
             "supervisor_email": self.supervisor_email,
             "customer": self.customer,
+            "company": self.company,
             "createdAt": self.created_at.isoformat() if self.created_at else None
         }
 
@@ -385,4 +390,36 @@ class DailyProductionLog(db.Model):
             "manager_name": self.manager_name,
             "total_unique_parts": self.total_unique_parts,
             "total_requirements": self.total_requirements
+        }
+
+# ----------------------------- EmailRequest -----------------------------
+class EmailRequest(db.Model):
+    __tablename__ = 'email_requests'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    imap_uid = db.Column(db.String(50), unique=True, index=True)
+    message_id = db.Column(db.Text, index=True)
+    sender = db.Column(db.Text)
+    sender_email = db.Column(db.Text)
+    subject = db.Column(db.Text)
+    body = db.Column(db.Text)
+    received_at = db.Column(db.DateTime, index=True)
+    status = db.Column(db.String(20), default=Status.UNREAD, index=True)
+    created_at = db.Column(db.DateTime, default=db.func.now())
+
+    def __repr__(self):
+        return f'<EmailRequest {self.imap_uid} from {self.sender_email} status={self.status}>'
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "imap_uid": self.imap_uid,
+            "message_id": self.message_id,
+            "sender": self.sender,
+            "sender_email": self.sender_email,
+            "subject": self.subject,
+            "body": self.body,
+            "received_date": self.received_at.isoformat() if self.received_at else None,
+            "status": self.status,
+            "is_read": self.status != Status.UNREAD
         }
