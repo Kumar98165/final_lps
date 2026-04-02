@@ -7,7 +7,6 @@ import {
     CheckCircle2, 
     MessageSquare,
     Info,
-    Target,
     ArrowRight
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
@@ -27,7 +26,6 @@ export const SupervisorRowVerifyModal: React.FC<SupervisorRowVerifyModalProps> =
 }) => {
     if (!isOpen || !row) return null;
 
-    const isTargetMet = Number(row["Today Produced"] || 0) >= Number(row["Target Qty"] || 0);
     const statusVal = (row["Production Status"] || 'PENDING').trim().toUpperCase();
 
     const renderDetailField = (label: string, value: any, icon?: any, colorClass: string = "text-slate-900") => (
@@ -95,10 +93,9 @@ export const SupervisorRowVerifyModal: React.FC<SupervisorRowVerifyModalProps> =
                             {renderDetailField("Part Description", row["PART DESCRIPTION"] || "Component Detail Not Specified", Info, "italic text-slate-500 font-bold")}
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                            {renderDetailField("Target Qty", row["Target Qty"], Target)}
-                            {renderDetailField("Today Produced", row["Today Produced"], CheckCircle2, "text-[#F37021]")}
-                            {renderDetailField("Remain Qty", row["Remain Qty"] || row["Balance Qty"] || "0", Info)}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {renderDetailField("Opening Stock", row["Opening Stock"] || "0", Info)}
+                            {renderDetailField("Todays Stock", row["Todays Stock"] || "0", Info, "text-[#F37021]")}
                             <div className="space-y-2 flex-1">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Production Status</label>
                                 <div className={cn(

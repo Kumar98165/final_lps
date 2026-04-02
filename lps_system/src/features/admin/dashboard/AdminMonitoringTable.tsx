@@ -35,7 +35,7 @@ export const AdminMonitoringTable = () => {
     const flattenedData = useMemo(() => {
         let allRows: any[] = [];
         logs.forEach(log => {
-            if (log.status === 'APPROVED' || log.status === 'REJECTED') {
+            if (log.status === 'APPROVED' || log.status === 'REJECTED' || log.status === 'VERIFIED') {
                 const logData = Array.isArray(log.log_data) ? log.log_data : [];
                 logData.forEach((row: any) => {
                     allRows.push({
@@ -47,8 +47,8 @@ export const AdminMonitoringTable = () => {
                         date: log.date ? new Date(log.date).toLocaleDateString() : 'N/A',
                         sapPartNumber: row['SAP PART NUMBER'] || 'N/A',
                         partDescription: row['PART DESCRIPTION'] || 'N/A',
-                        todayProduced: row['Today Produced'] || '0',
-                        targetQty: row['Target Qty'] || '0',
+                        todaysStock: row['Todays Stock'] || '0',
+                        targetQty: row['Target Qty'] || row['TOTAL SCHEDULE QTY'] || '0',
                     });
                 });
             }
@@ -84,7 +84,7 @@ export const AdminMonitoringTable = () => {
                         <tr>
                             <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Date & Model</th>
                             <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Part Description</th>
-                            <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-right">Production</th>
+                            <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-right">Current Stock</th>
                             <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 table-cell">Status</th>
                             <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Comment</th>
                         </tr>
@@ -123,22 +123,16 @@ export const AdminMonitoringTable = () => {
                                 <td className="p-4 border-y border-slate-100 text-right">
                                     <div className="flex flex-col items-end">
                                         <div className="flex items-end gap-1">
-                                            <span className="text-sm font-black text-slate-900">{row.todayProduced}</span>
-                                            <span className="text-[10px] font-bold text-slate-400 mb-0.5">/ {row.targetQty}</span>
-                                        </div>
-                                        <div className="w-16 h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden">
-                                            <div 
-                                                className={`h-full rounded-full ${row.logStatus === 'APPROVED' ? 'bg-emerald-500' : 'bg-red-500'}`} 
-                                                style={{ width: `${Math.min(100, (Number(row.todayProduced) / Math.max(1, Number(row.targetQty))) * 100)}%` }}
-                                            />
+                                            <span className="text-sm font-black text-[#F37021]">{row.todaysStock}</span>
+                                            <span className="text-[10px] font-bold text-slate-400 mb-0.5">Units In Stock</span>
                                         </div>
                                     </div>
                                 </td>
                                 <td className="p-4 border-y border-slate-100">
-                                    {row.logStatus === 'APPROVED' ? (
+                                    {row.logStatus === 'APPROVED' || row.logStatus === 'VERIFIED' ? (
                                         <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-emerald-100">
                                             <CheckCircle size={12} />
-                                            Approved
+                                            {row.logStatus === 'VERIFIED' ? 'Verified' : 'Approved'}
                                         </div>
                                     ) : (
                                         <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 text-red-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-red-100">

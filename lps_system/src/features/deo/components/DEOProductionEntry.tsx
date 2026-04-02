@@ -47,26 +47,20 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
         onEditingChange(!!editingPart);
     }, [editingPart, onEditingChange]);
 
-    // Validation for final submission
+    // Validation for final submission (Updated: Now only requires stock data as Produced is removed)
     const isFormValid = useMemo(() => {
         if (!requirements || requirements.length === 0) return false;
-        // Check if essential fields are filled for every part
         return requirements.every(req => {
             const stockVal = req["Todays Stock"];
-            const producedVal = req["Today Produced"];
-
             // Allow 0 (zero), but reject undefined, null, or empty strings
-            const hasStock = stockVal !== undefined && stockVal !== null && String(stockVal).trim() !== "";
-            const hasProduced = producedVal !== undefined && producedVal !== null && String(producedVal).trim() !== "";
-
-            return hasStock && hasProduced;
+            return stockVal !== undefined && stockVal !== null && String(stockVal).trim() !== "";
         });
     }, [requirements]);
 
-    // Identification columns (Reverting to the user's specific 10-field schema)
+    // Identification columns (Updated: "Today Produced" removed per project requirement)
     const allColumns = [
         "SN. NO", "SAP PART NUMBER", "PART NUMBER", "PART DESCRIPTION",
-        "PER DAY", "SAP Stock", "Opening Stock", "Todays Stock", "Today Produced", "Coverage Days"
+        "PER DAY", "SAP Stock", "Opening Stock", "Todays Stock", "Coverage Days"
     ];
 
     const vModel = assignedModels.find(m => m.id === selectedModelId);
@@ -120,7 +114,6 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                     </div>
 
                     <div className="flex items-center gap-4">
-                        {/* Integrated Selection Controls */}
                         <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-2xl border border-slate-100 shadow-inner">
                             <div className="px-4 py-1 border-r border-slate-200">
                                 <span className="block text-[7px] font-black text-slate-400 uppercase tracking-widest mb-0.5 leading-none">TARGET MODEL</span>
@@ -142,8 +135,6 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                 </div>
                             </div>
                         </div>
-
-                        {/* Submission Button Removed from Header per User Request */}
                     </div>
                 </div>
 
@@ -191,7 +182,6 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                     </div>
                 </div>
 
-                {/* Footer Strip */}
                 <div className="pt-6 border-t border-slate-50 flex flex-wrap items-center justify-between gap-6">
                     <div className="flex items-center gap-8">
                         <div className="flex items-center gap-3">
@@ -222,7 +212,7 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
             </motion.div>
 
 
-            {/* Pop Form Modal (Image 3 Style requirement) */}
+            {/* Pop Form Modal */}
             <AnimatePresence>
                 {editingPart && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm">
@@ -285,7 +275,6 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                         </div>
                                     )}
 
-                                    {/* Read-only Info */}
                                     <div className="col-span-12 grid grid-cols-12 gap-4">
                                         <div className="col-span-2 space-y-1.5">
                                             <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest px-1 text-center">SN</label>
@@ -313,7 +302,6 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                         </div>
                                     </div>
 
-                                    {/* Editable & Metric Fields */}
                                     <div className="col-span-12 grid grid-cols-4 gap-4 pt-1">
                                         <div className="space-y-1.5">
                                             <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">PER DAY</label>
@@ -354,7 +342,6 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                                 value={editingPart["Todays Stock"] || ""}
                                                 onChange={(e) => {
                                                     const val = e.target.value;
-                                                    // Live calculate Coverage Days: Stock / Per Day
                                                     const perDay = parseFloat(editingPart["PER DAY"] || "0");
                                                     const stockValue = parseFloat(val || "0");
                                                     const calculatedCoverage = perDay > 0 ? (stockValue / perDay).toFixed(1) : "0.0";
@@ -375,25 +362,7 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                         </div>
                                     </div>
 
-                                    {/* Production & Coverage Group */}
-                                    <div className="col-span-12 grid grid-cols-3 gap-4">
-                                        <div className="space-y-1.5">
-                                            <label className="block text-[11px] font-black text-[#F37021] uppercase tracking-widest px-1 flex items-center gap-2">
-                                                <Target size={12} strokeWidth={3} />
-                                                Produced
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={editingPart["Today Produced"] || ""}
-                                                onChange={(e) => {
-                                                    const val = e.target.value;
-                                                    setEditingPart((prev: any) => ({ ...prev, "Today Produced": val, row_status: null }));
-                                                    handleCellEdit(editingPart.id, "Today Produced", val);
-                                                }}
-                                                className="w-full bg-[#F37021]/5 border-2 border-[#F37021]/20 focus:border-[#F37021] rounded-xl p-3 text-center text-base font-black text-[#F37021] transition-all outline-none shadow-md h-[48px]"
-                                                autoFocus
-                                            />
-                                        </div>
+                                    <div className="col-span-12 grid grid-cols-2 gap-4">
                                         <div className="space-y-1.5">
                                             <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">Coverage Days</label>
                                             <div className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-[11px] font-black text-slate-900 flex justify-center items-center shadow-inner h-[48px]">
@@ -436,7 +405,6 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                     </div>
 
 
-                                    {/* Issue & Reply Section */}
                                     <div className="col-span-12 mt-2 pt-5 border-t border-slate-100">
                                         <div className="flex items-center gap-3 mb-4">
                                             <div className="w-8 h-8 rounded-lg bg-[#F37021]/10 flex items-center justify-center">
@@ -446,7 +414,6 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            {/* Supervisor Issue */}
                                             <div className="space-y-2">
                                                 <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest px-1 flex items-center gap-2">
                                                     <AlertTriangle size={12} className="text-red-500" />
@@ -462,7 +429,6 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                                 </div>
                                             </div>
 
-                                            {/* DEO Reply */}
                                             <div className="space-y-2">
                                                 <label className="block text-[11px] font-black text-[#F37021] uppercase tracking-widest px-1 flex items-center gap-2">
                                                     <CheckCircle2 size={16} />
@@ -489,7 +455,6 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                                 </div>
                             </div>
 
-                            {/* Modal Footer */}
                             <div className="px-8 py-5 border-t border-slate-50 bg-slate-50/50 shrink-0">
                                 <button
                                     onClick={() => setEditingPart(null)}
@@ -504,7 +469,6 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                 }
             </AnimatePresence >
 
-            {/* Table Area with Fixed Footer for Submit Button */}
             < div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col h-[700px] relative" >
                 <div className="flex-1 overflow-auto custom-scrollbar">
                     {requirements.length > 0 ? (
@@ -512,7 +476,7 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                             <thead>
                                 <tr className="sticky top-0 z-30 bg-slate-50/50 backdrop-blur-md">
                                     {allColumns.map((h, i) => {
-                                        const isSticky = i < 2; // Only SN. NO and SAP PART NUMBER sticky
+                                        const isSticky = i < 2;
                                         let leftOffset = 0;
                                         if (i === 1) leftOffset = 80;
 
@@ -627,7 +591,7 @@ export const DEOProductionEntry: React.FC<DEOProductionEntryProps> = ({
                     {!isFormValid && (
                         <div className="flex items-center gap-3 text-slate-400 font-bold text-[10px] uppercase tracking-widest animate-pulse">
                             <AlertTriangle size={14} />
-                            Please fill all stock & production data to finalize
+                            Please fill all stock data to finalize
                         </div>
                     )}
                     <button

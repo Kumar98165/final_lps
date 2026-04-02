@@ -165,7 +165,6 @@ export const LogDetailView = ({
                                 <th className="px-3 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-[#F37021] text-center border-b border-orange-100 bg-orange-50/50 min-w-[100px]">SAP Stock</th>
                                 <th className="px-3 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-[#F37021] text-center border-b border-orange-100 bg-orange-50/50 min-w-[110px]">Opening Stock</th>
                                 <th className="px-3 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-[#F37021] text-center border-b border-orange-100 bg-orange-50/50 min-w-[110px]">Todays Stock</th>
-                                <th className="px-3 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-emerald-600 text-center border-b border-emerald-100 bg-emerald-50/50 min-w-[110px]">Today Produced</th>
                                 <th className="px-3 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 text-center border-b border-slate-100 min-w-[110px]">Coverage Days</th>
                                 <th className="px-3 py-4 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 text-center border-b border-slate-100 min-w-[150px] sticky right-0 bg-slate-50/50 z-30">Vetting Action</th>
                             </tr>
@@ -231,11 +230,6 @@ export const LogDetailView = ({
                                         <td className="p-2 border-b border-slate-50">
                                             <div className="w-full rounded-2xl p-4 flex items-center justify-center border border-slate-100 shadow-sm bg-orange-50/30 min-h-[60px]">
                                                 <span className="text-sm font-black text-slate-900">{row["Todays Stock"] || "—"}</span>
-                                            </div>
-                                        </td>
-                                        <td className="p-2 border-b border-slate-50">
-                                            <div className="w-full rounded-2xl p-4 flex items-center justify-center border border-emerald-100 shadow-sm bg-emerald-50/30 min-h-[60px]">
-                                                <span className="text-sm font-black text-emerald-600">{row["Today Produced"] || "0"}</span>
                                             </div>
                                         </td>
                                         <td className="p-2 border-b border-slate-50">
@@ -427,8 +421,8 @@ export const LogDetailView = ({
                                         </div>
                                     </div>
 
-                                    {/* Stats Group 1: Per Day & Stocks */}
-                                    <div className="col-span-12 grid grid-cols-4 gap-4 pt-2">
+                                    {/* Stats Group: Per Day & Stocks */}
+                                    <div className="col-span-12 grid grid-cols-3 gap-4 pt-2">
                                         <div className="space-y-1.5">
                                             <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">PER DAY</label>
                                             <div className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 text-[11px] font-black text-slate-900 flex items-center shadow-sm h-[44px] justify-center">
@@ -436,37 +430,24 @@ export const LogDetailView = ({
                                             </div>
                                         </div>
                                         <div className="space-y-1.5">
-                                            <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">SAP Stock</label>
-                                            <div className="bg-orange-50/50 border border-orange-100 rounded-xl p-3 text-center shadow-sm">
-                                                <span className="text-lg font-black text-slate-900">{selectedRowDetail["SAP Stock"] || "0"}</span>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-1.5">
                                             <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">Opening Stock</label>
-                                            <div className="bg-orange-50/50 border border-orange-100 rounded-xl p-3 text-center shadow-sm">
-                                                <span className="text-lg font-black text-slate-900">{selectedRowDetail["Opening Stock"] || "0"}</span>
+                                            <div className="bg-orange-50/50 border border-orange-100 rounded-xl p-4 text-center shadow-sm">
+                                                <span className="text-xl font-black text-slate-900">{selectedRowDetail["Opening Stock"] || "0"}</span>
                                             </div>
                                         </div>
                                         <div className="space-y-1.5">
                                             <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">Todays Stock</label>
-                                            <div className="bg-orange-50/50 border border-orange-100 rounded-xl p-3 text-center shadow-sm">
-                                                <span className="text-lg font-black text-slate-900">{selectedRowDetail["Todays Stock"] || "0"}</span>
+                                            <div className="bg-[#F37021]/5 border border-[#F37021]/10 rounded-xl p-4 text-center shadow-sm">
+                                                <span className="text-xl font-black text-[#F37021]">{selectedRowDetail["Todays Stock"] || "0"}</span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Stats Group 2: Production & Status */}
-                                    <div className="col-span-12 grid grid-cols-3 gap-4 pt-2">
-                                        <div className="space-y-1.5">
-                                            <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">Today Produced</label>
-                                            <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-4 text-center shadow-sm border-2">
-                                                <span className="text-xl font-black text-emerald-600">{selectedRowDetail["Today Produced"] || "0"}</span>
-                                            </div>
-                                        </div>
+                                    <div className="col-span-12 grid grid-cols-2 gap-4 pt-2">
                                         <div className="space-y-1.5">
                                             <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">Coverage Days</label>
                                             <div className={cn(
-                                                "border rounded-xl px-4 py-2.5 text-[11px] font-black shadow-sm h-[44px] flex items-center justify-center",
+                                                "border rounded-xl px-4 py-3 text-[11px] font-black shadow-sm h-[48px] flex items-center justify-center",
                                                 parseFloat(selectedRowDetail["Coverage Days"] || "0") < 5 
                                                     ? "bg-red-50 text-red-600 border-red-200" 
                                                     : "bg-emerald-50 text-emerald-900 border-emerald-100"
@@ -477,7 +458,7 @@ export const LogDetailView = ({
                                         <div className="space-y-1.5">
                                             <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">Production Status</label>
                                             <div className={cn(
-                                                "rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-widest shadow-sm h-[44px] flex items-center justify-center border-2",
+                                                "rounded-xl px-4 py-3 text-[10px] font-black uppercase tracking-widest shadow-sm h-[48px] flex items-center justify-center border-2",
                                                 (selectedRowDetail["Production Status"] || 'PENDING') === 'COMPLETE' ? "bg-emerald-50 border-emerald-200 text-emerald-700"
                                                 : (selectedRowDetail["Production Status"] || 'PENDING') === 'IN PROGRESS' ? "bg-amber-50 border-amber-200 text-amber-700"
                                                 : "bg-slate-50 border-slate-200 text-slate-600"

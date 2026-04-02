@@ -4,11 +4,8 @@ import {
     ArrowLeft, 
     CheckCircle, 
     X, 
-    Clock, 
-    ChevronDown,
-    Search
+    Clock
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 
 interface DEOSubmissionHistoryProps {
     isLoadingHistory: boolean;
@@ -22,8 +19,7 @@ export const DEOSubmissionHistory: React.FC<DEOSubmissionHistoryProps> = ({
     isLoadingHistory,
     submissionHistory,
     selectedHistoryLog,
-    setSelectedHistoryLog,
-    handleHistoryRowUpdate
+    setSelectedHistoryLog
 }) => {
     if (isLoadingHistory) {
         return (
@@ -61,8 +57,8 @@ export const DEOSubmissionHistory: React.FC<DEOSubmissionHistoryProps> = ({
                             <thead>
                                 <tr className="bg-slate-50/50">
                                     <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-r border-slate-100">Part Info</th>
-                                    <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-r border-slate-100">Target</th>
-                                    <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-r border-slate-100">Produced</th>
+                                    <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-r border-slate-100">Opening Stock</th>
+                                    <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-r border-slate-100">Todays Stock</th>
                                     <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-r border-slate-100">Status</th>
                                     <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest border-b">Verification</th>
                                 </tr>
@@ -77,16 +73,10 @@ export const DEOSubmissionHistory: React.FC<DEOSubmissionHistoryProps> = ({
                                             </div>
                                         </td>
                                         <td className="px-6 py-5 text-center border-r border-slate-50">
-                                            <span className="text-[11px] font-black text-slate-400 tabular-nums">{row["Target Qty"] || row.required_qty || 0}</span>
+                                            <span className="text-[11px] font-black text-slate-400 tabular-nums">{row["Opening Stock"] || 0}</span>
                                         </td>
                                         <td className="px-6 py-5 text-center border-r border-slate-50">
-                                            <input 
-                                                type="text"
-                                                value={row["Today Produced"] || ""}
-                                                readOnly={row.row_status === 'VERIFIED'}
-                                                onChange={(e) => handleHistoryRowUpdate(selectedHistoryLog.id, idx, "Today Produced", e.target.value)}
-                                                className={`w-20 text-center py-1.5 rounded-lg text-[11px] font-black transition-all ${row.row_status === 'VERIFIED' ? 'bg-slate-50 text-slate-400 border-transparent cursor-default' : 'bg-white border border-slate-200 focus:border-[#F37021] text-slate-900 shadow-sm'}`}
-                                            />
+                                            <span className="text-[11px] font-black text-[#F37021] tabular-nums">{row["Todays Stock"] || 0}</span>
                                         </td>
                                         <td className="px-6 py-5 text-center border-r border-slate-50">
                                             <span className={`inline-flex px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${

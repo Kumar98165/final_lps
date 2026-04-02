@@ -164,9 +164,8 @@ const DEORowManualModal: React.FC<DEORowManualModalProps> = ({
                                 {renderInputField("Target Qty", "Target Qty", "0", "number", true)}
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                                {renderInputField("Today Produced", "Today Produced", "0", "number")}
-                                {renderReadOnlyField("Remain Qty", Math.max(0, Number(formData["Target Qty"] || 0) - Number(formData["Today Produced"] || 0)).toString())}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                {renderInputField("Todays Stock", "Todays Stock", "Enter stock...", "number")}
                                 <div className="space-y-2 flex-1">
                                     <label className="text-[10px] font-black text-[#A0AEC0] uppercase tracking-wider px-1">
                                         Production Status
@@ -184,8 +183,7 @@ const DEORowManualModal: React.FC<DEORowManualModalProps> = ({
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                                {renderInputField("Todays Stock", "Todays Stock", "Enter stock...", "number")}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="space-y-2 flex-1">
                                     <label className="text-[10px] font-black text-[#A0AEC0] uppercase tracking-wider px-1">
                                         Coverage Days

@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
-import {
-    Box
+import { 
+    Activity,
 } from 'lucide-react';
 import { API_BASE } from '../../lib/apiConfig';
 import { getToken } from '../../lib/storage';
@@ -52,10 +52,10 @@ const DEODashboardPage = () => {
     const [submissionHistory, setSubmissionHistory] = useState<any[]>([]);
 
     const entryModels = useMemo(() =>
-        assignedModels.filter(m => 
+        assignedModels.filter(m =>
             // In entry, only show accepted models that are NOT yet finished
-            m.deo_accepted && 
-            m.status?.toUpperCase() !== 'COMPLETED' && 
+            m.deo_accepted &&
+            m.status?.toUpperCase() !== 'COMPLETED' &&
             m.status?.toUpperCase() !== 'VERIFIED'
         ),
         [assignedModels]
@@ -65,7 +65,7 @@ const DEODashboardPage = () => {
         assignedModels.filter(m => {
             const isCompleted = m.status?.toUpperCase() === 'COMPLETED' || m.status?.toUpperCase() === 'VERIFIED';
             if (!isCompleted) return false;
-            
+
             // For completed models, don't show them if they are rejected in history
             const hasRejected = submissionHistory.some(s =>
                 (s.car_model_id === m.id || s.model_name === m.name) && s.status === 'REJECTED'
@@ -96,14 +96,43 @@ const DEODashboardPage = () => {
         onConfirm: () => { }
     });
     const [rejectionModalData, setRejectionModalData] = useState<{ part: string; reason: string } | null>(null);
-    
+
     // Sync management: Debounce and sequence control
     const syncTimeoutRef = useRef<any>(null);
     const lastSyncTimeRef = useRef<number>(0);
+    const lineDropdownRef = useRef<HTMLDivElement>(null);
+
+    // Dashboard Filters
+    const [selectedLine, setSelectedLine] = useState('ALL LINES');
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+    const [isLineDropdownOpen, setIsLineDropdownOpen] = useState(false);
+
+    const uniqueLines = useMemo(() => {
+        const lines = Array.from(new Set(assignedModels.map(m => m.line_name).filter(Boolean)));
+        return ['ALL LINES', ...lines.sort()];
+    }, [assignedModels]);
+
+    const filteredAssignedModels = useMemo(() => {
+        if (selectedLine === 'ALL LINES') return assignedModels;
+        return assignedModels.filter(m => m.line_name === selectedLine);
+    }, [assignedModels, selectedLine]);
+
+    const filteredSubmissionHistory = useMemo(() => {
+        const dateStr = new Date(selectedDate).toISOString().split('T')[0];
+        let filtered = submissionHistory.filter(s => s.date?.split('T')[0] === dateStr);
+        
+        if (selectedLine !== 'ALL LINES') {
+            filtered = filtered.filter(s => {
+                const model = assignedModels.find(m => m.id === s.car_model_id || m.name === s.model_name);
+                return model?.line_name === selectedLine;
+            });
+        }
+        return filtered;
+    }, [submissionHistory, selectedDate, selectedLine, assignedModels]);
 
     const handleCellEdit = useCallback(async (rowId: number, colKeyOrEdits: string | Record<string, any>, value?: any) => {
         const edits = typeof colKeyOrEdits === 'string' ? { [colKeyOrEdits]: value } : colKeyOrEdits;
-        
+
         let finalEdits = { ...edits };
 
         // 1. Update local state first for immediate feedback
@@ -111,7 +140,7 @@ const DEODashboardPage = () => {
             return prev.map(req => {
                 if (req.id === rowId) {
                     const tempReq = { ...req, ...edits };
-                    
+
                     // Derived: Coverage Days
                     if (edits['Todays Stock'] !== undefined || edits['PER DAY'] !== undefined) {
                         const today = parseFloat(tempReq['Todays Stock'] || '0') || 0;
@@ -119,24 +148,6 @@ const DEODashboardPage = () => {
                         const coverage = pDay > 0 ? (today / pDay).toFixed(1) : '0.0';
                         finalEdits['Coverage Days'] = coverage;
                         tempReq['Coverage Days'] = coverage;
-                    }
-
-                    // Derived: Remain Qty & Status
-                    if (edits['Today Produced'] !== undefined || edits['Target Qty'] !== undefined) {
-                        const target = parseFloat(tempReq['Target Qty'] || '0') || 0;
-                        const produced = parseFloat(tempReq['Today Produced'] || '0') || 0;
-                        const remain = Math.max(0, target - produced).toString();
-                        
-                        finalEdits['Remain Qty'] = remain;
-                        tempReq['Remain Qty'] = remain;
-
-                        if (produced >= target && target > 0) {
-                            finalEdits['Production Status'] = 'COMPLETE';
-                            tempReq['Production Status'] = 'COMPLETE';
-                        } else if (produced > 0) {
-                            finalEdits['Production Status'] = 'IN PROGRESS';
-                            tempReq['Production Status'] = 'IN PROGRESS';
-                        }
                     }
 
                     // Reset audit flags on any edit
@@ -166,7 +177,7 @@ const DEODashboardPage = () => {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ 
+                    body: JSON.stringify({
                         ...finalEdits,
                         car_model_id: selectedModelId,
                         demand_id: demand?.id
@@ -439,9 +450,6 @@ const DEODashboardPage = () => {
                         "PART DESCRIPTION": item.common?.description,
                         "ASSEMBLY NUMBER": item.common?.assembly_number || "",
                         "Target Qty": "0",
-                        "Today Produced": "",
-                        "Remain Qty": "0",
-                        "Balance Qty": "0",
                         "Production Status": "PENDING",
                         "SAP Stock": "",
                         "Opening Stock": "",
@@ -472,7 +480,7 @@ const DEODashboardPage = () => {
 
                 // Fields that DEO actually types in
                 const DATA_FIELDS = ["SAP Stock", "Opening Stock", "Todays Stock", "Balance Qty", "Defect Count", "Failure Reason", "Remarks", "PER DAY"];
-                const RESET_FIELDS = ["Today Produced", "Remain Qty", "Production Status", "row_status", "rejection_reason", "supervisor_reviewed", "deo_reply"];
+                const RESET_FIELDS = ["Production Status", "row_status", "rejection_reason", "supervisor_reviewed", "deo_reply"];
 
                 let finalData = formatted;
 
@@ -485,7 +493,7 @@ const DEODashboardPage = () => {
                         );
                         if (hRow) {
                             const newFields: any = {};
-                            
+
                             // 1. Always restore static data fields (Stock counts etc.)
                             DATA_FIELDS.forEach(field => {
                                 if (hRow[field] !== undefined && hRow[field] !== null && hRow[field] !== '') {
@@ -556,9 +564,22 @@ const DEODashboardPage = () => {
             if (!modalConfig.isOpen && !isEditingPart) {
                 fetchDashboardData(true);
             }
-        }, 20000);
+        }, 10000); // 10 seconds for real-time feel
         return () => clearInterval(interval);
     }, [modalConfig.isOpen, isEditingPart]);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (lineDropdownRef.current && !lineDropdownRef.current.contains(event.target as Node)) {
+                setIsLineDropdownOpen(false);
+            }
+        };
+
+        if (isLineDropdownOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isLineDropdownOpen]);
 
     // Fetch BOM when model or tab changes — NOT on isEditing change
     useEffect(() => {
@@ -630,12 +651,66 @@ const DEODashboardPage = () => {
         switch (activeTab) {
             case 'DASHBOARD':
                 return (
-                    <div className="space-y-8">
+                    <div className="space-y-10 animate-in fade-in duration-700">
+                        {/* High-Fidelity Header Overhaul - Title Left, Filters Right (Supervisor Style) */}
+                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12 px-2">
+                            <div className="space-y-1">
+                                <h1 className="text-4xl font-black text-[#0f172a] tracking-tight leading-none">DEO Dashboard</h1>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] mt-2">Operational Oversite • CIE Automotive</p>
+                            </div>
+                            
+                            <div className="flex flex-wrap items-center gap-3">
+                                {/* Production Line Pill Selector */}
+                                <div className="relative" ref={lineDropdownRef}>
+                                    <div 
+                                        onClick={() => setIsLineDropdownOpen(!isLineDropdownOpen)}
+                                        className="bg-white rounded-xl px-6 py-3.5 border border-slate-100 shadow-sm flex items-center justify-between min-w-[180px] cursor-pointer hover:border-slate-200 transition-all font-sans"
+                                    >
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-4">All lines</span>
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`text-slate-300 transition-transform ${isLineDropdownOpen ? 'rotate-180' : ''}`} strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                                    </div>
+                                    {isLineDropdownOpen && (
+                                        <div className="absolute top-full right-0 mt-2 bg-white rounded-xl border border-slate-100 shadow-2xl z-[100] overflow-hidden py-1 min-w-full max-h-[300px] overflow-y-auto animate-in slide-in-from-top-1">
+                                            {uniqueLines.map((line) => (
+                                                <div 
+                                                    key={line}
+                                                    onClick={() => {
+                                                        setSelectedLine(line);
+                                                        setIsLineDropdownOpen(false);
+                                                    }}
+                                                    className={`px-6 py-3 text-[10px] font-black uppercase tracking-widest cursor-pointer hover:bg-slate-50 transition-colors ${selectedLine === line ? 'text-[#F37021] bg-orange-50/30' : 'text-slate-600'}`}
+                                                >
+                                                    {line}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Date Selector Pill */}
+                                <div className="bg-white rounded-xl px-6 py-3.5 border border-slate-100 shadow-sm flex items-center gap-4 min-w-[180px] relative group hover:border-slate-200 transition-all font-sans">
+                                    <div className="relative flex-1 h-4 overflow-hidden">
+                                        <input 
+                                            type="date"
+                                            value={selectedDate}
+                                            onChange={(e) => setSelectedDate(e.target.value)}
+                                            className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full"
+                                        />
+                                        <div className="flex items-center justify-between w-full h-full pointer-events-none">
+                                            <span className="text-[10px] font-black text-[#0f172a] tracking-widest uppercase">
+                                                {new Date(selectedDate).toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                            </span>
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-300 ml-2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <DEOStats
-                            assignedModels={assignedModels}
-                            submissionHistory={submissionHistory}
-                            selectedModelId={selectedModelId}
-                            setActiveTab={setActiveTab}
+                            assignedModels={filteredAssignedModels}
+                            submissionHistory={filteredSubmissionHistory}
+                            selectedDate={selectedDate}
                         />
                     </div>
                 );
@@ -674,7 +749,7 @@ const DEODashboardPage = () => {
                         ) : (
                             <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col h-[700px] relative">
                                 <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
-                                    <Box size={32} />
+                                    <Activity size={32} />
                                 </div>
                                 <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight mb-2">No Active Work Assignments</h3>
                                 <p className="text-slate-500 font-bold max-w-xs mx-auto text-sm uppercase">You have currently completed all assigned models.</p>
@@ -720,7 +795,6 @@ const DEODashboardPage = () => {
                                             <th className="p-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Part No</th>
                                             <th className="p-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Description</th>
                                             <th className="p-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Stock</th>
-                                            <th className="p-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Today Produced</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -729,7 +803,6 @@ const DEODashboardPage = () => {
                                                 <td className="p-4 text-xs font-bold">{req["PART NUMBER"]}</td>
                                                 <td className="p-4 text-xs">{req["PART DESCRIPTION"]}</td>
                                                 <td className="p-4 text-xs font-black">{req["Todays Stock"]}</td>
-                                                <td className="p-4 text-xs font-black">{req["Today Produced"]}</td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -744,20 +817,22 @@ const DEODashboardPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] pb-20">
-            <div className="max-w-[1600px] mx-auto px-6 lg:px-12 pt-12">
+        <div className="min-h-screen bg-[#F8FAFC] pb-32">
+            <div className="max-w-[1600px] mx-auto px-6 lg:px-12 pt-8">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={activeTab}
-                        initial={{ opacity: 0, x: 10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -10 }}
-                        transition={{ duration: 0.2 }}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.3 }}
                     >
                         {renderContent()}
                     </motion.div>
                 </AnimatePresence>
             </div>
+
+            {/* No Floating Nav - Tabs moved to Header or removed as per request */}
 
             <CustomModal
                 isOpen={modalConfig.isOpen}

@@ -34,14 +34,11 @@ const ManagerDashboardPage = () => {
                         <div className="h-2 w-12 bg-slate-900 rounded-full" />
                         <span className="text-[10px] font-black text-slate-900 uppercase tracking-[0.3em]">Operational Overview</span>
                     </div>
-                    <h1 className="text-5xl lg:text-7xl font-black text-slate-900 uppercase tracking-tighter leading-none">
-                        Manager<br /><span className="text-slate-300">Dashboard</span>
-                    </h1>
                 </div>
             </motion.div>
 
             <motion.div variants={itemVariants} className="flex-1 flex items-center justify-center border-2 border-dashed border-slate-100 rounded-[3rem]">
-                <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em]">Analytics Module Pending Data Stream</p>
+                {/* Dashboard content will be streamed here */}
             </motion.div>
         </motion.div>
     );

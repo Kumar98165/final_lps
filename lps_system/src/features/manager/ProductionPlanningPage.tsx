@@ -49,8 +49,8 @@ const ProductionPlanningPage = () => {
     const [demand, setDemand] = useState<any>(null);
     const TRANSIENT_FIELDS = [
         "TOTAL SCHEDULE QTY", "PER DAY", "SAP Stock", "Opening Stock", 
-        "Todays Stock", "Coverage Days", "Today Produced", "Remain Qty", 
-        "Balance Qty", "Production Status", "Defect Count", "Failure Reason", "Remarks"
+        "Todays Stock", "Coverage Days", "Balance Qty", "Production Status", 
+        "Defect Count", "Failure Reason", "Remarks"
     ];
 
     const [requirements, setRequirements] = useState<any[]>([]);
@@ -200,8 +200,8 @@ const ProductionPlanningPage = () => {
                                 if (latestLog && latestLog.log_data) {
                                     const DEO_EDITABLE_FIELDS = [
                                         "SAP Stock", "Opening Stock", "Todays Stock",
-                                        "Today Produced", "Remain Qty", "Balance Qty",
-                                        "Production Status", "Defect Count", "Failure Reason", "Remarks"
+                                        "Balance Qty", "Production Status", 
+                                        "Defect Count", "Failure Reason", "Remarks"
                                     ];
 
                                     formatted = formatted.map((fRow: any) => {

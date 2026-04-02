@@ -1,12 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
     Activity,
     AlertCircle,
-    Database,
-    Users,
-    Search,
-    ChevronLeft,
+    ChevronDown,
+    Calendar,
 } from 'lucide-react';
 import { getPendingVerifications, verifyDailyProductionRow, verifyDailyProductionLog } from '../api';
 import { API_BASE } from '../../../lib/apiConfig';
@@ -32,20 +30,28 @@ import {
     ReportsView,
     AlertsView
 } from './components/SupervisorViews';
+import { SupervisorKPI } from './components/SupervisorKPI';
+import { SupervisorAnalytics } from './components/SupervisorAnalytics';
 
 
 const SupervisorDashboardPage = () => {
     const location = useLocation();
+    const dateInputRef = useRef<HTMLInputElement>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [verifications, setVerifications] = useState<any[]>([]);
     const [assignedModels, setAssignedModels] = useState<any[]>([]);
-    const [searchTerm, setSearchTerm] = useState('');
     const [selectedLog, setSelectedLog] = useState<any>(null);
     const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
     const [rejectingRowIndex, setRejectingRowIndex] = useState<number | null>(null);
     const [rowRejectionComment, setRowRejectionComment] = useState('');
     const [activeVerifyTab, setActiveVerifyTab] = useState<'pending' | 'ready'>('pending');
+    
+    // Phase 3 Filters
+    const [selectedLine, setSelectedLine] = useState('Select Line');
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+    const [isLineOpen, setIsLineOpen] = useState(false);
+
     const [modalConfig, setModalConfig] = useState({
         isOpen: false,
         title: '',
@@ -81,7 +87,6 @@ const SupervisorDashboardPage = () => {
     useEffect(() => {
         refreshSupervisorData();
         const interval = setInterval(() => {
-            // Only poll if no log is being reviewed and no modal is open
             if (!selectedLog && !modalConfig.isOpen) {
                 refreshSupervisorData(true);
             }
@@ -89,11 +94,51 @@ const SupervisorDashboardPage = () => {
         return () => clearInterval(interval);
     }, [selectedLog, modalConfig.isOpen]);
 
+    // Filtering Logic
+    const uniqueLines = useMemo(() => {
+        const lines = Array.from(new Set(assignedModels.map(m => m.line_name).filter(Boolean)));
+        return lines.sort();
+    }, [assignedModels]);
+
+    const filteredAssignedModels = useMemo(() => {
+        if (selectedLine === 'Select Line') return assignedModels;
+        return assignedModels.filter(m => m.line_name === selectedLine);
+    }, [assignedModels, selectedLine]);
+
+    const filteredVerifications = useMemo(() => {
+        let filtered = verifications;
+        // Filter by Date (Match "YYYY-MM-DD" or similar)
+        if (selectedDate) {
+            filtered = filtered.filter(v => v.date === selectedDate);
+        }
+        if (selectedLine !== 'Select Line') {
+            filtered = filtered.filter(v => v.line_name === selectedLine);
+        }
+        return filtered;
+    }, [verifications, selectedLine, selectedDate]);
+
+    // KPI Logic
+    const kpiStats = useMemo(() => {
+        const activeAssigned = filteredAssignedModels;
+        const uniqueDeos = Array.from(new Set(activeAssigned.map(m => m.assigned_deo_name).filter(Boolean)));
+        const activeDeos = Array.from(new Set(activeAssigned.filter(m => (m.actual_qty || 0) > 0).map(m => m.assigned_deo_name))).length;
+        // Accurate Live Mapping
+        const awaitingReview = filteredVerifications.filter(v => v.status === 'SUBMITTED' || v.status === 'PENDING' || !v.status).length;
+        const readyVerified = filteredVerifications.filter(v => v.status === 'VERIFIED' || v.status === 'APPROVED' || v.status === 'READY' || v.status === 'DONE').length;
+        const rejectedCount = filteredVerifications.filter(v => v.status === 'REJECTED').length;
+        
+        return {
+            totalDeos: uniqueDeos.length,
+            activeDeos: activeDeos,
+            readyModels: readyVerified,
+            pendingModels: awaitingReview,
+            rejectedModels: rejectedCount
+        };
+    }, [filteredAssignedModels, filteredVerifications]);
+
 
     const handleRowVerify = async (rowIndex: number, status: 'VERIFIED' | 'REJECTED', reason: string = "") => {
         if (!selectedLog) return;
-
-        // Optimistic UI update
         const updatedLog = { ...selectedLog };
         updatedLog.log_data[rowIndex] = {
             ...updatedLog.log_data[rowIndex],
@@ -101,11 +146,9 @@ const SupervisorDashboardPage = () => {
             rejection_reason: reason
         };
         setSelectedLog(updatedLog);
-
         const sap_part_number = selectedLog.log_data[rowIndex]?.["SAP PART NUMBER"] ||
             selectedLog.log_data[rowIndex]?.["SAP PART #"] ||
             selectedLog.log_data[rowIndex]?.["sap_part_number"];
-
         const success = await verifyDailyProductionRow(selectedLog.id, rowIndex, status, reason, sap_part_number);
         if (!success) {
             setModalConfig({
@@ -116,14 +159,12 @@ const SupervisorDashboardPage = () => {
                 onConfirm: () => setModalConfig(prev => ({ ...prev, isOpen: false }))
             });
         } else {
-            // Silently refresh other lists
             refreshSupervisorData(true);
         }
     };
 
     const handleBulkVerify = async () => {
         if (!selectedLog) return;
-
         setModalConfig({
             isOpen: true,
             title: 'Verify Production',
@@ -134,19 +175,15 @@ const SupervisorDashboardPage = () => {
                 setLoading(true);
                 try {
                     const token = getToken();
-                    // 1. Verify all individual rows
                     const verifyPromises = selectedLog.log_data.map((row: any, index: number) => {
                         const sap_part_number = row?.["SAP PART NUMBER"] || row?.["SAP PART #"] || row?.["sap_part_number"] || "";
                         return verifyDailyProductionRow(selectedLog.id, index, 'VERIFIED', 'Bulk Verified by Supervisor', sap_part_number);
                     });
                     await Promise.all(verifyPromises);
-
-                    // 2. Finalize the entire assignment
                     const response = await fetch(`${API_BASE}/supervisor/finalize-assignment/${selectedLog.car_model_id}`, {
                         method: 'POST',
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
-
                     if (response.ok) {
                         setModalConfig({
                             isOpen: true,
@@ -155,8 +192,8 @@ const SupervisorDashboardPage = () => {
                             type: 'alert',
                             onConfirm: (_: string) => {
                                 setModalConfig(prev => ({ ...prev, isOpen: false }));
-                                setSelectedLog(null); // Close detail view
-                                refreshSupervisorData(); // Full refresh
+                                setSelectedLog(null);
+                                refreshSupervisorData();
                             }
                         });
                     } else {
@@ -190,7 +227,6 @@ const SupervisorDashboardPage = () => {
 
     const handleRejectLog = async (reason: string) => {
         if (!selectedLog) return;
-
         const success = await verifyDailyProductionLog(selectedLog.id, 'REJECTED', reason);
         if (success) {
             setModalConfig({
@@ -216,43 +252,31 @@ const SupervisorDashboardPage = () => {
     };
 
     if (loading) return (
-        <div className="p-24 text-center flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="bg-[#F8FAFC] min-h-screen flex flex-col items-center justify-center">
             <Activity size={48} className="text-[#F37021] animate-spin mb-6" />
-            <div className="text-slate-500 font-black uppercase tracking-[0.4em] animate-pulse">Initializing Supervisor Control...</div>
+            <div className="text-slate-400 font-bold uppercase tracking-[0.2em] animate-pulse">Syncing production data...</div>
         </div>
     );
 
     if (error) return (
-        <div className="p-24 text-center flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="bg-[#F8FAFC] min-h-screen flex flex-col items-center justify-center">
             <AlertCircle size={48} className="text-rose-500 mb-6" />
-            <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight mb-2">Something went wrong</h3>
-            <p className="text-slate-500 font-bold max-w-md">{error}</p>
-            <button
-                onClick={() => window.location.reload()}
-                className="mt-8 px-8 py-3 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all"
-            >
-                Try Again
-            </button>
+            <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight mb-2">Sync Interrupted</h3>
+            <p className="text-slate-500 font-bold max-md">{error}</p>
         </div>
     );
 
-    const activeAssignedModels = assignedModels.filter(m => !!m.assigned_deo_name && !!m.line_name);
-
-    const filteredModels = activeAssignedModels.filter(m =>
-        m.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        m.model_code?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
 
     const renderContent = () => {
         switch (location.pathname) {
             case SUPERVISOR_MONITORING:
-                return <MonitoringView assignedModels={activeAssignedModels} />;
+                return <MonitoringView assignedModels={filteredAssignedModels} />;
             case SUPERVISOR_PROGRESS:
-                return <ProgressView assignedModels={activeAssignedModels} />;
+                return <ProgressView assignedModels={filteredAssignedModels} />;
             case SUPERVISOR_VERIFY:
                 return (
                     <SupervisorVerifyLogs
-                        verifications={verifications}
+                        verifications={filteredVerifications}
                         activeVerifyTab={activeVerifyTab}
                         setActiveVerifyTab={setActiveVerifyTab}
                         setSelectedLog={setSelectedLog}
@@ -265,125 +289,85 @@ const SupervisorDashboardPage = () => {
             case SUPERVISOR_DASHBOARD:
             default:
                 return (
-                    <div className="space-y-12">
-                        {/* Quick Stats Removed at user request */}
-
-                        {/* Assigned Models */}
-                        <div className="space-y-8">
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-4">
-                                <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter leading-none">Your Active Oversight</h2>
-                                <div className="flex items-center gap-4">
-                                    <div className="relative group">
-                                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#F37021] transition-all duration-300" size={20} />
-                                        <input
-                                            type="text"
-                                            placeholder="SEARCH MODELS..."
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                            className="bg-white border-2 border-slate-100 rounded-3xl py-4 pl-14 pr-8 text-xs font-black tracking-widest uppercase focus:border-[#F37021]/30 focus:ring-0 transition-all w-full md:w-96 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:border-slate-200 placeholder:text-slate-300"
-                                        />
+                    <div className="space-y-5 pb-8 font-sans">
+                        {/* Professional Professional Header */}
+                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-4">
+                            <div>
+                                <h1 className="text-4xl font-black text-[#0f172a] tracking-tight leading-none">Supervisor Dashboard</h1>
+                            </div>
+                            
+                            <div className="flex items-center gap-4 relative">
+                                {/* Line Selection (Professional Update) */}
+                                <div className="relative">
+                                    <div 
+                                        onClick={() => setIsLineOpen(!isLineOpen)}
+                                        className={`bg-white rounded-xl px-4 py-2.5 flex items-center justify-between min-w-[140px] shadow-sm border border-slate-200/60 cursor-pointer hover:border-slate-300 transition-all group z-[60]`}
+                                    >
+                                        <span className={`text-[11px] font-bold ${selectedLine === 'Select Line' ? 'text-slate-400' : 'text-[#0f172a]'}`}>
+                                            {selectedLine === 'Select Line' ? 'All lines' : selectedLine}
+                                        </span>
+                                        <ChevronDown size={14} className={`text-slate-300 group-hover:text-slate-600 transition-transform ${isLineOpen ? 'rotate-180' : ''}`} />
                                     </div>
+                                    
+                                    {isLineOpen && (
+                                        <>
+                                            <div className="fixed inset-0 z-[55]" onClick={() => setIsLineOpen(false)} />
+                                            <div className="absolute top-[110%] left-0 w-full bg-white rounded-xl shadow-xl overflow-hidden z-[100] border border-slate-100 py-1 animate-in fade-in slide-in-from-top-2">
+                                                <div 
+                                                    onClick={() => { setSelectedLine('Select Line'); setIsLineOpen(false); }}
+                                                    className="px-4 py-2.5 text-[10px] font-bold text-slate-400 hover:bg-slate-50 cursor-pointer"
+                                                >
+                                                    All
+                                                </div>
+                                                {uniqueLines.map(line => (
+                                                    <div 
+                                                        key={line}
+                                                        onClick={() => { setSelectedLine(line); setIsLineOpen(false); }}
+                                                        className={`px-4 py-2.5 text-[10px] font-bold hover:bg-orange-50 hover:text-orange-900 cursor-pointer transition-colors ${selectedLine === line ? 'bg-orange-50 text-orange-900' : 'text-slate-600'}`}
+                                                    >
+                                                        {line}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+
+                                {/* Date Selection (Sentence Case Fix) */}
+                                <div 
+                                    onClick={() => dateInputRef.current?.showPicker()}
+                                    className="bg-white rounded-xl px-4 py-2.5 flex items-center gap-4 shadow-sm border border-slate-200/60 cursor-pointer hover:border-slate-300 transition-all group relative"
+                                >
+                                    <input 
+                                        ref={dateInputRef}
+                                        type="date"
+                                        value={selectedDate}
+                                        onChange={(e) => setSelectedDate(e.target.value)}
+                                        className="absolute inset-0 opacity-0 pointer-events-none"
+                                    />
+                                    <span className="text-[11px] font-bold text-[#0f172a]">
+                                        {new Date(selectedDate).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}
+                                    </span>
+                                    <Calendar size={15} className="text-slate-300 group-hover:text-[#F37021] transition-colors" />
                                 </div>
                             </div>
+                        </div>
 
-                            <div className="space-y-4">
-                                {/* Header for Columns (Hidden on small screens) */}
-                                <div className="hidden md:flex px-12 py-2">
-                                    <div className="flex-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Vehicle Configuration</div>
-                                    <div className="flex-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Line Routing</div>
-                                    <div className="flex-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Assigned Operator</div>
-                                </div>
+                        <SupervisorKPI 
+                            totalDeos={kpiStats.totalDeos}
+                            activeDeos={kpiStats.activeDeos}
+                            readyModels={kpiStats.readyModels}
+                            pendingModels={kpiStats.pendingModels}
+                            rejectedModels={kpiStats.rejectedModels}
+                        />
 
-                                {filteredModels.length > 0 ? (
-                                    filteredModels.map((model) => (
-                                        <div key={model.id} className="bg-white rounded-[2.5rem] border border-slate-100/80 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.04)] hover:border-[#F37021]/10 transition-all duration-500 flex flex-col md:flex-row md:items-center p-8 group relative overflow-hidden">
-                                            {/* Hover Accent Line */}
-                                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#F37021] opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                                            {/* Vehicle Configuration */}
-                                            <div className="flex-1 flex items-center gap-6 mb-6 md:mb-0">
-                                                <div className="w-16 h-16 rounded-[1.5rem] bg-slate-900 flex items-center justify-center text-white shadow-2xl group-hover:scale-105 group-hover:bg-[#F37021] transition-all duration-500 relative overflow-hidden">
-                                                    <Database size={28} strokeWidth={2.5} />
-                                                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                                                </div>
-                                                <div>
-                                                    <span className="block text-xl font-black text-slate-900 uppercase tracking-tighter leading-none mb-1.5 transition-colors group-hover:text-[#F37021]">
-                                                        {model.name}
-                                                    </span>
-                                                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                                        <span className="bg-slate-100 px-2 py-0.5 rounded text-[10px]">{model.model_code}</span>
-                                                        <span className="opacity-50">•</span>
-                                                        {model.variant_name || 'Standard'}
-                                                    </span>
-                                                </div>
-                                            </div>
-
-                                            {/* Line Routing */}
-                                            <div className="flex-1 flex items-center gap-4 mb-6 md:mb-0">
-                                                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-[#F37021] group-hover:bg-[#F37021]/10 transition-all duration-300">
-                                                    <Activity size={16} />
-                                                </div>
-                                                <div className="flex flex-col">
-                                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Line Assignment</span>
-                                                    <span className="text-sm font-black text-slate-700 uppercase tracking-widest">
-                                                        {model.line_name || 'NOT ASSIGNED'}
-                                                    </span>
-                                                </div>
-                                            </div>
-
-                                            {/* Assigned Operator */}
-                                            <div className="flex-1 flex items-center">
-                                                {model.assigned_deo_name ? (
-                                                    <div className="flex items-center gap-4 bg-slate-50/50 p-2 pr-6 rounded-[2rem] group-hover:bg-white group-hover:shadow-sm transition-all duration-300 border border-transparent group-hover:border-slate-100">
-                                                        <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-[#F37021] shadow-md border border-slate-50 relative">
-                                                            <Users size={20} />
-                                                            <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full" />
-                                                        </div>
-                                                        <div>
-                                                            <span className="block text-xs font-black text-slate-900 uppercase tracking-tight leading-none mb-1">
-                                                                {model.assigned_deo_name}
-                                                            </span>
-                                                            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-1.5">
-                                                                ALLOCATED
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex items-center gap-4 opacity-70">
-                                                        <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 border-2 border-dashed border-slate-200">
-                                                            <Users size={20} />
-                                                        </div>
-                                                        <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest bg-amber-50 px-5 py-2 rounded-full border border-amber-100 shadow-sm animate-pulse">
-                                                            Pending Assignment
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {/* Action Indicator */}
-                                            <div className="absolute right-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-500 hidden md:block">
-                                                <div className="w-10 h-10 rounded-full bg-[#111827] flex items-center justify-center text-white shadow-lg">
-                                                    <ChevronLeft size={20} className="rotate-180" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="bg-white rounded-[3rem] border-2 border-dashed border-slate-100 p-24 text-center">
-                                        <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-8 text-slate-200">
-                                            <Search size={48} strokeWidth={1} />
-                                        </div>
-                                        <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight mb-2">No results found</h3>
-                                        <p className="text-slate-400 font-bold max-w-xs mx-auto text-sm leading-relaxed">We couldn't find any vehicle matching your search criteria.</p>
-                                        <button
-                                            onClick={() => setSearchTerm('')}
-                                            className="mt-8 text-[#F37021] font-black text-xs uppercase tracking-[0.2em] hover:opacity-70 transition-opacity"
-                                        >
-                                            Clear All Filters
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
+                        {/* Analytical Data Stream */}
+                        <div className="space-y-4">
+                            <h2 className="text-[9px] font-black uppercase text-slate-400 px-4 mb-2 tracking-[0.2em]">Operational analytics</h2>
+                            <SupervisorAnalytics 
+                                assignedModels={filteredAssignedModels} 
+                                verifications={filteredVerifications}
+                            />
                         </div>
                     </div>
                 );
@@ -391,14 +375,8 @@ const SupervisorDashboardPage = () => {
     };
 
     return (
-        <div className="max-w-[1920px] mx-auto min-h-screen font-sans bg-[#F8FAFC]">
-            <div className="p-8 pb-4">
-                <div>
-                    {/* Oversight Dashboard Header Removed at user request */}
-                </div>
-            </div>
-
-            <div className="px-8 pb-12">
+        <div className="max-w-[1700px] mx-auto min-h-screen font-sans bg-[#F8FAFC]">
+            <div className="px-5 py-6 relative z-10">
                 {selectedLog ? (
                     <LogDetailView
                         selectedLog={selectedLog}
@@ -411,21 +389,18 @@ const SupervisorDashboardPage = () => {
                     renderContent()
                 )}
             </div>
-
+            
             <DEORowManualModal
                 isOpen={selectedRowIndex !== null}
                 onClose={() => setSelectedRowIndex(null)}
                 row={selectedRowIndex !== null ? selectedLog?.log_data[selectedRowIndex] : null}
-                isSupervisor={false} // Allow editing so supervisor can correct Target/Produced
+                isSupervisor={false} 
                 onSave={async (updatedRow) => {
                     if (selectedRowIndex !== null && selectedLog) {
                         const updatedLog = { ...selectedLog };
-                        // Automatically mark as verified when supervisor saves
                         updatedRow.row_status = 'VERIFIED';
                         updatedLog.log_data[selectedRowIndex] = updatedRow;
                         setSelectedLog(updatedLog);
-
-                        // Sync to backend
                         const token = getToken();
                         try {
                             const res = await fetch(`${API_BASE}/supervisor/update-log`, {
@@ -444,24 +419,17 @@ const SupervisorDashboardPage = () => {
                                     is_final: selectedLog.status === 'SUBMITTED' || selectedLog.status === 'VERIFIED'
                                 })
                             });
-                            if (res.ok) {
-                                refreshSupervisorData(true);
-                            }
-                        } catch (e) {
-                            console.error("Failed to sync supervisor edit", e);
-                        }
+                            if (res.ok) { refreshSupervisorData(true); }
+                        } catch (e) { console.error("Failed to sync supervisor edit", e); }
                     }
                     setSelectedRowIndex(null);
                 }}
                 onVerify={async (status, reason, updatedRow) => {
                     if (selectedRowIndex !== null && selectedLog) {
-                        // If supervisor edited data before verifying, sync it first
                         if (updatedRow) {
                             const updatedLog = { ...selectedLog };
                             updatedLog.log_data[selectedRowIndex] = { ...updatedRow, row_status: status, rejection_reason: reason };
                             setSelectedLog(updatedLog);
-
-                            // Save the full log to ensure the correction is persisted
                             const token = getToken();
                             await fetch(`${API_BASE}/supervisor/update-log`, {
                                 method: 'POST',
@@ -480,7 +448,6 @@ const SupervisorDashboardPage = () => {
                                 })
                             });
                         }
-
                         if (status === 'REJECTED') {
                             setRejectingRowIndex(selectedRowIndex);
                             setSelectedRowIndex(null);
@@ -491,7 +458,6 @@ const SupervisorDashboardPage = () => {
                     }
                 }}
             />
-
             <RowRejectionModal
                 rejectingRowIndex={rejectingRowIndex}
                 setRejectingRowIndex={setRejectingRowIndex}
@@ -499,7 +465,6 @@ const SupervisorDashboardPage = () => {
                 setRowRejectionComment={setRowRejectionComment}
                 handleRowVerify={handleRowVerify}
             />
-
             <CustomModal
                 isOpen={modalConfig.isOpen}
                 onClose={() => setModalConfig(prev => ({ ...prev, isOpen: false }))}
