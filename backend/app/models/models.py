@@ -15,6 +15,103 @@ class Status:
     READ = 'READ'
     PROCESSED = 'PROCESSED'
 
+# ----------------------------- ProductionData -----------------------------
+class ProductionData(db.Model):
+    """Stores production-specific metrics for a part."""
+    __tablename__ = 'production_data'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    master_data_id = db.Column(db.Integer, db.ForeignKey('master_data.id', ondelete='CASCADE'), unique=True, index=True)
+    
+    # Specific columns based on most common patterns
+    total_value = db.Column(db.String(100))
+    model_specific = db.Column(db.String(100)) # Mapping for "Model1" etc
+    coverage = db.Column(db.String(100))
+    total_production = db.Column(db.String(100))
+    total_dispatch = db.Column(db.String(100))
+    
+    # New Structured Fields from additional_fields
+    rm_size = db.Column(db.String(100))
+    stock = db.Column(db.String(100))
+    total_disp = db.Column(db.String(100))
+    target_qty = db.Column(db.String(100))
+    today_produced = db.Column(db.String(100))
+    remain_qty = db.Column(db.String(100))
+    sn_no = db.Column(db.String(100))
+    row_status = db.Column(db.String(100))
+    
+    # Overflow for dynamic headers (minimal use moving forward)
+    additional_fields = db.Column(db.JSON, default={})
+
+    master_data = db.relationship('MasterData', back_populates='production_rel', uselist=False)
+
+    def to_dict(self):
+        data = {
+            "Total value": self.total_value,
+            "Model1": self.model_specific,
+            "Coverage": self.coverage,
+            "Total Production": self.total_production,
+            "Total Dispatch": self.total_dispatch,
+            "RM SIZE": self.rm_size,
+            "STOCK": self.stock,
+            "Total disp": self.total_disp,
+            "Target Qty": self.target_qty,
+            "Today Produced": self.today_produced,
+            "Remain Qty": self.remain_qty,
+            "SN NO": self.sn_no,
+            "row_status": self.row_status
+        }
+        if self.additional_fields:
+            data.update(self.additional_fields)
+        # Filter out None values
+        return {k: v for k, v in data.items() if v is not None}
+
+# ----------------------------- MaterialData -----------------------------
+class MaterialData(db.Model):
+    """Stores material-specific details for a part."""
+    __tablename__ = 'material_data'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    master_data_id = db.Column(db.Integer, db.ForeignKey('master_data.id', ondelete='CASCADE'), unique=True, index=True)
+    
+    # Specific columns for material properties
+    rm_thk_mm = db.Column(db.String(100))
+    sheet_width = db.Column(db.String(100))
+    sheet_length = db.Column(db.String(100))
+    no_of_comp_per_sheet = db.Column(db.String(100))
+    rm_size = db.Column(db.String(100))
+    rm_grade = db.Column(db.String(100))
+    act_rm_sizes = db.Column(db.String(100))
+    revised = db.Column(db.String(100))
+    validity = db.Column(db.String(100))
+    
+    # New Structured Fields from additional_fields
+    per_day = db.Column(db.String(100))
+    total_scheduled_qty = db.Column(db.String(100))
+    
+    # Overflow for dynamic headers
+    additional_fields = db.Column(db.JSON, default={})
+
+    master_data = db.relationship('MasterData', back_populates='material_rel', uselist=False)
+
+    def to_dict(self):
+        data = {
+            "RM Thk mm": self.rm_thk_mm,
+            "Sheet Width": self.sheet_width,
+            "Sheet Length": self.sheet_length,
+            "No of comp per sheet": self.no_of_comp_per_sheet,
+            "RM SIZE": self.rm_size,
+            "RM Grade": self.rm_grade,
+            "Act RM Sizes": self.act_rm_sizes,
+            "Revised": self.revised,
+            "VALIDITY": self.validity,
+            "PER DAY": self.per_day,
+            "TOTAL SCHEDULE QTY": self.total_scheduled_qty
+        }
+        if self.additional_fields:
+            data.update(self.additional_fields)
+        return {k: v for k, v in data.items() if v is not None}
+
 # ----------------------------- MasterData -----------------------------
 class MasterData(db.Model):
     """Stores master data for parts, with dynamic JSON fields."""
@@ -28,9 +125,9 @@ class MasterData(db.Model):
     saleable_no = db.Column(db.String(255))
     assembly_number = db.Column(db.String(255))
     
-    # Store dynamic fields as JSON
-    production_data = db.Column(db.JSON)
-    material_data = db.Column(db.JSON)
+    # Relationships for refined storage
+    production_rel = db.relationship('ProductionData', back_populates='master_data', uselist=False, cascade='all, delete-orphan')
+    material_rel = db.relationship('MaterialData', back_populates='master_data', uselist=False, cascade='all, delete-orphan')
     
     # Flag for parts added manually/ad-hoc on the shop floor
     is_ad_hoc = db.Column(db.Boolean, default=False)
@@ -45,6 +142,10 @@ class MasterData(db.Model):
         return f'<MasterData {self.model} {self.sap_part_number}>'
 
     def to_dict(self):
+        # Strict relational data access
+        prod_data = self.production_rel.to_dict() if self.production_rel else {}
+        mat_data = self.material_rel.to_dict() if self.material_rel else {}
+        
         return {
             "common": {
                 "id": self.id,
@@ -56,8 +157,8 @@ class MasterData(db.Model):
                 "assembly_number": self.assembly_number,
                 "is_ad_hoc": self.is_ad_hoc
             },
-            "production_data": self.production_data or {},
-            "material_data": self.material_data or {}
+            "production_data": prod_data,
+            "material_data": mat_data
         }
 
 # ----------------------------- User -----------------------------
