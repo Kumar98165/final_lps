@@ -83,7 +83,7 @@ const AdminAuditPage: React.FC = () => {
 
     useEffect(() => {
         fetchData();
-        const interval = setInterval(() => fetchData(page), 15000);
+        const interval = setInterval(() => fetchData(page), 60000); // 1 minute
         return () => clearInterval(interval);
     }, [page]);
 
@@ -129,7 +129,7 @@ const AdminAuditPage: React.FC = () => {
         };
         if (act.includes('LOGOUT')) return {
             icon: <LogOut size={14} />,
-            bg: 'bg-slate-50 text-slate-600 border border-slate-200',
+            bg: 'bg-ind-bg text-ind-text2 border border-ind-border',
         };
         if (act.includes('DELETE')) return {
             icon: <Trash2 size={14} />,
@@ -175,18 +175,18 @@ const AdminAuditPage: React.FC = () => {
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                             </span>
-                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">System Status</span>
+                            <span className="text-[10px] font-bold text-ind-text2 uppercase tracking-widest">System Status</span>
                         </div>
-                        <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight mb-1">
+                        <h1 className="text-2xl md:text-3xl font-extrabold text-ind-text tracking-tight leading-tight mb-1">
                             System <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F37021] to-orange-400">Audit Trail</span>
                         </h1>
-                        <p className="text-slate-500 font-medium text-xs md:text-sm">Comprehensive activity monitoring and security verification across operations.</p>
+                        <p className="text-ind-text2 font-medium text-xs md:text-sm">Comprehensive activity monitoring and security verification across operations.</p>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <div className="flex flex-col items-center justify-center px-3 py-2 bg-white rounded-xl border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Live Sync</span>
-                            <span className="text-sm font-black text-slate-800 leading-none">15s</span>
+                        <div className="flex flex-col items-center justify-center px-3 py-2 bg-white rounded-xl border border-ind-border/50 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                            <span className="text-[9px] font-bold text-ind-text3 uppercase tracking-wider mb-0.5">Live Sync</span>
+                            <span className="text-sm font-black text-slate-800 leading-none">60s</span>
                         </div>
                         <motion.button
                             whileHover={{ scale: 1.05 }}
@@ -213,7 +213,7 @@ const AdminAuditPage: React.FC = () => {
                                 <Users size={16} />
                             </div>
                             <div>
-                                <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">Active Users</h3>
+                                <h3 className="text-[10px] font-bold text-ind-text2 uppercase tracking-widest leading-none mb-1">Active Users</h3>
                                 <div className="text-xl font-black text-slate-800 leading-none">
                                     {stats.reduce((sum, s) => sum + s.active, 0)}
                                 </div>
@@ -235,7 +235,7 @@ const AdminAuditPage: React.FC = () => {
                                 <TrendingUp size={16} />
                             </div>
                             <div>
-                                <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">Total Users</h3>
+                                <h3 className="text-[10px] font-bold text-ind-text2 uppercase tracking-widest leading-none mb-1">Total Users</h3>
                                 <div className="text-xl font-black text-slate-800 leading-none">
                                     {stats.reduce((sum, s) => sum + s.total, 0)}
                                 </div>
@@ -257,7 +257,7 @@ const AdminAuditPage: React.FC = () => {
                                 <Activity size={16} />
                             </div>
                             <div>
-                                <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">Audit Events</h3>
+                                <h3 className="text-[10px] font-bold text-ind-text2 uppercase tracking-widest leading-none mb-1">Audit Events</h3>
                                 <div className="text-xl font-black text-slate-800 leading-none">
                                     {totalActionsToday || logs.length}
                                 </div>
@@ -275,13 +275,13 @@ const AdminAuditPage: React.FC = () => {
                         <div className="w-6 h-6 rounded bg-indigo-50 flex items-center justify-center text-indigo-600">
                             <Shield size={12} />
                         </div>
-                        <h2 className="text-sm font-extrabold text-slate-900 tracking-tight">Role Distribution</h2>
+                        <h2 className="text-sm font-extrabold text-ind-text tracking-tight">Role Distribution</h2>
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         {isLoading ? (
                             [1, 2, 3, 4].map((i) => (
-                                <div key={i} className="bg-white rounded-xl p-3 shadow-sm animate-pulse h-16 border border-slate-100/50" />
+                                <div key={i} className="bg-white rounded-xl p-3 shadow-sm animate-pulse h-16 border border-ind-border/50/50" />
                             ))
                         ) : stats.length > 0 ? (
                             stats.map((stat, idx) => {
@@ -305,19 +305,19 @@ const AdminAuditPage: React.FC = () => {
                                                     <h3 className="text-[11px] font-extrabold text-slate-800 uppercase tracking-tight leading-none">{stat.role}</h3>
                                                     <div className="flex items-center gap-1 mt-1">
                                                         <span className={`w-1.5 h-1.5 rounded-full ${stat.active > 0 ? 'bg-emerald-500' : 'bg-slate-300'}`}></span>
-                                                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider leading-none">{stat.active > 0 ? 'Active' : 'Offline'}</span>
+                                                        <span className="text-[9px] font-bold text-ind-text2 uppercase tracking-wider leading-none">{stat.active > 0 ? 'Active' : 'Offline'}</span>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div className="text-right">
                                                 <div className="flex items-baseline justify-end gap-0.5">
                                                     <span className="text-[13px] font-black text-slate-800 leading-none">{stat.active}</span>
-                                                    <span className="text-[9px] font-bold text-slate-400 leading-none">/{stat.total}</span>
+                                                    <span className="text-[9px] font-bold text-ind-text3 leading-none">/{stat.total}</span>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="w-full bg-slate-100 rounded-full h-1 overflow-hidden mt-1">
+                                        <div className="w-full bg-ind-border/30 rounded-full h-1 overflow-hidden mt-1">
                                             <motion.div
                                                 initial={{ width: 0 }}
                                                 animate={{ width: `${activeRate}%` }}
@@ -339,25 +339,25 @@ const AdminAuditPage: React.FC = () => {
                 {/* Audit Logs Table */}
                 <section className="relative z-10">
                     <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white shadow-[0_4px_20px_rgb(0,0,0,0.03)] overflow-hidden flex flex-col h-[500px]">
-                        <div className="p-4 md:p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
+                        <div className="p-4 md:p-5 border-b border-ind-border/50 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-md shadow-slate-900/10">
                                     <Clock size={18} />
                                 </div>
                                 <div>
-                                    <h2 className="text-base font-extrabold text-slate-900 tracking-tight leading-none">Activity Ledger</h2>
-                                    <p className="text-[11px] text-slate-500 font-medium mt-1">Real-time audit trail of system operations</p>
+                                    <h2 className="text-base font-extrabold text-ind-text tracking-tight leading-none">Activity Ledger</h2>
+                                    <p className="text-[11px] text-ind-text2 font-medium mt-1">Real-time audit trail of system operations</p>
                                 </div>
                             </div>
 
                             <div className="relative w-full md:max-w-xs group">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={14} />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-ind-text3 group-focus-within:text-blue-500 transition-colors" size={14} />
                                 <input
                                     type="text"
                                     placeholder="Search user, action, IP..."
                                     value={searchTerm}
                                     onChange={(e) => handleSearch(e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-200 focus:border-blue-400 focus:bg-white rounded-xl py-2 pl-9 pr-3 text-[11px] font-semibold text-slate-700 transition-all outline-none focus:ring-4 focus:ring-blue-500/10 placeholder-slate-400"
+                                    className="w-full bg-ind-bg border border-ind-border focus:border-blue-400 focus:bg-white rounded-xl py-2 pl-9 pr-3 text-[11px] font-semibold text-slate-700 transition-all outline-none focus:ring-4 focus:ring-blue-500/10 placeholder-slate-400"
                                 />
                             </div>
                         </div>
@@ -365,12 +365,12 @@ const AdminAuditPage: React.FC = () => {
                         <div className="overflow-x-auto overflow-y-auto flex-1">
                             <table className="w-full text-left relative text-[11px]">
                                 <thead className="sticky top-0 z-20">
-                                    <tr className="bg-slate-50/95 backdrop-blur-xl shadow-sm">
-                                        <th className="px-5 py-2.5 text-left text-[10px] font-bold text-slate-500 capitalize tracking-wide whitespace-nowrap">Timestamp</th>
-                                        <th className="px-5 py-2.5 text-left text-[10px] font-bold text-slate-500 capitalize tracking-wide">User Profile</th>
-                                        <th className="px-5 py-2.5 text-left text-[10px] font-bold text-slate-500 capitalize tracking-wide">Action Performed</th>
-                                        <th className="px-5 py-2.5 text-left text-[10px] font-bold text-slate-500 capitalize tracking-wide">Network / IP Address</th>
-                                        <th className="px-5 py-2.5 text-center text-[10px] font-bold text-slate-500 capitalize tracking-wide">Current Status</th>
+                                    <tr className="bg-ind-bg/95 backdrop-blur-xl shadow-sm">
+                                        <th className="px-5 py-2.5 text-left text-[10px] font-bold text-ind-text2 capitalize tracking-wide whitespace-nowrap">Timestamp</th>
+                                        <th className="px-5 py-2.5 text-left text-[10px] font-bold text-ind-text2 capitalize tracking-wide">User Profile</th>
+                                        <th className="px-5 py-2.5 text-left text-[10px] font-bold text-ind-text2 capitalize tracking-wide">Action Performed</th>
+                                        <th className="px-5 py-2.5 text-left text-[10px] font-bold text-ind-text2 capitalize tracking-wide">Network / IP Address</th>
+                                        <th className="px-5 py-2.5 text-center text-[10px] font-bold text-ind-text2 capitalize tracking-wide">Current Status</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100/80">
@@ -387,10 +387,10 @@ const AdminAuditPage: React.FC = () => {
                                             >
                                                 <td className="px-5 py-2 whitespace-nowrap">
                                                     <div className="flex items-center gap-2">
-                                                        <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-slate-200 group-hover:bg-blue-400 transition-colors"></div>
+                                                        <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-ind-border/50 group-hover:bg-blue-400 transition-colors"></div>
                                                         <div>
                                                             <div className="text-[11px] font-extrabold text-slate-800 leading-none mb-0.5">{time}</div>
-                                                            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">{date}</div>
+                                                            <div className="text-[9px] font-bold text-ind-text3 uppercase tracking-widest leading-none">{date}</div>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -409,8 +409,8 @@ const AdminAuditPage: React.FC = () => {
                                                     </div>
                                                 </td>
                                                 <td className="px-5 py-2">
-                                                    <div className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-500 bg-slate-50 px-2 py-1 rounded-md w-fit border border-slate-100">
-                                                        <Globe size={12} className="text-slate-400" />
+                                                    <div className="flex items-center gap-1.5 text-[10px] font-semibold text-ind-text2 bg-ind-bg px-2 py-1 rounded-md w-fit border border-ind-border/50">
+                                                        <Globe size={12} className="text-ind-text3" />
                                                         {log.ipAddress}
                                                     </div>
                                                 </td>
@@ -418,7 +418,7 @@ const AdminAuditPage: React.FC = () => {
                                                     <div className="flex justify-center">
                                                         <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border shadow-sm ${log.userStatus === 'ACTIVE'
                                                             ? 'bg-emerald-50 text-emerald-700 border-emerald-200 shadow-emerald-500/10'
-                                                            : 'bg-slate-50 text-slate-600 border-slate-200 shadow-slate-500/10'
+                                                            : 'bg-ind-bg text-ind-text2 border-ind-border shadow-slate-500/10'
                                                             }`}>
                                                             <div className={`w-1.5 h-1.5 rounded-full ${log.userStatus === 'ACTIVE' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'bg-slate-400'}`} />
                                                             {log.userStatus}
@@ -431,11 +431,11 @@ const AdminAuditPage: React.FC = () => {
                                         <tr>
                                             <td colSpan={5} className="px-8 py-20 text-center">
                                                 <div className="flex flex-col items-center justify-center">
-                                                    <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-                                                        <Search size={32} className="text-slate-300" />
+                                                    <div className="w-20 h-20 bg-ind-bg rounded-full flex items-center justify-center mb-4">
+                                                        <Search size={32} className="text-ind-text3" />
                                                     </div>
-                                                    <p className="text-base font-bold text-slate-600 mb-1">No matching records found</p>
-                                                    <p className="text-sm text-slate-400 font-medium">Try adjusting your search criteria</p>
+                                                    <p className="text-base font-bold text-ind-text2 mb-1">No matching records found</p>
+                                                    <p className="text-sm text-ind-text3 font-medium">Try adjusting your search criteria</p>
                                                 </div>
                                             </td>
                                         </tr>
@@ -445,11 +445,11 @@ const AdminAuditPage: React.FC = () => {
                         </div>
 
                         {/* Pagination */}
-                        <div className="px-8 py-5 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
-                            <div className="text-sm font-semibold text-slate-500">
-                                Showing <span className="text-slate-900 font-extrabold">Page {page}</span> of <span className="text-slate-900 font-extrabold">{totalPages}</span>
-                                <span className="mx-2 text-slate-300">|</span>
-                                <span className="text-slate-900 font-extrabold">{logs.length}</span> records
+                        <div className="px-8 py-5 bg-ind-bg/50 border-t border-ind-border/50 flex items-center justify-between">
+                            <div className="text-sm font-semibold text-ind-text2">
+                                Showing <span className="text-ind-text font-extrabold">Page {page}</span> of <span className="text-ind-text font-extrabold">{totalPages}</span>
+                                <span className="mx-2 text-ind-text3">|</span>
+                                <span className="text-ind-text font-extrabold">{logs.length}</span> records
                             </div>
                             <div className="flex items-center gap-3">
                                 <motion.button
@@ -457,7 +457,7 @@ const AdminAuditPage: React.FC = () => {
                                     whileTap={{ scale: 0.95 }}
                                     disabled={page === 1}
                                     onClick={() => setPage(p => Math.max(1, p - 1))}
-                                    className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white hover:border-slate-300 text-slate-700 font-bold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+                                    className="flex items-center gap-2 px-4 py-2 rounded-xl border border-ind-border bg-white hover:border-slate-300 text-slate-700 font-bold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
                                 >
                                     <ChevronLeft size={16} />
                                     Previous

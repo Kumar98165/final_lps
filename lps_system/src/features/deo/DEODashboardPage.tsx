@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '../../lib/utils';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { 
+import {
     Activity,
 } from 'lucide-react';
 import { API_BASE } from '../../lib/apiConfig';
@@ -77,7 +78,29 @@ const DEODashboardPage = () => {
 
     // BOM Table State
     const [requirements, setRequirements] = useState<any[]>([]);
+    const requirementsRef = useRef<any[]>([]); // To avoid stale closures in handleCellEdit
     const [demand, setDemand] = useState<any>(null);
+    const [apiStatus, setApiStatus] = useState<'checking' | 'online' | 'offline'>('checking');
+
+    // Keep ref in sync for debounced handlers
+    useEffect(() => {
+        requirementsRef.current = requirements;
+    }, [requirements]);
+
+    const checkApi = async () => {
+        try {
+            const res = await fetch(`${API_BASE}/health`);
+            if (res.ok) setApiStatus('online');
+            else setApiStatus('offline');
+        } catch {
+            setApiStatus('offline');
+        }
+    };
+
+    useEffect(() => {
+        // Initial data check combined with the first layout sync
+        // No redundant 10s health check needed
+    }, []);
     const [isLoadingHistory, setIsLoadingHistory] = useState(false);
     const [selectedHistoryLog, setSelectedHistoryLog] = useState<any>(null);
     const [modalConfig, setModalConfig] = useState<{
@@ -120,7 +143,7 @@ const DEODashboardPage = () => {
     const filteredSubmissionHistory = useMemo(() => {
         const dateStr = new Date(selectedDate).toISOString().split('T')[0];
         let filtered = submissionHistory.filter(s => s.date?.split('T')[0] === dateStr);
-        
+
         if (selectedLine !== 'ALL LINES') {
             filtered = filtered.filter(s => {
                 const model = assignedModels.find(m => m.id === s.car_model_id || m.name === s.model_name);
@@ -169,6 +192,12 @@ const DEODashboardPage = () => {
             const syncId = Date.now();
             lastSyncTimeRef.current = syncId;
 
+            // Use the Ref to get the absolute latest row data
+            const rowData = requirementsRef.current.find((r: any) => r.id === rowId);
+            const realEntryId = rowData?._real_id ?? null;
+
+            console.log(`[SYNC] Sending sync for row: ${rowId} (Real ID: ${realEntryId})`, finalEdits);
+
             try {
                 const token = getToken();
                 const res = await fetch(`${API_BASE}/deo/sync/${rowId}`, {
@@ -180,7 +209,8 @@ const DEODashboardPage = () => {
                     body: JSON.stringify({
                         ...finalEdits,
                         car_model_id: selectedModelId,
-                        demand_id: demand?.id
+                        demand_id: demand?.id,
+                        ...(realEntryId ? { real_entry_id: realEntryId } : {})
                     })
                 });
 
@@ -189,12 +219,15 @@ const DEODashboardPage = () => {
 
                 if (!res.ok) {
                     console.error('Failed to sync cell update');
+                } else {
+                    console.log(`[SYNC SUCCESS] Row: ${rowId}`);
                 }
             } catch (error) {
                 console.error('Sync error:', error);
             }
         }, 500); // 500ms debounce
-    }, [selectedModelId, demand?.id]);
+    }, [selectedModelId, demand?.id]); // Removed requirements from dependencies to stop hook recreation
+
 
     const handleHistoryRowUpdate = async (logId: number, rowIndex: number, colKey: string, value: string) => {
         if (!selectedHistoryLog) return;
@@ -375,25 +408,25 @@ const DEODashboardPage = () => {
         if (!silent) setIsLoading(true);
         try {
             const token = getToken();
-            const [workRes, statusRes, historyRes] = await Promise.all([
+            const [workRes, historyRes] = await Promise.all([
                 fetch(`${API_BASE}/deo/assigned-work`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch(`${API_BASE}/deo/daily-status`, { headers: { 'Authorization': `Bearer ${token}` } }),
                 fetch(`${API_BASE}/deo/history`, { headers: { 'Authorization': `Bearer ${token}` } })
             ]);
             if (workRes.ok) {
                 const result = await workRes.json();
-                if (result.success) setAssignedModels(result.data);
+                if (result.success) {
+                    setAssignedModels(result.data);
+                    setApiStatus('online'); // Success confirms online status
+                }
             }
-            if (statusRes.ok) {
-                // consume the response
-                await statusRes.json();
-            }
+            // Silent fail or minimal data check
             if (historyRes.ok) {
                 const result = await historyRes.json();
                 if (result.success) setSubmissionHistory(result.data);
             }
         } catch (error) {
             console.error('Failed to fetch dashboard data:', error);
+            setApiStatus('offline');
         } finally {
             if (!silent) setIsLoading(false);
         }
@@ -449,11 +482,7 @@ const DEODashboardPage = () => {
                         "SAP PART NUMBER": item.common?.sap_part_number,
                         "PART DESCRIPTION": item.common?.description,
                         "ASSEMBLY NUMBER": item.common?.assembly_number || "",
-                        "Target Qty": "0",
                         "Production Status": "PENDING",
-                        "SAP Stock": "",
-                        "Opening Stock": "",
-                        "Todays Stock": "",
                         "TOTAL SCHEDULE QTY": "",
                         "PER DAY": "",
                         "Coverage Days": "0.0"
@@ -475,12 +504,15 @@ const DEODashboardPage = () => {
                     .sort((a: any, b: any) => b.id - a.id)[0];
 
                 // Determine if we should restore "today's" session data or start fresh
-                // If the latest log is already APPROVED/VERIFIED, it's likely from a previous session/day
-                const isNewSession = latestLog && (latestLog.status === 'APPROVED' || latestLog.status === 'VERIFIED' || latestLog.status === 'COMPLETED');
+                // A session is "NEW" if the latest log is from a different date than the selected date
+                // Using locale-safe string comparison to avoid UTC/Local mismatches
+                const todayDateStr = selectedDate; 
+                const logDateStr = latestLog?.date ? new Date(latestLog.date).toLocaleDateString('en-CA') : '';
+                const isNewSession = latestLog && (logDateStr !== todayDateStr);
 
-                // Fields that DEO actually types in
-                const DATA_FIELDS = ["SAP Stock", "Opening Stock", "Todays Stock", "Balance Qty", "Defect Count", "Failure Reason", "Remarks", "PER DAY"];
-                const RESET_FIELDS = ["Production Status", "row_status", "rejection_reason", "supervisor_reviewed", "deo_reply"];
+                // Fields that DEO actually types in (Status is now a core data field for the session)
+                const DATA_FIELDS = ["SAP Stock", "Opening Stock", "Todays Stock", "Balance Qty", "Defect Count", "Failure Reason", "Remarks", "PER DAY", "Production Status"];
+                const RESET_FIELDS = ["row_status", "rejection_reason", "supervisor_reviewed", "deo_reply"];
 
                 let finalData = formatted;
 
@@ -496,7 +528,7 @@ const DEODashboardPage = () => {
 
                             // 1. Always restore static data fields (Stock counts etc.)
                             DATA_FIELDS.forEach(field => {
-                                if (hRow[field] !== undefined && hRow[field] !== null && hRow[field] !== '') {
+                                if (hRow[field] !== undefined && hRow[field] !== null) {
                                     newFields[field] = hRow[field];
                                 }
                             });
@@ -508,6 +540,12 @@ const DEODashboardPage = () => {
                                         newFields[field] = hRow[field];
                                     }
                                 });
+                            }
+
+                            // 3. Store real DB entry id separately so sync can use Mode A (direct PK lookup)
+                            //    Keep fRow.id (fake index) unchanged for URL routing
+                            if (hRow.id && typeof hRow.id === 'number') {
+                                newFields._real_id = hRow.id;
                             }
 
                             return { ...fRow, ...newFields };
@@ -564,7 +602,7 @@ const DEODashboardPage = () => {
             if (!modalConfig.isOpen && !isEditingPart) {
                 fetchDashboardData(true);
             }
-        }, 10000); // 10 seconds for real-time feel
+        }, 60000); // Increased from 10s to 60s
         return () => clearInterval(interval);
     }, [modalConfig.isOpen, isEditingPart]);
 
@@ -595,7 +633,7 @@ const DEODashboardPage = () => {
             if (!modalConfig.isOpen && !isEditingPart) {
                 fetchBOM(true);
             }
-        }, 45000); // 45 seconds
+        }, 120000); // Increased from 45s to 120s
         return () => clearInterval(interval);
     }, [activeTab, selectedModelId, modalConfig.isOpen, isEditingPart]);
 
@@ -642,7 +680,7 @@ const DEODashboardPage = () => {
             return (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {[1, 2, 3].map(i => (
-                        <div key={i} className="h-64 bg-white border border-slate-100 rounded-[2.5rem] animate-pulse" />
+                        <div key={i} className="h-64 bg-white border border-ind-border/50 rounded-[2.5rem] animate-pulse" />
                     ))}
                 </div>
             );
@@ -655,30 +693,30 @@ const DEODashboardPage = () => {
                         {/* High-Fidelity Header Overhaul - Title Left, Filters Right (Supervisor Style) */}
                         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12 px-2">
                             <div className="space-y-1">
-                                <h1 className="text-4xl font-black text-[#0f172a] tracking-tight leading-none">DEO Dashboard</h1>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] mt-2">Operational Oversite • CIE Automotive</p>
+                                <h1 className="text-4xl font-black text-ind-text tracking-tight leading-none">DEO Dashboard</h1>
+                                <p className="text-[10px] font-bold text-ind-text3 uppercase tracking-[0.3em] mt-2">Operational Oversite • CIE Automotive</p>
                             </div>
-                            
+
                             <div className="flex flex-wrap items-center gap-3">
                                 {/* Production Line Pill Selector */}
                                 <div className="relative" ref={lineDropdownRef}>
-                                    <div 
+                                    <div
                                         onClick={() => setIsLineDropdownOpen(!isLineDropdownOpen)}
-                                        className="bg-white rounded-xl px-6 py-3.5 border border-slate-100 shadow-sm flex items-center justify-between min-w-[180px] cursor-pointer hover:border-slate-200 transition-all font-sans"
+                                        className="bg-white rounded-xl px-6 py-3.5 border border-ind-border/50 shadow-sm flex items-center justify-between min-w-[180px] cursor-pointer hover:border-ind-border transition-all font-sans"
                                     >
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-4">All lines</span>
-                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`text-slate-300 transition-transform ${isLineDropdownOpen ? 'rotate-180' : ''}`} strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                                        <span className="text-[10px] font-bold text-ind-text3 uppercase tracking-widest mr-4">All lines</span>
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`text-ind-text3 transition-transform ${isLineDropdownOpen ? 'rotate-180' : ''}`} strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
                                     </div>
                                     {isLineDropdownOpen && (
-                                        <div className="absolute top-full right-0 mt-2 bg-white rounded-xl border border-slate-100 shadow-2xl z-[100] overflow-hidden py-1 min-w-full max-h-[300px] overflow-y-auto animate-in slide-in-from-top-1">
+                                        <div className="absolute top-full right-0 mt-2 bg-white rounded-xl border border-ind-border/50 shadow-2xl z-[100] overflow-hidden py-1 min-w-full max-h-[300px] overflow-y-auto animate-in slide-in-from-top-1">
                                             {uniqueLines.map((line) => (
-                                                <div 
+                                                <div
                                                     key={line}
                                                     onClick={() => {
                                                         setSelectedLine(line);
                                                         setIsLineDropdownOpen(false);
                                                     }}
-                                                    className={`px-6 py-3 text-[10px] font-black uppercase tracking-widest cursor-pointer hover:bg-slate-50 transition-colors ${selectedLine === line ? 'text-[#F37021] bg-orange-50/30' : 'text-slate-600'}`}
+                                                    className={`px-6 py-3 text-[10px] font-black uppercase tracking-widest cursor-pointer hover:bg-ind-bg transition-colors ${selectedLine === line ? 'text-ind-primary bg-orange-50/30' : 'text-ind-text2'}`}
                                                 >
                                                     {line}
                                                 </div>
@@ -688,22 +726,50 @@ const DEODashboardPage = () => {
                                 </div>
 
                                 {/* Date Selector Pill */}
-                                <div className="bg-white rounded-xl px-6 py-3.5 border border-slate-100 shadow-sm flex items-center gap-4 min-w-[180px] relative group hover:border-slate-200 transition-all font-sans">
+                                <div className="bg-white rounded-xl px-6 py-3.5 border border-ind-border/50 shadow-sm flex items-center gap-4 min-w-[180px] relative group hover:border-ind-border transition-all font-sans">
                                     <div className="relative flex-1 h-4 overflow-hidden">
-                                        <input 
+                                        <input
                                             type="date"
                                             value={selectedDate}
                                             onChange={(e) => setSelectedDate(e.target.value)}
                                             className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full"
                                         />
                                         <div className="flex items-center justify-between w-full h-full pointer-events-none">
-                                            <span className="text-[10px] font-black text-[#0f172a] tracking-widest uppercase">
+                                            <span className="text-[10px] font-black text-ind-text tracking-widest uppercase">
                                                 {new Date(selectedDate).toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                                             </span>
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-300 ml-2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-ind-text3 ml-2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-4">
+                                {/* Pulse Connection Indicator */}
+                                <div className="flex items-center gap-2 bg-slate-900/5 px-3 py-1.5 rounded-full border border-slate-900/5">
+                                    <div className={cn(
+                                        "w-2 h-2 rounded-full",
+                                        apiStatus === 'online' ? "bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]" : 
+                                        apiStatus === 'offline' ? "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]" : "bg-slate-300"
+                                    )} />
+                                    <span className={cn(
+                                        "text-[9px] font-black uppercase tracking-widest",
+                                        apiStatus === 'online' ? "text-emerald-700" : 
+                                        apiStatus === 'offline' ? "text-rose-700" : "text-slate-400"
+                                    )}>
+                                        {apiStatus === 'online' ? "API LIVE" : apiStatus === 'offline' ? "API BLOCKED" : "CHECK..."}
+                                    </span>
+                                </div>
+
+                                <button 
+                                    onClick={() => {
+                                        console.log('--- MANUAL PING START ---');
+                                        checkApi();
+                                    }}
+                                    className="px-4 py-1.5 bg-orange-100 text-orange-600 rounded-lg text-[9px] font-black uppercase tracking-wider hover:bg-orange-200 transition-colors"
+                                >
+                                    Ping Backend
+                                </button>
                             </div>
                         </div>
 
@@ -747,12 +813,12 @@ const DEODashboardPage = () => {
                                 />
                             </>
                         ) : (
-                            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col h-[700px] relative">
-                                <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
+                            <div className="bg-white rounded-[2.5rem] border border-ind-border/50 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col h-[700px] relative">
+                                <div className="w-20 h-20 bg-ind-bg rounded-full flex items-center justify-center mx-auto mb-6 text-ind-text3">
                                     <Activity size={32} />
                                 </div>
-                                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight mb-2">No Active Work Assignments</h3>
-                                <p className="text-slate-500 font-bold max-w-xs mx-auto text-sm uppercase">You have currently completed all assigned models.</p>
+                                <h3 className="text-xl font-black text-ind-text uppercase tracking-tight mb-2">No Active Work Assignments</h3>
+                                <p className="text-ind-text2 font-bold max-w-xs mx-auto text-sm uppercase">You have currently completed all assigned models.</p>
                             </div>
                         )}
                     </motion.div>
@@ -775,31 +841,31 @@ const DEODashboardPage = () => {
                 return (
                     <div className="space-y-8">
                         <div className="flex items-center gap-4 pb-8">
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select Model:</span>
+                            <span className="text-[10px] font-black text-ind-text3 uppercase tracking-widest">Select Model:</span>
                             <select
                                 value={selectedModelId || ''}
                                 onChange={(e) => setSelectedModelId(Number(e.target.value))}
-                                className="bg-white border-2 border-slate-100 rounded-2xl px-8 py-4 text-xs font-black uppercase tracking-widest"
+                                className="bg-white border-2 border-ind-border/50 rounded-2xl px-8 py-4 text-xs font-black uppercase tracking-widest"
                             >
                                 {verifyModels.map(model => (
                                     <option key={model.id} value={model.id}>{model.name}</option>
                                 ))}
                             </select>
                         </div>
-                        <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+                        <div className="bg-white rounded-3xl border border-ind-border p-6 shadow-sm">
                             <h1 className="text-xl font-black uppercase tracking-tight mb-4">{vModel.name} VERIFIED DATA</h1>
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left">
-                                    <thead className="bg-slate-50">
+                                    <thead className="bg-ind-bg">
                                         <tr>
-                                            <th className="p-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Part No</th>
-                                            <th className="p-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Description</th>
-                                            <th className="p-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Stock</th>
+                                            <th className="p-4 text-[10px] font-black uppercase tracking-widest text-ind-text3">Part No</th>
+                                            <th className="p-4 text-[10px] font-black uppercase tracking-widest text-ind-text3">Description</th>
+                                            <th className="p-4 text-[10px] font-black uppercase tracking-widest text-ind-text3">Stock</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {requirements.map(req => (
-                                            <tr key={req.id} className="border-b border-slate-100">
+                                            <tr key={req.id} className="border-b border-ind-border/50">
                                                 <td className="p-4 text-xs font-bold">{req["PART NUMBER"]}</td>
                                                 <td className="p-4 text-xs">{req["PART DESCRIPTION"]}</td>
                                                 <td className="p-4 text-xs font-black">{req["Todays Stock"]}</td>
@@ -817,7 +883,7 @@ const DEODashboardPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] pb-32">
+        <div className="min-h-screen bg-ind-bg pb-32">
             <div className="max-w-[1600px] mx-auto px-6 lg:px-12 pt-8">
                 <AnimatePresence mode="wait">
                     <motion.div

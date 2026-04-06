@@ -10,6 +10,13 @@ from sqlalchemy.orm.attributes import flag_modified
 
 deo_bp = Blueprint('deo', __name__)
 
+def parse_float(val):
+    if val is None or val == "": return 0.0
+    try:
+        return float(str(val).replace(',', '').strip())
+    except:
+        return 0.0
+
 @deo_bp.route('/assigned-work', methods=['GET'])
 @jwt_required()
 @role_required(['DEO', 'Supervisor', 'Admin', 'Manager'])
@@ -67,56 +74,139 @@ def get_assigned_work():
 
     return jsonify({"success": True, "data": data})
 
-@deo_bp.route('/sync/<int:fake_id>', methods=['PUT'])
+@deo_bp.route('/sync/<int:row_id>', methods=['PUT'])
 @jwt_required()
 @role_required(['DEO'])
-def live_sync_cell(fake_id):
+def live_sync_cell(row_id):
+    """
+    Syncs a single row's data to the database.
+    Supports two modes (determined by presence of 'real_entry_id' in body):
+    - real_entry_id present: direct DEOProductionEntry primary-key lookup
+    - real_entry_id absent:  legacy fake-index mode (row_index = row_id - 10000)
+    """
+    print(f"\n[SYNC DEBUG] Incoming sync for Row ID: {row_id}")
     username = get_jwt_identity()
+
     user = User.query.filter_by(username=username).first()
     data = request.json or {}
-    
+
     car_model_id = data.get('car_model_id')
     demand_id = data.get('demand_id')
-    row_index = fake_id - 10000
-    
-    if not car_model_id or row_index < 0:
-        return jsonify({"success": False, "message": "Invalid sync parameters"}), 400
-        
+    real_entry_id = data.get('real_entry_id')  # Set by frontend when it has the real DB id
+
+    if not car_model_id:
+        return jsonify({"success": False, "message": "car_model_id required"}), 400
+
+    from app.models.models import DEOProductionEntry
+
+    mapping = {
+        "SAP Stock": "sap_stock", "Opening Stock": "opening_stock",
+        "Todays Stock": "todays_stock", "Production Status": "status",
+        "row_status": "row_status", "rejection_reason": "rejection_reason", "deo_reply": "deo_reply"
+    }
+
     today = date.today()
+
+    def _apply_and_save(entry):
+        for key, val in data.items():
+            col = mapping.get(key)
+            if col:
+                if col in ["sap_stock", "opening_stock", "todays_stock"]:
+                    setattr(entry, col, parse_float(val))
+                else:
+                    setattr(entry, col, val)
+        if entry.per_day and entry.per_day > 0:
+            entry.coverage_days = round(float(entry.todays_stock or 0) / entry.per_day, 1)
+        db.session.commit()
+        log = DailyProductionLog.query.get(entry.log_id)
+        if log:
+            sync_log_to_work_status(log)
+        return jsonify({"success": True})
+
+    # ─── Mode A: direct DB entry id ─────────────────────────────────────────
+    if real_entry_id:
+        entry = DEOProductionEntry.query.get(int(real_entry_id))
+        if not entry:
+            return jsonify({"success": False, "message": "Entry not found"}), 404
+        return _apply_and_save(entry)
+
+    # ─── Mode B: legacy fake-index mode (row_id = 10000 + idx) ──────────────
+    row_index = row_id - 10000
+    if row_index < 0:
+        return jsonify({"success": False, "message": "Invalid row_id"}), 400
+
     log = DailyProductionLog.query.filter_by(
         car_model_id=car_model_id,
         deo_id=user.id,
         date=today
     ).order_by(DailyProductionLog.id.desc()).first()
-    
+
     if not log:
-        # Auto-create draft log if missing (Live Sync safety)
+        # Auto-create log and entries if missing
         cm = CarModel.query.get(car_model_id)
-        if not cm: return jsonify({"success": False, "message": "Model not found"}), 404
-        
+        if not cm:
+            return jsonify({"success": False, "message": "Model not found"}), 404
+
         from app.services.db_service import MasterDataDBService
         bom = MasterDataDBService().get_by_model(cm.name)
-        log_data = [{"id": 10000 + i, "PART NUMBER": b.get('common', {}).get('part_number', ''), "Today Produced": "0"} for i, b in enumerate(bom)]
-        
-        log = DailyProductionLog(car_model_id=car_model_id, demand_id=demand_id, deo_id=user.id, model_name=cm.name, log_data=log_data, status='DRAFT')
+        log = DailyProductionLog(
+            car_model_id=car_model_id, demand_id=demand_id,
+            deo_id=user.id, model_name=cm.name, status='DRAFT'
+        )
         db.session.add(log)
+        db.session.flush()
+
+        for i, b in enumerate(bom):
+            entry = DEOProductionEntry(
+                log_id=log.id, sn_no=i + 1,
+                sap_part_number=b.get('common', {}).get('sap_part_number'),
+                part_number=b.get('common', {}).get('part_number'),
+                part_description=b.get('common', {}).get('description'),
+                per_day=parse_float(b.get('production_data', {}).get('Target Qty')),
+                date=today, car_model_id=car_model_id
+            )
+            db.session.add(entry)
         db.session.commit()
 
-    log_data = list(log.log_data)
-    if row_index < len(log_data):
+    from app.services.production_service import get_merged_log_data
+    merged = get_merged_log_data(log)
+
+    if 0 <= row_index < len(merged):
+        sap_part = str(merged[row_index].get('SAP PART NUMBER', '')).strip().upper()
+        entry = DEOProductionEntry.query.filter(
+            DEOProductionEntry.log_id == log.id,
+            db.func.upper(db.func.trim(DEOProductionEntry.sap_part_number)) == sap_part
+        ).first()
+
+        # If no entry exists yet for this SAP part, create one now
+        if not entry:
+            entry = DEOProductionEntry(
+                log_id=log.id, sn_no=row_index + 1,
+                sap_part_number=merged[row_index].get('SAP PART NUMBER', ''),
+                part_number=merged[row_index].get('PART NUMBER', ''),
+                part_description=merged[row_index].get('PART DESCRIPTION', ''),
+                per_day=parse_float(merged[row_index].get('PER DAY', 0)),
+                date=today, car_model_id=car_model_id
+            )
+            db.session.add(entry)
+            db.session.flush()
+
         for key, val in data.items():
-            if key not in ['car_model_id', 'demand_id']:
-                log_data[row_index][key] = val
-        
-        log.log_data = log_data
-        flag_modified(log, "log_data")
+            col = mapping.get(key)
+            if col:
+                if col in ["sap_stock", "opening_stock", "todays_stock"]:
+                    setattr(entry, col, parse_float(val))
+                else:
+                    setattr(entry, col, val)
+
+        if entry.per_day and entry.per_day > 0:
+            entry.coverage_days = round(float(entry.todays_stock or 0) / entry.per_day, 1)
+
         db.session.commit()
-        
-        # Optional: Sync to summary for real-time dashboard
         sync_log_to_work_status(log)
         return jsonify({"success": True})
-    
-    return jsonify({"success": False, "message": "Row out of bounds"}), 400
+
+    return jsonify({"success": False, "message": "Entry not found"}), 400
 
 @deo_bp.route('/submit', methods=['POST'])
 @jwt_required()
@@ -137,24 +227,37 @@ def submit_log():
     today = date.today()
     log = DailyProductionLog.query.filter_by(car_model_id=model_id, deo_id=user.id, date=today).first()
 
-    if log:
-        log.log_data = log_data
-        log.status = 'SUBMITTED' if is_final else 'DRAFT'
-        flag_modified(log, "log_data")
-    else:
+    from app.models.models import DEOProductionEntry
+    if not log:
         cm = CarModel.query.get(model_id)
-        log = DailyProductionLog(
-            car_model_id=model_id,
-            demand_id=demand_id,
-            deo_id=user.id,
-            model_name=cm.name if cm else "Unknown",
-            log_data=log_data,
-            status='SUBMITTED' if is_final else 'DRAFT'
-        )
+        log = DailyProductionLog(car_model_id=model_id, demand_id=demand_id, deo_id=user.id, model_name=cm.name if cm else "Unknown", status='SUBMITTED' if is_final else 'DRAFT')
         db.session.add(log)
+        db.session.flush()
+
+    log.status = 'SUBMITTED' if is_final else 'DRAFT'
+    for row in log_data:
+        sap = str(row.get('SAP PART NUMBER', '')).strip().upper()
+        if not sap: continue
+        
+        # Robust case-insensitive lookup
+        entry = DEOProductionEntry.query.filter(
+            DEOProductionEntry.log_id == log.id,
+            db.func.upper(db.func.trim(DEOProductionEntry.sap_part_number)) == sap
+        ).first()
+        
+        if not entry:
+            entry = DEOProductionEntry(log_id=log.id, sap_part_number=sap, date=today, car_model_id=model_id)
+            db.session.add(entry)
+            
+        entry.sap_stock = parse_float(row.get('SAP Stock'))
+        entry.opening_stock = parse_float(row.get('Opening Stock'))
+        entry.todays_stock = parse_float(row.get('Todays Stock'))
+        entry.status = row.get('Production Status') or 'PENDING'
+        entry.per_day = parse_float(row.get('PER DAY') or row.get('Per Day'))
+        if entry.per_day > 0: entry.coverage_days = round(entry.todays_stock / entry.per_day, 1)
 
     db.session.commit()
-    # Update summary table for Admin Dashboard immediately
+    from app.services.production_service import sync_log_to_work_status
     sync_log_to_work_status(log)
     
     log_audit("DEO_SUBMIT_LOG" if is_final else "DEO_SAVE_DRAFT")
@@ -214,19 +317,40 @@ def deo_update_row():
         return jsonify({"success": False, "message": "Log ID and row index required"}), 400
         
     log = DailyProductionLog.query.get(log_id)
-    if not log:
-        return jsonify({"success": False, "message": "Log not found"}), 404
+    if not log: return jsonify({"success": False, "message": "Log not found"}), 404
         
-    log_data = list(log.log_data)
-    if row_index < len(log_data):
-        log_data[row_index].update(updated_data)
-        log.log_data = log_data
-        flag_modified(log, "log_data")
-        db.session.commit()
+    from app.services.production_service import get_merged_log_data
+    merged = get_merged_log_data(log)
+    
+    if 0 <= row_index < len(merged):
+        sap_part = str(merged[row_index].get('SAP PART NUMBER', '')).strip().upper()
+        from app.models.models import DEOProductionEntry
+        # Robust case-insensitive lookup
+        entry = DEOProductionEntry.query.filter(
+            DEOProductionEntry.log_id == log.id,
+            db.func.upper(db.func.trim(DEOProductionEntry.sap_part_number)) == sap_part
+        ).first()
         
-        # If it was rejected, maybe we keep it rejected until supervisor re-reviews
-        # but we sync the stats
-        sync_log_to_work_status(log)
-        return jsonify({"success": True})
+        if entry:
+            mapping = {
+                "SAP Stock": "sap_stock", "Opening Stock": "opening_stock", 
+                "Todays Stock": "todays_stock", "Production Status": "status",
+                "row_status": "row_status", "rejection_reason": "rejection_reason", "deo_reply": "deo_reply"
+            }
+            for key, val in updated_data.items():
+                col = mapping.get(key)
+                if col:
+                    if col in ["sap_stock", "opening_stock", "todays_stock"]:
+                        setattr(entry, col, parse_float(val))
+                    else:
+                        setattr(entry, col, val)
+            
+            if entry.per_day > 0:
+                entry.coverage_days = round(entry.todays_stock / entry.per_day, 1)
+
+            db.session.commit()
+            from app.services.production_service import sync_log_to_work_status
+            sync_log_to_work_status(log)
+            return jsonify({"success": True})
         
     return jsonify({"success": False, "message": "Row index out of bounds"}), 400

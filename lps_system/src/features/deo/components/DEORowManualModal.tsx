@@ -98,7 +98,7 @@ const DEORowManualModal: React.FC<DEORowManualModalProps> = ({
                 onChange={(e) => handleChange(key, e.target.value)}
                 placeholder={placeholder}
                 disabled={isSupervisor}
-                className={`w-full bg-white border-2 ${isFocused ? 'border-[#F37021] ring-4 ring-[#F37021]/5' : 'border-[#F1F5F9]'} ${isSupervisor ? 'bg-slate-50 cursor-not-allowed opacity-75 border-slate-200' : ''} rounded-[1.5rem] py-4 px-6 text-[#1A202C] font-black text-sm outline-none transition-all placeholder:text-[#CBD5E0] shadow-sm`}
+                className={`w-full bg-white border-2 ${isFocused ? 'border-ind-primary ring-4 ring-[#F37021]/5' : 'border-[#F1F5F9]'} ${isSupervisor ? 'bg-ind-bg cursor-not-allowed opacity-75 border-ind-border' : ''} rounded-[1.5rem] py-4 px-6 text-[#1A202C] font-black text-sm outline-none transition-all placeholder:text-[#CBD5E0] shadow-sm`}
             />
         </div>
     );
@@ -137,7 +137,7 @@ const DEORowManualModal: React.FC<DEORowManualModalProps> = ({
                         </div>
                         <button 
                             onClick={onClose}
-                            className="w-10 h-10 bg-[#F8FAFC] hover:bg-[#F1F5F9] rounded-full flex items-center justify-center text-[#94A3B8] transition-colors"
+                            className="w-10 h-10 bg-ind-bg hover:bg-[#F1F5F9] rounded-full flex items-center justify-center text-[#94A3B8] transition-colors"
                         >
                             <X size={20} />
                         </button>
@@ -148,7 +148,7 @@ const DEORowManualModal: React.FC<DEORowManualModalProps> = ({
                         {/* Section 1: Entry Details */}
                         <div className="space-y-8">
                             <div className="inline-flex items-center gap-3 bg-[#0F172A] text-white px-6 py-2.5 rounded-full shadow-lg">
-                                <Shield size={14} className="text-[#F37021]" />
+                                <Shield size={14} className="text-ind-primary" />
                                 <span className="text-[10px] font-black uppercase tracking-widest">Entry Details</span>
                             </div>
 
@@ -174,7 +174,7 @@ const DEORowManualModal: React.FC<DEORowManualModalProps> = ({
                                         value={formData["Production Status"] || "PENDING"}
                                         onChange={(e) => handleChange("Production Status", e.target.value)}
                                         disabled={isSupervisor}
-                                        className={`w-full bg-white border-2 border-[#F1F5F9] rounded-[1.5rem] py-4 px-6 text-[#1A202C] font-black text-sm outline-none transition-all shadow-sm ${isSupervisor ? 'bg-slate-50 cursor-not-allowed opacity-75' : 'cursor-pointer'}`}
+                                        className={`w-full bg-white border-2 border-[#F1F5F9] rounded-[1.5rem] py-4 px-6 text-[#1A202C] font-black text-sm outline-none transition-all shadow-sm ${isSupervisor ? 'bg-ind-bg cursor-not-allowed opacity-75' : 'cursor-pointer'}`}
                                     >
                                         <option value="PENDING">PENDING</option>
                                         <option value="IN_PROGRESS">IN PROGRESS</option>
@@ -222,17 +222,17 @@ const DEORowManualModal: React.FC<DEORowManualModalProps> = ({
                         {/* Section 2: Remarks (Always visible for technical reporting) */}
                         <div className="space-y-6 pt-10 border-t border-[#F1F5F9]">
                             <div className="inline-flex items-center gap-3 bg-[#0F172A] text-white px-6 py-2.5 rounded-full shadow-lg">
-                                <Edit2 size={14} className="text-[#F37021]" />
+                                <Edit2 size={14} className="text-ind-primary" />
                                 <span className="text-[10px] font-black uppercase tracking-widest">DEO Remarks / Issue Report</span>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="space-y-3">
                                     <label className="text-[10px] font-extrabold text-[#A0AEC0] uppercase tracking-wider px-1 flex items-center gap-2">
-                                        <Activity size={12} className="text-slate-400" /> DEO Production Remarks
+                                        <Activity size={12} className="text-ind-text3" /> DEO Production Remarks
                                     </label>
                                     {isSupervisor ? (
-                                        <div className="w-full bg-[#F8FAFC] border-2 border-slate-100 rounded-[2rem] p-6 text-sm font-bold text-slate-500 min-h-[140px] shadow-inner italic">
+                                        <div className="w-full bg-ind-bg border-2 border-ind-border/50 rounded-[2rem] p-6 text-sm font-bold text-ind-text2 min-h-[140px] shadow-inner italic">
                                             {formData["Remarks"] || 'No remarks provided by DEO.'}
                                         </div>
                                     ) : (
@@ -240,7 +240,7 @@ const DEORowManualModal: React.FC<DEORowManualModalProps> = ({
                                             value={formData["Remarks"] || ''}
                                             onChange={(e) => handleChange("Remarks", e.target.value)}
                                             placeholder="Describe any production issue or remark here..."
-                                            className="w-full bg-white border-2 border-slate-200 focus:border-[#F37021] rounded-[2rem] p-6 text-sm font-bold text-slate-800 outline-none transition-all min-h-[140px] resize-none shadow-sm"
+                                            className="w-full bg-white border-2 border-ind-border focus:border-ind-primary rounded-[2rem] p-6 text-sm font-bold text-slate-800 outline-none transition-all min-h-[140px] resize-none shadow-sm"
                                         />
                                     )}
                                 </div>
@@ -248,14 +248,14 @@ const DEORowManualModal: React.FC<DEORowManualModalProps> = ({
 
                                 {isSupervisor && (
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-extrabold text-[#F37021] uppercase tracking-wider px-1 flex items-center gap-2">
+                                        <label className="text-[10px] font-extrabold text-ind-primary uppercase tracking-wider px-1 flex items-center gap-2">
                                             <Shield size={12} /> Supervisor Review Comments
                                         </label>
                                         <textarea
                                             value={formData.rejection_reason || ''}
                                             onChange={(e) => handleChange("rejection_reason", e.target.value)}
                                             placeholder="Add your review feedback or rejection reason here..."
-                                            className="w-full bg-white border-2 border-slate-200 focus:border-[#F37021] rounded-[2rem] p-6 text-sm font-bold text-slate-800 outline-none transition-all min-h-[140px] resize-none shadow-sm"
+                                            className="w-full bg-white border-2 border-ind-border focus:border-ind-primary rounded-[2rem] p-6 text-sm font-bold text-slate-800 outline-none transition-all min-h-[140px] resize-none shadow-sm"
                                         />
                                     </div>
                                 )}

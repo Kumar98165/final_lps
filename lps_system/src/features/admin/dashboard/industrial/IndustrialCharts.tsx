@@ -37,14 +37,14 @@ export const IndustrialChartsHub: React.FC<ChartProps> = ({ productionData, stat
         if (active && payload && payload.length) {
             return (
                 <div className="bg-white/95 backdrop-blur-md border border-ind-border p-3 rounded-xl shadow-xl ring-4 ring-black/5 animate-in fade-in zoom-in duration-200">
-                    <p className="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest mb-2 border-b border-slate-100 pb-1">{label}</p>
+                    <p className="text-[0.6rem] font-black text-ind-text3 uppercase tracking-widest mb-2 border-b border-ind-border/50 pb-1">{label}</p>
                     {payload.map((p: any, i: number) => (
                         <div key={i} className="flex items-center justify-between gap-6 mb-1 last:mb-0">
                             <div className="flex items-center gap-2">
                                 <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: p.color }} />
-                                <span className="text-[0.65rem] font-bold text-slate-600 uppercase">{p.name}</span>
+                                <span className="text-[0.65rem] font-bold text-ind-text2 uppercase">{p.name}</span>
                             </div>
-                            <span className="text-[0.7rem] font-black text-slate-900">{p.value} UNITS</span>
+                            <span className="text-[0.7rem] font-black text-ind-text">{p.value} UNITS</span>
                         </div>
                     ))}
                 </div>
@@ -68,7 +68,7 @@ export const IndustrialChartsHub: React.FC<ChartProps> = ({ productionData, stat
                         </div>
                         <div>
                             <h3 className="text-sm font-black text-slate-800 tracking-tight uppercase">Operational Velocity</h3>
-                            <p className="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest">Real-time Production Trend vs Target</p>
+                            <p className="text-[0.65rem] font-bold text-ind-text3 uppercase tracking-widest">Real-time Production Trend vs Target</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100">
@@ -134,17 +134,17 @@ export const IndustrialChartsHub: React.FC<ChartProps> = ({ productionData, stat
             >
                 <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-2xl bg-orange-50 text-[#F37021] flex items-center justify-center shadow-sm">
+                        <div className="w-10 h-10 rounded-2xl bg-orange-50 text-ind-primary flex items-center justify-center shadow-sm">
                             <BarChart3 size={20} strokeWidth={2.5} />
                         </div>
                         <div>
                             <h3 className="text-sm font-black text-slate-800 tracking-tight uppercase">Segment Intelligence</h3>
-                            <p className="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest">Model Distribution & Defect Analysis</p>
+                            <p className="text-[0.65rem] font-bold text-ind-text3 uppercase tracking-widest">Model Distribution & Defect Analysis</p>
                         </div>
                     </div>
-                    <div className="bg-slate-50 px-4 py-2 rounded-xl border border-slate-100 flex items-center gap-3">
-                        <span className="text-[0.6rem] font-black text-slate-500 tracking-widest">TOTAL MODELS:</span>
-                        <span className="text-sm font-black text-[#F37021]">{allModels.length}</span>
+                    <div className="bg-ind-bg px-4 py-2 rounded-xl border border-ind-border/50 flex items-center gap-3">
+                        <span className="text-[0.6rem] font-black text-ind-text2 tracking-widest">TOTAL MODELS:</span>
+                        <span className="text-sm font-black text-ind-primary">{allModels.length}</span>
                     </div>
                 </div>
 

@@ -7,7 +7,7 @@ import { useIndustrialState } from '../../hooks/useIndustrialState';
 import { AdminTopBar } from './AdminTopBar';
 import { AdminFilterBar, IndustrialKPICards } from './FilterAndKPIs';
 import { MailOrderSection } from './OrderManagement';
-import { MaterialsUsagePanel } from './MaterialsUsagePanel';
+// import { MaterialsUsagePanel } from './MaterialsUsagePanel';
 import { PersonnelSection } from './PersonnelSection';
 import { IndustrialTablesSection } from './IndustrialTables';
 import { StageWorkProgress } from './StageWorkProgress';
@@ -29,7 +29,7 @@ export const AdminIndustrialDashboard: React.FC = () => {
     const selectedOrder = mailOrders.find(o => o.id === selectedMailOrderId);
 
     return (
-        <div className="min-h-screen bg-ind-bg text-ind-text font-outfit p-4 lg:px-8 pb-20 relative overflow-x-hidden">
+        <div className="h-full bg-ind-bg text-ind-text p-4 lg:px-8 pb-20 relative overflow-x-hidden">
 
             <div className="relative z-10 max-w-[1760px] mx-auto">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 mt-4">
@@ -39,12 +39,10 @@ export const AdminIndustrialDashboard: React.FC = () => {
                         </h1>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <AdminTopBar />
-                    </div>
+
                 </div>
-                
-                <AdminFilterBar 
+
+                <AdminFilterBar
                     filters={filters}
                     lines={lines}
                     allModels={allModels}
@@ -53,51 +51,55 @@ export const AdminIndustrialDashboard: React.FC = () => {
                 />
 
                 <IndustrialKPICards stats={stats} />
+                <div className="grid grid-cols-2 gap-4">
+                    <StageWorkProgress
+                        productionEvents={filteredProduction}
+                        lines={lines}
+                        assignments={assignments}
+                        mailOrders={mailOrders}
+                    />
+                    <OrderAnalyticsHub orders={mailOrders} />
+                    <IndustrialTablesSection
+                        lines={lines}
+                        assignments={assignments}
+                        orders={mailOrders}
+                        rejections={rejections}
+                        onRecordProd={recordProduction}
+                        onAddLine={addLine}
+                        onAssign={() => addAssignment({ model: lines[0].model, lineId: lines[0].id, deo: "New User", supervisor: "Admin" })}
+                    />
+                </div>
 
-                <StageWorkProgress 
-                    productionEvents={filteredProduction}
-                    lines={lines}
-                    assignments={assignments}
-                    mailOrders={mailOrders}
-                />
 
-                <OrderAnalyticsHub orders={mailOrders} />
+
 
                 <div className="mb-4">
-                    <MailOrderSection 
+                    <MailOrderSection
                         orders={mailOrders}
                     />
                 </div>
 
-                <MaterialsUsagePanel 
+                {/* <MaterialsUsagePanel
                     materials={materials}
                     activeModel={activeMaterialModel}
                     onModelChange={setActiveMaterialModel}
                     models={Object.keys({ "EV-S186": 1, "EV-X90": 1, "ICE-2000": 1 })}
-                />
+                /> */}
 
-                <PersonnelSection 
+                {/* <PersonnelSection
                     lines={lines}
                     assignments={assignments}
                     rejections={rejections}
                     productionEvents={filteredProduction}
-                />
+                /> */}
 
-                <IndustrialTablesSection 
-                    lines={lines}
-                    assignments={assignments}
-                    orders={mailOrders}
-                    rejections={rejections}
-                    onRecordProd={recordProduction}
-                    onAddLine={addLine}
-                    onAssign={() => addAssignment({ model: lines[0].model, lineId: lines[0].id, deo: "New User", supervisor: "Admin" })}
-                />
+
             </div>
 
             <AnimatePresence>
                 {isRejModalOpen && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -112,7 +114,7 @@ export const AdminIndustrialDashboard: React.FC = () => {
                                     <X size={20} />
                                 </button>
                             </div>
-                            
+
                             <div className="p-6 overflow-y-auto max-h-[70vh] custom-scrollbar">
                                 <div className="grid grid-cols-2 gap-4 mb-6">
                                     <button className="flex items-center justify-center gap-2 py-3 bg-ind-g1/5 border border-ind-border2 rounded-xl text-ind-g1 font-bold text-sm hover:bg-ind-g1/10 transition-all">
@@ -158,7 +160,7 @@ export const AdminIndustrialDashboard: React.FC = () => {
             <AnimatePresence>
                 {selectedMailOrderId && selectedOrder && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -173,7 +175,7 @@ export const AdminIndustrialDashboard: React.FC = () => {
                                     <X size={20} />
                                 </button>
                             </div>
-                            
+
                             <div className="p-6 space-y-6">
                                 <div className="bg-ind-bg2 border border-ind-border rounded-xl p-5 space-y-4">
                                     <div className="grid grid-cols-2 gap-4">
@@ -191,13 +193,13 @@ export const AdminIndustrialDashboard: React.FC = () => {
                                 <div className="space-y-4">
                                     {selectedOrder.status === 'pending' && (
                                         <div className="flex gap-3 pt-4">
-                                            <button 
+                                            <button
                                                 onClick={() => { acceptOrder(selectedOrder.id); setSelectedMailOrderId(null); }}
                                                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-linear-to-br from-ind-g3 to-ind-g1 text-white font-bold rounded-xl shadow-lg shadow-ind-g4/20 hover:scale-105 transition-all"
                                             >
                                                 ACCEPT ORDER
                                             </button>
-                                            <button 
+                                            <button
                                                 onClick={() => { rejectOrder(selectedOrder.id); setSelectedMailOrderId(null); }}
                                                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-ind-red text-white font-bold rounded-xl shadow-lg shadow-ind-red/20 hover:scale-105 transition-all"
                                             >

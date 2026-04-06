@@ -52,25 +52,25 @@ const DemandDetailsModal = ({ demand, onClose }: { demand: Demand, onClose: () =
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Modal Header: Clean & Bright */}
-                <div className="relative p-8 pb-3 border-b border-slate-100/50 flex items-center justify-between bg-white">
+                <div className="relative p-8 pb-3 border-b border-ind-border/50/50 flex items-center justify-between bg-white">
                     <div className="flex items-center gap-5">
-                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-[#F37021] shadow-[0_8px_20px_rgba(243,112,33,0.15)] border border-orange-50">
+                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-ind-primary shadow-[0_8px_20px_rgba(243,112,33,0.15)] border border-orange-50">
                             <Car size={32} strokeWidth={2.5} />
                         </div>
                         <div>
                             <div className="flex items-center gap-2 mb-0.5">
-                                <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">{demand.model_name}</h2>
-                                <span className="px-2 py-0.5 bg-orange-50 text-[#F37021] text-[9px] font-black rounded uppercase tracking-widest border border-orange-100/50">
+                                <h2 className="text-2xl font-black text-ind-text uppercase tracking-tight">{demand.model_name}</h2>
+                                <span className="px-2 py-0.5 bg-orange-50 text-ind-primary text-[9px] font-black rounded uppercase tracking-widest border border-orange-100/50">
                                     Active Specification
                                 </span>
                             </div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{demand.formatted_id || `DEM-${demand.id}`}</p>
+                            <p className="text-[10px] font-black text-ind-text3 uppercase tracking-[0.2em]">{demand.formatted_id || `DEM-${demand.id}`}</p>
                         </div>
                     </div>
 
                     <button
                         onClick={onClose}
-                        className="w-10 h-10 bg-slate-100 hover:bg-orange-50 text-slate-400 hover:text-[#F37021] rounded-full flex items-center justify-center transition-all"
+                        className="w-10 h-10 bg-ind-border/30 hover:bg-orange-50 text-ind-text3 hover:text-ind-primary rounded-full flex items-center justify-center transition-all"
                     >
                         <X size={20} />
                     </button>
@@ -80,45 +80,45 @@ const DemandDetailsModal = ({ demand, onClose }: { demand: Demand, onClose: () =
                 <div className="p-10 pt-8 space-y-10">
                     {/* High-Level Info Cards */}
                     <div className="grid grid-cols-2 gap-6">
-                        <div className="p-6 rounded-[2rem] bg-slate-50/50 border border-slate-100/50 space-y-4">
+                        <div className="p-6 rounded-[2rem] bg-ind-bg/50 border border-ind-border/50/50 space-y-4">
                             <div className="space-y-1">
-                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                                    <User size={10} className="text-[#F37021]" />
+                                <span className="text-[9px] font-black text-ind-text3 uppercase tracking-widest flex items-center gap-1.5">
+                                    <User size={10} className="text-ind-primary" />
                                     Customer / Division
                                 </span>
                                 <div className="text-lg font-black text-slate-800 leading-none">
                                     {demand.customer || 'Standard Production'}
                                 </div>
                             </div>
-                            <div className="space-y-1 pt-2 border-t border-slate-100/50">
-                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                                    <Info size={10} className="text-[#F37021]" />
+                            <div className="space-y-1 pt-2 border-t border-ind-border/50/50">
+                                <span className="text-[9px] font-black text-ind-text3 uppercase tracking-widest flex items-center gap-1.5">
+                                    <Info size={10} className="text-ind-primary" />
                                     Assigned Manager
                                 </span>
-                                <div className="text-sm font-black text-slate-600">
+                                <div className="text-sm font-black text-ind-text2">
                                     {demand.manager || 'Rajesh Sharma'}
                                 </div>
                             </div>
                         </div>
 
-                        <div className="p-6 rounded-[2rem] bg-slate-50/50 border border-slate-100/50 space-y-4">
+                        <div className="p-6 rounded-[2rem] bg-ind-bg/50 border border-ind-border/50/50 space-y-4">
                             <div className="space-y-1">
-                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                                    <Loader2 size={10} className="text-[#F37021]" />
+                                <span className="text-[9px] font-black text-ind-text3 uppercase tracking-widest flex items-center gap-1.5">
+                                    <Loader2 size={10} className="text-ind-primary" />
                                     Target Production Line
                                 </span>
                                 <div className="text-lg font-black text-slate-800 leading-none">
                                     {demand.line || 'T4-LINE'}
                                 </div>
                             </div>
-                            <div className="space-y-1 pt-2 border-t border-slate-100/50">
-                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                                    <CheckCircle size={10} className="text-[#F37021]" />
+                            <div className="space-y-1 pt-2 border-t border-ind-border/50/50">
+                                <span className="text-[9px] font-black text-ind-text3 uppercase tracking-widest flex items-center gap-1.5">
+                                    <CheckCircle size={10} className="text-ind-primary" />
                                     Quantity Target
                                 </span>
                                 <div className="flex items-baseline gap-1">
-                                    <span className="text-3xl font-black text-slate-900 tracking-tighter">{demand.quantity.toLocaleString()}</span>
-                                    <span className="text-[10px] font-black text-slate-400 uppercase leading-none">Units</span>
+                                    <span className="text-3xl font-black text-ind-text tracking-tighter">{demand.quantity.toLocaleString()}</span>
+                                    <span className="text-[10px] font-black text-ind-text3 uppercase leading-none">Units</span>
                                 </div>
                             </div>
                         </div>
@@ -126,25 +126,25 @@ const DemandDetailsModal = ({ demand, onClose }: { demand: Demand, onClose: () =
 
                     {/* Timeline Container: Sleeker Visuals */}
                     <div className="relative">
-                        <div className="absolute top-1/2 left-0 w-full h-px bg-slate-200 -translate-y-1/2" />
+                        <div className="absolute top-1/2 left-0 w-full h-px bg-ind-border/50 -translate-y-1/2" />
                         <div className="relative flex justify-between items-center bg-white px-2">
-                            <div className="bg-white border-2 border-slate-100 rounded-3xl p-4 pr-8 shadow-sm group">
-                                <span className="text-[8px] font-black text-[#F37021] uppercase tracking-[0.2em] block mb-1">Production Start</span>
+                            <div className="bg-white border-2 border-ind-border/50 rounded-3xl p-4 pr-8 shadow-sm group">
+                                <span className="text-[8px] font-black text-ind-primary uppercase tracking-[0.2em] block mb-1">Production Start</span>
                                 <div className="flex items-center gap-2 text-sm font-black text-slate-800">
-                                    <Calendar size={14} className="text-slate-300" />
+                                    <Calendar size={14} className="text-ind-text3" />
                                     {new Date(demand.start_date).toLocaleDateString()}
                                 </div>
                             </div>
 
-                            <div className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center border-2 border-white shadow-sm z-10">
-                                <ArrowRight className="text-slate-300" size={18} />
+                            <div className="w-10 h-10 bg-ind-bg rounded-full flex items-center justify-center border-2 border-white shadow-sm z-10">
+                                <ArrowRight className="text-ind-text3" size={18} />
                             </div>
 
-                            <div className="bg-white border-2 border-slate-100 rounded-3xl p-4 pl-8 shadow-sm text-right">
-                                <span className="text-[8px] font-black text-[#F37021] uppercase tracking-[0.2em] block mb-1 text-right">Target Completion</span>
+                            <div className="bg-white border-2 border-ind-border/50 rounded-3xl p-4 pl-8 shadow-sm text-right">
+                                <span className="text-[8px] font-black text-ind-primary uppercase tracking-[0.2em] block mb-1 text-right">Target Completion</span>
                                 <div className="flex items-center gap-2 text-sm font-black text-slate-800 justify-end">
                                     {new Date(demand.end_date).toLocaleDateString()}
-                                    <Calendar size={14} className="text-slate-300" />
+                                    <Calendar size={14} className="text-ind-text3" />
                                 </div>
                             </div>
                         </div>
@@ -152,9 +152,9 @@ const DemandDetailsModal = ({ demand, onClose }: { demand: Demand, onClose: () =
                 </div>
 
                 {/* Modal Footer: Clean & Professional */}
-                <div className="px-10 py-8 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                        Document Reference: <span className="text-slate-500 font-black">{demand.formatted_id || `DEM-${demand.id}`}</span>
+                <div className="px-10 py-8 bg-ind-bg/50 border-t border-ind-border/50 flex items-center justify-between">
+                    <p className="text-[10px] font-bold text-ind-text3 uppercase tracking-wider">
+                        Document Reference: <span className="text-ind-text2 font-black">{demand.formatted_id || `DEM-${demand.id}`}</span>
                     </p>
                     <button
                         onClick={onClose}
@@ -192,7 +192,7 @@ const DemandGridCard = ({ demand, onDetails }: { demand: Demand, onDetails: (dem
                     ? 'bg-gradient-to-br from-emerald-50/60 to-white border-emerald-100 shadow-[0_20px_50px_rgba(16,185,129,0.08)]'
                     : isInPlanning
                         ? 'bg-gradient-to-br from-amber-50/60 to-white border-amber-100 shadow-[0_20px_50px_rgba(245,158,11,0.08)]'
-                        : 'bg-white border-slate-100 hover:border-orange-200'}
+                        : 'bg-white border-ind-border/50 hover:border-orange-200'}
             `}
         >
             {/* Top accent bar with gradient */}
@@ -207,7 +207,7 @@ const DemandGridCard = ({ demand, onDetails }: { demand: Demand, onDetails: (dem
                             ? 'bg-white text-emerald-600'
                             : isInPlanning
                                 ? 'bg-white text-amber-600'
-                                : 'bg-orange-50 text-[#F37021]'}
+                                : 'bg-orange-50 text-ind-primary'}
                     `}>
                         <Car size={32} strokeWidth={2.5} />
                     </div>
@@ -216,7 +216,7 @@ const DemandGridCard = ({ demand, onDetails }: { demand: Demand, onDetails: (dem
                             {demand.model_name}
                         </h3>
                         <div className="flex items-center gap-2">
-                            <span className={`text-[11px] font-black text-slate-400 px-2.5 py-1 rounded-lg ${isReady ? 'bg-white/80' : 'bg-slate-50'}`}>
+                            <span className={`text-[11px] font-black text-ind-text3 px-2.5 py-1 rounded-lg ${isReady ? 'bg-white/80' : 'bg-ind-bg'}`}>
                                 {demand.formatted_id || `DEM-${demand.id}`}
                             </span>
                         </div>
@@ -235,16 +235,16 @@ const DemandGridCard = ({ demand, onDetails }: { demand: Demand, onDetails: (dem
             </div>
 
             {/* Details Box - Enhanced Spacing and Typography */}
-            <div className={`rounded-[2rem] p-6 grid grid-cols-2 gap-6 mb-10 ${isReady ? 'bg-white/80' : isInPlanning ? 'bg-white/80' : 'bg-slate-50/60'}`}>
+            <div className={`rounded-[2rem] p-6 grid grid-cols-2 gap-6 mb-10 ${isReady ? 'bg-white/80' : isInPlanning ? 'bg-white/80' : 'bg-ind-bg/60'}`}>
                 <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">
+                    <div className="flex items-center gap-2 text-[9px] font-black text-ind-text3 uppercase tracking-widest pl-1">
                         <Loader2 size={12} className={isReady ? 'text-emerald-500' : isInPlanning ? 'text-amber-500' : 'text-indigo-400'} />
                         LINE NAME
                     </div>
                     <div className="text-lg font-black text-slate-700 uppercase pl-1">{demand.line || 'T4-LINE'}</div>
                 </div>
                 <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">
+                    <div className="flex items-center gap-2 text-[9px] font-black text-ind-text3 uppercase tracking-widest pl-1">
                         <Calendar size={12} className={isReady ? 'text-emerald-500' : isInPlanning ? 'text-amber-500' : 'text-indigo-400'} />
                         SCHEDULE
                     </div>
@@ -255,10 +255,10 @@ const DemandGridCard = ({ demand, onDetails }: { demand: Demand, onDetails: (dem
             {/* Footer: Quantity and Action */}
             <div className="mt-auto flex items-end justify-between">
                 <div>
-                    <span className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] mb-2 pl-1">TARGET QUANTITY</span>
+                    <span className="block text-[10px] font-black text-ind-text3 uppercase tracking-[0.15em] mb-2 pl-1">TARGET QUANTITY</span>
                     <div className="flex items-baseline gap-2 pl-1">
-                        <span className="text-5xl font-black text-slate-900 tracking-tighter leading-none">{demand.quantity.toLocaleString()}</span>
-                        <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Units</span>
+                        <span className="text-5xl font-black text-ind-text tracking-tighter leading-none">{demand.quantity.toLocaleString()}</span>
+                        <span className="text-[11px] font-black text-ind-text3 uppercase tracking-widest">Units</span>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -266,7 +266,7 @@ const DemandGridCard = ({ demand, onDetails }: { demand: Demand, onDetails: (dem
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => onDetails(demand)}
-                        className="p-4 bg-white border border-slate-200 text-slate-400 hover:text-[#F37021] hover:border-orange-200 rounded-2xl transition-all shadow-sm"
+                        className="p-4 bg-white border border-ind-border text-ind-text3 hover:text-ind-primary hover:border-orange-200 rounded-2xl transition-all shadow-sm"
                         title="View Details"
                     >
                         <Info size={20} />
@@ -304,20 +304,20 @@ const DemandListRow = ({ demand, onAccept, onDetails }: { demand: Demand, onAcce
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-100 hover:border-[#F37021]/30 transition-all group relative overflow-hidden md:grid md:grid-cols-12 md:gap-4 md:items-center"
+            className="bg-white rounded-2xl p-3.5 shadow-sm border border-ind-border/50 hover:border-ind-primary/30 transition-all group relative overflow-hidden md:grid md:grid-cols-12 md:gap-4 md:items-center"
         >
-            <div className="absolute top-0 left-0 w-1 h-full bg-slate-100 group-hover:bg-[#F37021] transition-colors" />
+            <div className="absolute top-0 left-0 w-1 h-full bg-ind-border/30 group-hover:bg-[#F37021] transition-colors" />
 
             {/* Demand Details */}
             <div className="col-span-4 pl-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-[#F37021] shadow-sm group-hover:scale-105 transition-transform">
+                    <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-ind-primary shadow-sm group-hover:scale-105 transition-transform">
                         <Car size={20} />
                     </div>
                     <div>
                         <h3 className="text-sm font-black text-slate-800 tracking-tight mb-0.5">{demand.model_name}</h3>
-                        <div className="flex items-center gap-2 text-[9px] font-bold text-slate-400 uppercase tracking-wider">
-                            <span className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{demand.formatted_id || `DEM-${demand.id}`}</span>
+                        <div className="flex items-center gap-2 text-[9px] font-bold text-ind-text3 uppercase tracking-wider">
+                            <span className="bg-ind-border/30 px-1.5 py-0.5 rounded text-ind-text2">{demand.formatted_id || `DEM-${demand.id}`}</span>
                             <span>•</span>
                             <span>{demand.line || 'Line 1'}</span>
                         </div>
@@ -333,11 +333,11 @@ const DemandListRow = ({ demand, onAccept, onDetails }: { demand: Demand, onAcce
                         ${demand.status === 'PENDING' ? 'bg-amber-50 text-amber-600 border-amber-100' :
                             demand.status === 'IN_PROGRESS' ? 'bg-blue-50 text-blue-600 border-blue-100' :
                                 demand.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                                    'bg-slate-50 text-slate-600 border-slate-200'}
+                                    'bg-ind-bg text-ind-text2 border-ind-border'}
                     `}>
                         {demand.status.replace('_', ' ')}
                     </span>
-                    <span className="text-[8px] font-bold text-slate-400 flex items-center gap-1">
+                    <span className="text-[8px] font-bold text-ind-text3 flex items-center gap-1">
                         <User size={9} /> {demand.manager || 'System Admin'}
                     </span>
                 </div>
@@ -347,7 +347,7 @@ const DemandListRow = ({ demand, onAccept, onDetails }: { demand: Demand, onAcce
             <div className="col-span-2 text-right">
                 <div className="flex flex-col items-end">
                     <span className="text-lg font-black text-slate-800 tracking-tight">{demand.quantity.toLocaleString()}</span>
-                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Units</span>
+                    <span className="text-[8px] font-black text-ind-text3 uppercase tracking-wider">Units</span>
                 </div>
             </div>
 
@@ -368,7 +368,7 @@ const DemandListRow = ({ demand, onAccept, onDetails }: { demand: Demand, onAcce
                 )}
                 <button
                     onClick={() => onDetails(demand)}
-                    className="px-3 py-1.5 bg-slate-50 text-slate-500 hover:text-[#F37021] hover:bg-orange-50 rounded-lg text-[10px] font-black transition-colors uppercase tracking-wider border border-transparent hover:border-orange-100"
+                    className="px-3 py-1.5 bg-ind-bg text-ind-text2 hover:text-ind-primary hover:bg-orange-50 rounded-lg text-[10px] font-black transition-colors uppercase tracking-wider border border-transparent hover:border-orange-100"
                 >
                     Details
                 </button>
@@ -391,7 +391,7 @@ const ManagerDemandPage = () => {
 
     useEffect(() => {
         loadData();
-        const interval = setInterval(loadData, 10000); // Poll every 10s
+        const interval = setInterval(loadData, 60000); // 1 minute
         return () => clearInterval(interval);
     }, []);
 
@@ -478,9 +478,9 @@ const ManagerDemandPage = () => {
     const isListView = activeTab === 'NEW REQUESTS' || activeTab === 'ALL';
 
     return (
-        <div className="max-w-[1800px] mx-auto min-h-screen font-sans bg-slate-50/50">
+        <div className="max-w-[1800px] mx-auto min-h-screen font-sans bg-ind-bg/50">
             {/* Sticky Header Container */}
-            <div className="sticky top-0 z-30 bg-slate-50/95 backdrop-blur-xl border-b border-slate-200/60 shadow-sm transition-all">
+            <div className="sticky top-0 z-30 bg-ind-bg/95 backdrop-blur-xl border-b border-ind-border/60 shadow-sm transition-all">
                 <div className="px-8 pt-5 pb-3 space-y-4">
                     {/* Header Section with Stats */}
                     <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
@@ -489,27 +489,27 @@ const ManagerDemandPage = () => {
                                 <Car size={22} strokeWidth={2.5} />
                             </div>
                             <div className="space-y-0.5">
-                                <span className="block text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Demand Management</span>
-                                <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex flex-col">
+                                <span className="block text-[9px] font-black text-ind-text3 uppercase tracking-[0.2em]">Demand Management</span>
+                                <h1 className="text-2xl font-extrabold text-ind-text tracking-tight flex flex-col">
                                     NEW DEMAND CAR MODEL
                                 </h1>
-                                <p className="text-[11px] font-bold text-slate-400 max-w-lg leading-relaxed">
+                                <p className="text-[11px] font-bold text-ind-text3 max-w-lg leading-relaxed">
                                     Review and coordinate production designs for vehicle models assigned by Administration.
                                 </p>
                             </div>
                         </div>
 
                         {/* Stats Box */}
-                        <div className="flex bg-white rounded-2xl border border-slate-200/50 p-1 shadow-sm h-fit overflow-hidden">
-                            <div className="px-5 py-1.5 text-center border-r border-slate-100 min-w-[70px]">
-                                <span className="block text-[8px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">TOTAL</span>
+                        <div className="flex bg-white rounded-2xl border border-ind-border/50 p-1 shadow-sm h-fit overflow-hidden">
+                            <div className="px-5 py-1.5 text-center border-r border-ind-border/50 min-w-[70px]">
+                                <span className="block text-[8px] font-bold text-ind-text3 uppercase tracking-wider mb-0.5">TOTAL</span>
                                 <span className="block text-xl font-black text-slate-800 leading-none tracking-tight">{stats.total}</span>
                             </div>
-                            <div className="px-5 py-1.5 text-center border-r border-slate-100 min-w-[70px]">
+                            <div className="px-5 py-1.5 text-center border-r border-ind-border/50 min-w-[70px]">
                                 <span className="block text-[8px] font-bold text-orange-500 uppercase tracking-wider mb-0.5">PENDING</span>
                                 <span className="block text-xl font-black text-orange-500 leading-none tracking-tight">{stats.pending}</span>
                             </div>
-                            <div className="px-5 py-1.5 text-center border-r border-slate-100 min-w-[70px]">
+                            <div className="px-5 py-1.5 text-center border-r border-ind-border/50 min-w-[70px]">
                                 <span className="block text-[8px] font-bold text-blue-500 uppercase tracking-wider mb-0.5">IN PROGRESS</span>
                                 <span className="block text-xl font-black text-blue-500 leading-none tracking-tight">{stats.inProgress}</span>
                             </div>
@@ -532,7 +532,7 @@ const ManagerDemandPage = () => {
                                         text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap px-6 py-2.5 rounded-full
                                         ${activeTab === tab
                                             ? 'bg-[#F37021] text-white shadow-lg shadow-orange-500/20'
-                                            : 'text-slate-400 hover:text-slate-600 hover:bg-white'}
+                                            : 'text-ind-text3 hover:text-ind-text2 hover:bg-white'}
                                     `}
                                 >
                                     {tab}
@@ -543,13 +543,13 @@ const ManagerDemandPage = () => {
                         {/* Search */}
                         <div className="flex items-center gap-4 w-full md:w-auto">
                             <div className="relative group w-full md:w-96">
-                                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#F37021] transition-colors" size={14} />
+                                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-ind-text3 group-focus-within:text-ind-primary transition-colors" size={14} />
                                 <input
                                     type="text"
                                     placeholder="Search models, lines or targets..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full bg-white border border-slate-200 focus:border-[#F37021] rounded-full py-2.5 pl-14 pr-6 text-slate-600 font-bold text-xs tracking-wide placeholder:text-slate-300 outline-none transition-all shadow-sm"
+                                    className="w-full bg-white border border-ind-border focus:border-ind-primary rounded-full py-2.5 pl-14 pr-6 text-ind-text2 font-bold text-xs tracking-wide placeholder:text-ind-text3 outline-none transition-all shadow-sm"
                                 />
                             </div>
                         </div>
@@ -558,7 +558,7 @@ const ManagerDemandPage = () => {
 
                 {/* List Header (Only for List View) */}
                 {isListView && (
-                    <div className="hidden md:grid grid-cols-12 gap-4 px-8 pb-2 text-[9px] font-black text-slate-400 uppercase tracking-widest pt-3 border-t border-slate-100/50">
+                    <div className="hidden md:grid grid-cols-12 gap-4 px-8 pb-2 text-[9px] font-black text-ind-text3 uppercase tracking-widest pt-3 border-t border-ind-border/50/50">
                         <div className="col-span-4">Demand Details</div>
                         <div className="col-span-3 text-center">Production Status</div>
                         <div className="col-span-2 text-right">Target</div>
@@ -604,7 +604,7 @@ const ManagerDemandPage = () => {
                             </div>
                             <div className="space-y-1">
                                 <h3 className="text-xl font-black uppercase tracking-tight">Demand Accepted</h3>
-                                <p className="text-slate-400 text-xs font-black uppercase tracking-widest leading-none">
+                                <p className="text-ind-text3 text-xs font-black uppercase tracking-widest leading-none">
                                     {acceptedModelName} moved to Planning
                                 </p>
                             </div>

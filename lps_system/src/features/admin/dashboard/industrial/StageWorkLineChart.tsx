@@ -35,13 +35,13 @@ export const StageWorkLineChart: React.FC<Props> = ({ lines, assignments }) => {
     if (active && payload && payload.length) {
       const d = payload[0].payload;
       return (
-        <div className="bg-white p-5 rounded-2xl shadow-2xl border border-slate-200 text-sm min-w-[200px] pointer-events-none z-[9999]">
-          <p className="font-black text-slate-800 uppercase tracking-tight mb-2 border-b border-slate-100 pb-1">{d.name}</p>
-          <div className="space-y-1 text-[11px] font-bold text-slate-600">
+        <div className="bg-white p-5 rounded-2xl shadow-2xl border border-ind-border text-sm min-w-[200px] pointer-events-none z-[9999]">
+          <p className="font-black text-slate-800 uppercase tracking-tight mb-2 border-b border-ind-border/50 pb-1">{d.name}</p>
+          <div className="space-y-1 text-[11px] font-bold text-ind-text2">
             <p className="flex justify-between"><span>Progress:</span> <span className="text-emerald-600 font-black">{d.progress}%</span></p>
-            <p className="flex justify-between"><span>Done:</span> <span className="text-slate-900">{d.completed}</span></p>
-            <p className="flex justify-between"><span>Target:</span> <span className="text-slate-900">{d.target}</span></p>
-            <p className="flex justify-between pt-1 mt-1 border-t border-slate-50 italic text-slate-400"><span>Operator:</span> <span className="text-slate-700">{d.operator}</span></p>
+            <p className="flex justify-between"><span>Done:</span> <span className="text-ind-text">{d.completed}</span></p>
+            <p className="flex justify-between"><span>Target:</span> <span className="text-ind-text">{d.target}</span></p>
+            <p className="flex justify-between pt-1 mt-1 border-t border-slate-50 italic text-ind-text3"><span>Operator:</span> <span className="text-slate-700">{d.operator}</span></p>
           </div>
         </div>
       );
@@ -55,7 +55,7 @@ export const StageWorkLineChart: React.FC<Props> = ({ lines, assignments }) => {
       animate={{ opacity: 1, y: 0 }}
       className="bg-[#EDF2F7] border border-ind-border rounded-[2.5rem] p-8 shadow-sm flex flex-col h-[450px] mb-8 w-full"
     >
-      <div className="flex items-center gap-3 mb-8 pb-4 border-b border-slate-200">
+      <div className="flex items-center gap-3 mb-8 pb-4 border-b border-ind-border">
         <div className="w-1.5 h-6 bg-emerald-500 rounded-full" />
         <h3 className="text-xl font-black text-slate-800 tracking-tight uppercase">Line Progress Trend</h3>
       </div>

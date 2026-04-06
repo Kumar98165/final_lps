@@ -90,7 +90,7 @@ const SupervisorDashboardPage = () => {
             if (!selectedLog && !modalConfig.isOpen) {
                 refreshSupervisorData(true);
             }
-        }, 10000);
+        }, 60000); // 60s
         return () => clearInterval(interval);
     }, [selectedLog, modalConfig.isOpen]);
 
@@ -143,6 +143,7 @@ const SupervisorDashboardPage = () => {
         updatedLog.log_data[rowIndex] = {
             ...updatedLog.log_data[rowIndex],
             row_status: status,
+            'Production Status': status,
             rejection_reason: reason
         };
         setSelectedLog(updatedLog);
@@ -232,7 +233,7 @@ const SupervisorDashboardPage = () => {
             setModalConfig({
                 isOpen: true,
                 title: 'Submission Rejected',
-                message: `The log for ${selectedLog.model_name} has been returned to the DEO for correction.`,
+                message: '',
                 type: 'alert',
                 onConfirm: (_: string) => {
                     setModalConfig(prev => ({ ...prev, isOpen: false }));
@@ -252,17 +253,17 @@ const SupervisorDashboardPage = () => {
     };
 
     if (loading) return (
-        <div className="bg-[#F8FAFC] min-h-screen flex flex-col items-center justify-center">
-            <Activity size={48} className="text-[#F37021] animate-spin mb-6" />
-            <div className="text-slate-400 font-bold uppercase tracking-[0.2em] animate-pulse">Syncing production data...</div>
+        <div className="bg-ind-bg min-h-screen flex flex-col items-center justify-center">
+            <Activity size={48} className="text-ind-primary animate-spin mb-6" />
+            <div className="text-ind-text3 font-bold uppercase tracking-[0.2em] animate-pulse">Syncing production data...</div>
         </div>
     );
 
     if (error) return (
-        <div className="bg-[#F8FAFC] min-h-screen flex flex-col items-center justify-center">
+        <div className="bg-ind-bg min-h-screen flex flex-col items-center justify-center">
             <AlertCircle size={48} className="text-rose-500 mb-6" />
             <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight mb-2">Sync Interrupted</h3>
-            <p className="text-slate-500 font-bold max-md">{error}</p>
+            <p className="text-ind-text2 font-bold max-md">{error}</p>
         </div>
     );
 
@@ -293,7 +294,7 @@ const SupervisorDashboardPage = () => {
                         {/* Professional Professional Header */}
                         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-4">
                             <div>
-                                <h1 className="text-4xl font-black text-[#0f172a] tracking-tight leading-none">Supervisor Dashboard</h1>
+                                <h1 className="text-4xl font-black text-ind-text tracking-tight leading-none">Supervisor Dashboard</h1>
                             </div>
                             
                             <div className="flex items-center gap-4 relative">
@@ -301,21 +302,21 @@ const SupervisorDashboardPage = () => {
                                 <div className="relative">
                                     <div 
                                         onClick={() => setIsLineOpen(!isLineOpen)}
-                                        className={`bg-white rounded-xl px-4 py-2.5 flex items-center justify-between min-w-[140px] shadow-sm border border-slate-200/60 cursor-pointer hover:border-slate-300 transition-all group z-[60]`}
+                                        className={`bg-white rounded-xl px-4 py-2.5 flex items-center justify-between min-w-[140px] shadow-sm border border-ind-border/60 cursor-pointer hover:border-slate-300 transition-all group z-[60]`}
                                     >
-                                        <span className={`text-[11px] font-bold ${selectedLine === 'Select Line' ? 'text-slate-400' : 'text-[#0f172a]'}`}>
+                                        <span className={`text-[11px] font-bold ${selectedLine === 'Select Line' ? 'text-ind-text3' : 'text-ind-text'}`}>
                                             {selectedLine === 'Select Line' ? 'All lines' : selectedLine}
                                         </span>
-                                        <ChevronDown size={14} className={`text-slate-300 group-hover:text-slate-600 transition-transform ${isLineOpen ? 'rotate-180' : ''}`} />
+                                        <ChevronDown size={14} className={`text-ind-text3 group-hover:text-ind-text2 transition-transform ${isLineOpen ? 'rotate-180' : ''}`} />
                                     </div>
                                     
                                     {isLineOpen && (
                                         <>
                                             <div className="fixed inset-0 z-[55]" onClick={() => setIsLineOpen(false)} />
-                                            <div className="absolute top-[110%] left-0 w-full bg-white rounded-xl shadow-xl overflow-hidden z-[100] border border-slate-100 py-1 animate-in fade-in slide-in-from-top-2">
+                                            <div className="absolute top-[110%] left-0 w-full bg-white rounded-xl shadow-xl overflow-hidden z-[100] border border-ind-border/50 py-1 animate-in fade-in slide-in-from-top-2">
                                                 <div 
                                                     onClick={() => { setSelectedLine('Select Line'); setIsLineOpen(false); }}
-                                                    className="px-4 py-2.5 text-[10px] font-bold text-slate-400 hover:bg-slate-50 cursor-pointer"
+                                                    className="px-4 py-2.5 text-[10px] font-bold text-ind-text3 hover:bg-ind-bg cursor-pointer"
                                                 >
                                                     All
                                                 </div>
@@ -323,7 +324,7 @@ const SupervisorDashboardPage = () => {
                                                     <div 
                                                         key={line}
                                                         onClick={() => { setSelectedLine(line); setIsLineOpen(false); }}
-                                                        className={`px-4 py-2.5 text-[10px] font-bold hover:bg-orange-50 hover:text-orange-900 cursor-pointer transition-colors ${selectedLine === line ? 'bg-orange-50 text-orange-900' : 'text-slate-600'}`}
+                                                        className={`px-4 py-2.5 text-[10px] font-bold hover:bg-orange-50 hover:text-orange-900 cursor-pointer transition-colors ${selectedLine === line ? 'bg-orange-50 text-orange-900' : 'text-ind-text2'}`}
                                                     >
                                                         {line}
                                                     </div>
@@ -336,7 +337,7 @@ const SupervisorDashboardPage = () => {
                                 {/* Date Selection (Sentence Case Fix) */}
                                 <div 
                                     onClick={() => dateInputRef.current?.showPicker()}
-                                    className="bg-white rounded-xl px-4 py-2.5 flex items-center gap-4 shadow-sm border border-slate-200/60 cursor-pointer hover:border-slate-300 transition-all group relative"
+                                    className="bg-white rounded-xl px-4 py-2.5 flex items-center gap-4 shadow-sm border border-ind-border/60 cursor-pointer hover:border-slate-300 transition-all group relative"
                                 >
                                     <input 
                                         ref={dateInputRef}
@@ -345,10 +346,10 @@ const SupervisorDashboardPage = () => {
                                         onChange={(e) => setSelectedDate(e.target.value)}
                                         className="absolute inset-0 opacity-0 pointer-events-none"
                                     />
-                                    <span className="text-[11px] font-bold text-[#0f172a]">
+                                    <span className="text-[11px] font-bold text-ind-text">
                                         {new Date(selectedDate).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}
                                     </span>
-                                    <Calendar size={15} className="text-slate-300 group-hover:text-[#F37021] transition-colors" />
+                                    <Calendar size={15} className="text-ind-text3 group-hover:text-ind-primary transition-colors" />
                                 </div>
                             </div>
                         </div>
@@ -363,7 +364,7 @@ const SupervisorDashboardPage = () => {
 
                         {/* Analytical Data Stream */}
                         <div className="space-y-4">
-                            <h2 className="text-[9px] font-black uppercase text-slate-400 px-4 mb-2 tracking-[0.2em]">Operational analytics</h2>
+                            <h2 className="text-[9px] font-black uppercase text-ind-text3 px-4 mb-2 tracking-[0.2em]">Operational analytics</h2>
                             <SupervisorAnalytics 
                                 assignedModels={filteredAssignedModels} 
                                 verifications={filteredVerifications}
@@ -375,8 +376,8 @@ const SupervisorDashboardPage = () => {
     };
 
     return (
-        <div className="max-w-[1700px] mx-auto min-h-screen font-sans bg-[#F8FAFC]">
-            <div className="px-5 py-6 relative z-10">
+        <div className="max-w-[1700px] mx-auto min-h-screen font-sans bg-ind-bg">
+            <div className="px-5 py-6 relative">
                 {selectedLog ? (
                     <LogDetailView
                         selectedLog={selectedLog}
@@ -428,7 +429,12 @@ const SupervisorDashboardPage = () => {
                     if (selectedRowIndex !== null && selectedLog) {
                         if (updatedRow) {
                             const updatedLog = { ...selectedLog };
-                            updatedLog.log_data[selectedRowIndex] = { ...updatedRow, row_status: status, rejection_reason: reason };
+                            updatedLog.log_data[selectedRowIndex] = { 
+                                ...updatedRow, 
+                                row_status: status, 
+                                'Production Status': status,
+                                rejection_reason: reason 
+                            };
                             setSelectedLog(updatedLog);
                             const token = getToken();
                             await fetch(`${API_BASE}/supervisor/update-log`, {

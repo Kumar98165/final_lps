@@ -120,7 +120,7 @@ export const IndustrialVisualHub: React.FC<VisualHubProps> = ({ productionEvents
             >
                 <div className="flex items-center justify-between mb-8">
                     <h3 className="text-xl font-bold text-slate-800 tracking-tight">Operational Velocity Trend</h3>
-                    <div className="flex items-center gap-2 px-3 py-1 bg-slate-50 border border-slate-100 rounded-lg text-[0.6rem] font-black text-slate-500 uppercase tracking-widest">
+                    <div className="flex items-center gap-2 px-3 py-1 bg-ind-bg border border-ind-border/50 rounded-lg text-[0.6rem] font-black text-ind-text2 uppercase tracking-widest">
                         Daily Aggregate
                     </div>
                 </div>

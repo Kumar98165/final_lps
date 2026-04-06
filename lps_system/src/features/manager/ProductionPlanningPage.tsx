@@ -574,24 +574,24 @@ const ProductionPlanningPage = () => {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center flex-col gap-4">
-                <div className="animate-spin text-[#F37021]">
+            <div className="min-h-screen bg-ind-bg flex items-center justify-center flex-col gap-4">
+                <div className="animate-spin text-ind-primary">
                     <Layers size={40} />
                 </div>
-                <p className="font-black text-slate-300 text-xs tracking-widest uppercase animate-pulse">Fetching BOM Data...</p>
+                <p className="font-black text-ind-text3 text-xs tracking-widest uppercase animate-pulse">Fetching BOM Data...</p>
             </div>
         );
     }
 
     if (!demand) {
         return (
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center flex-col gap-6 text-center p-4">
+            <div className="min-h-screen bg-ind-bg flex items-center justify-center flex-col gap-6 text-center p-4">
                 <div className="w-20 h-20 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center shadow-inner">
                     <Car size={40} />
                 </div>
                 <div className="space-y-2">
                     <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tight">PLAN NOT FOUND</h2>
-                    <p className="text-slate-500 font-bold text-sm max-w-md mx-auto">
+                    <p className="text-ind-text2 font-bold text-sm max-w-md mx-auto">
                         This production requirement plan may have been deleted by an administrator or the demand ID is invalid.
                     </p>
                 </div>
@@ -606,9 +606,9 @@ const ProductionPlanningPage = () => {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50/50 p-6 md:p-8 font-sans w-full max-w-full overflow-x-hidden">
+        <div className="min-h-screen bg-ind-bg/50 p-6 md:p-8 font-sans w-full max-w-full overflow-x-hidden">
             {/* Unified Production Planning Header - Ultra Compact & Dynamic */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_15px_rgb(0,0,0,0.02)] p-5 mb-5 relative overflow-hidden group">
+            <div className="bg-white rounded-2xl border border-ind-border shadow-[0_2px_15px_rgb(0,0,0,0.02)] p-5 mb-5 relative overflow-hidden group">
                 {/* Subtle Ghost Background Icon - Minimalist */}
                 <div className="absolute top-1/2 right-4 -translate-y-1/2 opacity-[0.015] pointer-events-none group-hover:opacity-[0.03] transition-opacity duration-1000">
                     <Car size={150} strokeWidth={0.5} />
@@ -621,11 +621,11 @@ const ProductionPlanningPage = () => {
                             <div className="flex items-center gap-3">
                                 <button
                                     onClick={() => navigate(-1)}
-                                    className="w-7 h-7 rounded-full border border-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-50 transition-all shadow-sm"
+                                    className="w-7 h-7 rounded-full border border-ind-border/50 flex items-center justify-center text-ind-text3 hover:bg-ind-bg transition-all shadow-sm"
                                 >
                                     <ArrowLeft size={12} />
                                 </button>
-                                <h1 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2 uppercase">
+                                <h1 className="text-lg font-black text-ind-text tracking-tight flex items-center gap-2 uppercase">
                                     PRODUCTION REQUIREMENT PLAN
                                     {isSaving ? (
                                         <span className="px-2 py-0.5 bg-indigo-50 text-indigo-500 text-[8px] font-black rounded-md border border-indigo-100/30 tracking-[0.02em] animate-pulse flex items-center gap-1">
@@ -633,16 +633,16 @@ const ProductionPlanningPage = () => {
                                             SYNCING...
                                         </span>
                                     ) : (
-                                        <span className="px-2 py-0.5 bg-orange-50 text-[#F37021] text-[8px] font-black rounded-md border border-orange-100/30 tracking-[0.02em]">
+                                        <span className="px-2 py-0.5 bg-orange-50 text-ind-primary text-[8px] font-black rounded-md border border-orange-100/30 tracking-[0.02em]">
                                             LIVE-SYNC ACTIVE
                                         </span>
                                     )}
                                 </h1>
                             </div>
-                            <p className="text-slate-400 text-[9px] font-bold uppercase tracking-[0.1em] flex items-center gap-2 pl-10">
-                                BREAKDOWN FOR <span className="text-[#F37021]">{demand.model_name}</span>
+                            <p className="text-ind-text3 text-[9px] font-bold uppercase tracking-[0.1em] flex items-center gap-2 pl-10">
+                                BREAKDOWN FOR <span className="text-ind-primary">{demand.model_name}</span>
                                 <span className="text-slate-200 mx-1">•</span>
-                                ORDER: <span className="text-slate-600 font-extrabold">{demand.formatted_id || `DEM-${demand.id.toString().padStart(3, '0')}`}</span>
+                                ORDER: <span className="text-ind-text2 font-extrabold">{demand.formatted_id || `DEM-${demand.id.toString().padStart(3, '0')}`}</span>
                             </p>
                         </div>
 
@@ -651,7 +651,7 @@ const ProductionPlanningPage = () => {
                             <div className="flex items-center gap-3">
                                 <div className="hidden lg:flex flex-col items-end mr-2">
                                     <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Planning Phase</span>
-                                    <span className="text-[8px] font-bold text-slate-400 uppercase">Submit to finalize setup</span>
+                                    <span className="text-[8px] font-bold text-ind-text3 uppercase">Submit to finalize setup</span>
                                 </div>
                                 <button
                                     onClick={markAsReady}
@@ -667,11 +667,11 @@ const ProductionPlanningPage = () => {
                     {/* Middle Row: The 3 Summary Cards - Ultra Condensed */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
                         {/* 1. Target Production */}
-                        <div className="bg-slate-50/20 rounded-xl border border-slate-100 p-3.5 flex flex-col relative overflow-hidden group/card hover:bg-white transition-all">
-                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Target Production</span>
+                        <div className="bg-ind-bg/20 rounded-xl border border-ind-border/50 p-3.5 flex flex-col relative overflow-hidden group/card hover:bg-white transition-all">
+                            <span className="text-[8px] font-black text-ind-text3 uppercase tracking-widest mb-1.5">Target Production</span>
                             <div className="flex items-baseline gap-1.5">
-                                <span className="text-2xl font-black text-slate-900 tracking-tighter">{demand.quantity}</span>
-                                <span className="text-[9px] font-black text-slate-400 uppercase">Vehicles</span>
+                                <span className="text-2xl font-black text-ind-text tracking-tighter">{demand.quantity}</span>
+                                <span className="text-[9px] font-black text-ind-text3 uppercase">Vehicles</span>
                             </div>
                             <div className="absolute top-3.5 right-4 text-indigo-500/20">
                                 <Box size={14} />
@@ -679,11 +679,11 @@ const ProductionPlanningPage = () => {
                         </div>
 
                         {/* 2. Total Parts */}
-                        <div className="bg-slate-50/20 rounded-xl border border-slate-100 p-3.5 flex flex-col relative overflow-hidden group/card hover:bg-white transition-all">
-                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Total Unique Parts</span>
+                        <div className="bg-ind-bg/20 rounded-xl border border-ind-border/50 p-3.5 flex flex-col relative overflow-hidden group/card hover:bg-white transition-all">
+                            <span className="text-[8px] font-black text-ind-text3 uppercase tracking-widest mb-1.5">Total Unique Parts</span>
                             <div className="flex items-baseline gap-1.5">
-                                <span className="text-2xl font-black text-slate-900 tracking-tighter">{requirements.length}</span>
-                                <span className="text-[9px] font-black text-slate-400 uppercase">Components</span>
+                                <span className="text-2xl font-black text-ind-text tracking-tighter">{requirements.length}</span>
+                                <span className="text-[9px] font-black text-ind-text3 uppercase">Components</span>
                             </div>
                             <div className="absolute top-3.5 right-4 text-emerald-500/20">
                                 <Layers size={14} />
@@ -691,16 +691,16 @@ const ProductionPlanningPage = () => {
                         </div>
 
                         {/* 3. Total Material Units */}
-                        <div className="bg-slate-50/20 rounded-xl border border-slate-100 p-3.5 flex flex-col relative overflow-hidden group/card hover:bg-white transition-all">
-                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Total Requirements</span>
+                        <div className="bg-ind-bg/20 rounded-xl border border-ind-border/50 p-3.5 flex flex-col relative overflow-hidden group/card hover:bg-white transition-all">
+                            <span className="text-[8px] font-black text-ind-text3 uppercase tracking-widest mb-1.5">Total Requirements</span>
                             <div className="flex items-baseline gap-1.5">
-                                <span className="text-2xl font-black text-[#F37021] tracking-tighter">
+                                <span className="text-2xl font-black text-ind-primary tracking-tighter">
                                     {requirements.reduce((sum, req) => {
                                         const val = String(req.required_qty).replace(/,/g, '');
                                         return sum + (parseFloat(val) || 0);
                                     }, 0).toLocaleString()}
                                 </span>
-                                <span className="text-[9px] font-black text-slate-400 uppercase">Units</span>
+                                <span className="text-[9px] font-black text-ind-text3 uppercase">Units</span>
                             </div>
                             <div className="absolute top-3.5 right-4 text-orange-500/20">
                                 <Download size={14} />
@@ -709,40 +709,40 @@ const ProductionPlanningPage = () => {
                     </div>
 
                     {/* Bottom Row: Ultra Slim Metadata Inline Bar */}
-                    <div className="flex items-center gap-6 px-4 py-2 bg-slate-50/30 rounded-lg border border-slate-100/30">
+                    <div className="flex items-center gap-6 px-4 py-2 bg-ind-bg/30 rounded-lg border border-ind-border/50/30">
                         <div className="flex items-center gap-2">
                             <div className="w-1 h-1 rounded-full bg-indigo-400 mr-1" />
-                            <span className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest">Line:</span>
-                            <span className="text-[9px] font-black text-slate-600 uppercase">{demand.line || 'T4 LINE'}</span>
+                            <span className="text-[7.5px] font-black text-ind-text3 uppercase tracking-widest">Line:</span>
+                            <span className="text-[9px] font-black text-ind-text2 uppercase">{demand.line || 'T4 LINE'}</span>
                         </div>
-                        <div className="w-px h-2.5 bg-slate-200" />
+                        <div className="w-px h-2.5 bg-ind-border/50" />
                         <div className="flex items-center gap-2">
                             <div className="w-1 h-1 rounded-full bg-emerald-400 mr-1" />
-                            <span className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest">Responsible:</span>
-                            <span className="text-[9px] font-black text-slate-600 uppercase">{demand.manager || 'RAJESH SHARMA'}</span>
+                            <span className="text-[7.5px] font-black text-ind-text3 uppercase tracking-widest">Responsible:</span>
+                            <span className="text-[9px] font-black text-ind-text2 uppercase">{demand.manager || 'RAJESH SHARMA'}</span>
                         </div>
-                        <div className="w-px h-2.5 bg-slate-200" />
+                        <div className="w-px h-2.5 bg-ind-border/50" />
                         <div className="flex items-center gap-2">
-                            <span className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest">Customer:</span>
-                            <span className="text-[9px] font-black text-slate-500 uppercase">{demand.customer || 'TATA MOTORS'}</span>
+                            <span className="text-[7.5px] font-black text-ind-text3 uppercase tracking-widest">Customer:</span>
+                            <span className="text-[9px] font-black text-ind-text2 uppercase">{demand.customer || 'TATA MOTORS'}</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Main Content Area */}
-            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[700px]">
+            <div className="bg-white rounded-3xl border border-ind-border shadow-sm overflow-hidden flex flex-col h-[700px]">
 
                 {/* Simplified Toolbar - Matching Mockup */}
-                <div className="p-4 border-b border-slate-100 flex items-center justify-between gap-3 bg-white z-20">
+                <div className="p-4 border-b border-ind-border/50 flex items-center justify-between gap-3 bg-white z-20">
                     <div className="flex items-center gap-2">
                         {/* View Switcher Tabs - Premium Style */}
-                        <div className="flex bg-slate-100/50 p-1 rounded-full border border-slate-200 shadow-inner gap-0.5">
+                        <div className="flex bg-ind-border/30/50 p-1 rounded-full border border-ind-border shadow-inner gap-0.5">
                             <button
                                 onClick={() => setViewMode('g-chart')}
                                 className={`px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest transition-all flex items-center gap-2 uppercase ${viewMode === 'g-chart'
                                     ? 'bg-[#F37021] text-white shadow-[0_4px_12px_rgba(243,112,33,0.3)] scale-[1.02]'
-                                    : 'text-slate-400 hover:text-slate-600 hover:bg-white/50'
+                                    : 'text-ind-text3 hover:text-ind-text2 hover:bg-white/50'
                                     }`}
                             >
                                 <Activity size={13} strokeWidth={2.5} />
@@ -752,7 +752,7 @@ const ProductionPlanningPage = () => {
                                 onClick={() => setViewMode('all')}
                                 className={`px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest transition-all flex items-center gap-2 uppercase ${viewMode === 'all'
                                     ? 'bg-[#F37021] text-white shadow-[0_4px_12px_rgba(243,112,33,0.3)] scale-[1.02]'
-                                    : 'text-slate-400 hover:text-slate-600 hover:bg-white/50'
+                                    : 'text-ind-text3 hover:text-ind-text2 hover:bg-white/50'
                                     }`}
                             >
                                 <LayoutGrid size={13} strokeWidth={2.5} />
@@ -763,7 +763,7 @@ const ProductionPlanningPage = () => {
 
                     <div className="flex items-center gap-3">
                         {/* Add Buttons */}
-                        <div className="flex bg-slate-50 p-1.5 rounded-2xl border border-slate-200 shadow-sm gap-2">
+                        <div className="flex bg-ind-bg p-1.5 rounded-2xl border border-ind-border shadow-sm gap-2">
                             <button
                                 onClick={() => addRow()}
                                 className="h-10 px-5 bg-emerald-500 text-white rounded-xl font-black text-[9px] uppercase tracking-[0.15em] border border-emerald-400 hover:bg-emerald-600 hover:shadow-[0_4px_15px_rgba(16,185,129,0.3)] transition-all flex items-center gap-2 active:scale-95 group"
@@ -782,13 +782,13 @@ const ProductionPlanningPage = () => {
 
                         {/* Search */}
                         <div className="relative group w-64">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#F37021] transition-colors" size={14} />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-ind-text3 group-focus-within:text-ind-primary transition-colors" size={14} />
                             <input
                                 type="text"
                                 placeholder="Search by part or SAP #"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full bg-slate-50 border border-slate-200 focus:border-[#F37021] rounded-xl py-2 pl-10 pr-4 text-slate-600 font-bold text-xs placeholder:text-slate-400 outline-none transition-all"
+                                className="w-full bg-ind-bg border border-ind-border focus:border-ind-primary rounded-xl py-2 pl-10 pr-4 text-ind-text2 font-bold text-xs placeholder:text-ind-text3 outline-none transition-all"
                             />
                         </div>
 
@@ -798,16 +798,16 @@ const ProductionPlanningPage = () => {
 
                 {/* Main Table Content - Premium Grid Design with Sticky ID */}
                 <div className="flex-1 w-full relative bg-white overflow-hidden flex flex-col">
-                    <div className="flex-1 overflow-auto w-full border-b border-slate-100 custom-scrollbar bg-slate-50/20">
+                    <div className="flex-1 overflow-auto w-full border-b border-ind-border/50 custom-scrollbar bg-ind-bg/20">
                         {filteredRequirements.length > 0 ? (
                             <table className={`w-full min-w-max border-separate border-spacing-0`}>
                                 <thead>
                                     {/* GROUP HEADERS ROW */}
                                     {viewMode === 'all' && (
-                                        <tr className="bg-white border-b border-slate-200">
+                                        <tr className="bg-white border-b border-ind-border">
                                             {/* Sticky Offset Header (No Index Column) */}
                                             {/* Identification Headers - ALWAYS visible as a reference */}
-                                            <th colSpan={viewMode === 'all' ? (commonHeaders.length >= 3 ? 3 : 2) : 1} className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-4 text-center py-4 bg-slate-50/50 border-r border-b border-slate-200 sticky left-0 z-[60]">
+                                            <th colSpan={viewMode === 'all' ? (commonHeaders.length >= 3 ? 3 : 2) : 1} className="text-[10px] font-black text-ind-text3 uppercase tracking-[0.2em] px-4 text-center py-4 bg-ind-bg/50 border-r border-b border-ind-border sticky left-0 z-[60]">
                                                 <div className="flex items-center justify-center gap-2">
                                                     <ShieldCheck size={14} className="text-orange-500" />
                                                     Part Identification
@@ -815,19 +815,19 @@ const ProductionPlanningPage = () => {
                                             </th>
 
                                             {viewMode === 'all' && commonHeaders.length > (commonHeaders.length >= 3 ? 3 : 2) && (
-                                                <th key="empty-id-space" colSpan={commonHeaders.length - (commonHeaders.length >= 3 ? 3 : 2)} className="bg-slate-50/20 border-r border-b border-slate-200"></th>
+                                                <th key="empty-id-space" colSpan={commonHeaders.length - (commonHeaders.length >= 3 ? 3 : 2)} className="bg-ind-bg/20 border-r border-b border-ind-border"></th>
                                             )}
 
                                             {/* Production Group Header only in g-chart to avoid dead comparisons */}
                                             {(viewMode === 'all') && (
-                                                <th colSpan={materialHeaders.length} className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-4 text-center py-4 bg-slate-50/30 border-b border-slate-200">
+                                                <th colSpan={materialHeaders.length} className="text-[10px] font-black text-ind-text3 uppercase tracking-[0.2em] px-4 text-center py-4 bg-ind-bg/30 border-b border-ind-border">
                                                     <div className="flex items-center justify-center gap-2">
                                                         <Package size={14} className="text-orange-500" />
                                                         RM Sheet Data
                                                     </div>
                                                 </th>
                                             )}
-                                            <th className="w-12 border-b border-slate-200 bg-white"></th>
+                                            <th className="w-12 border-b border-ind-border bg-white"></th>
                                         </tr>
                                     )}
 
@@ -855,7 +855,7 @@ const ProductionPlanningPage = () => {
                                                         minWidth: width,
                                                         maxWidth: width
                                                     }}
-                                                    className={`py-4 px-2 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left bg-slate-50 border-b border-slate-200 sticky z-[50] group/h`}
+                                                    className={`py-4 px-2 text-[10px] font-black text-ind-text3 uppercase tracking-widest text-left bg-ind-bg border-b border-ind-border sticky z-[50] group/h`}
                                                 >
                                                     <div className="flex items-center justify-between gap-2 pl-2">
                                                         <span className="truncate">{h}</span>
@@ -874,7 +874,7 @@ const ProductionPlanningPage = () => {
                                             <th
                                                 key={h}
                                                 style={{ minWidth: (h === 'DESCRIPTION' || h.includes('DESC')) ? '300px' : '180px' }}
-                                                className="py-4 px-2 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left bg-slate-50 border-b border-slate-200 group/h"
+                                                className="py-4 px-2 text-[10px] font-black text-ind-text3 uppercase tracking-widest text-left bg-ind-bg border-b border-ind-border group/h"
                                             >
                                                 <div className="flex items-center justify-between gap-2 pl-2">
                                                     <span className="truncate">{h}</span>
@@ -891,7 +891,7 @@ const ProductionPlanningPage = () => {
                                         {(viewMode === 'all') && materialHeaders.map((h) => (
                                             <th
                                                 key={h}
-                                                className={`min-w-[130px] py-4 px-2 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center bg-slate-50/10 border-b border-slate-200 group/h`}
+                                                className={`min-w-[130px] py-4 px-2 text-[10px] font-black text-ind-text3 uppercase tracking-widest text-center bg-ind-bg/10 border-b border-ind-border group/h`}
                                             >
                                                 <div className="flex items-center justify-between gap-1 overflow-hidden">
                                                     <span className="flex-1 truncate">{h}</span>
@@ -908,19 +908,19 @@ const ProductionPlanningPage = () => {
                                                 {['TOTAL SCHEDULE QTY', 'PER DAY', 'SAP Stock', 'Opening Stock', 'Todays Stock', 'Coverage Days'].map((h) => (
                                                     <th
                                                         key={h}
-                                                        className="min-w-[80px] py-3 px-2 text-[9px] font-black text-slate-500 uppercase tracking-wider text-center bg-orange-50/20 border-b border-slate-200 border-r"
+                                                        className="min-w-[80px] py-3 px-2 text-[9px] font-black text-ind-text2 uppercase tracking-wider text-center bg-orange-50/20 border-b border-ind-border border-r"
                                                     >
                                                         {h}
                                                     </th>
                                                 ))}
                                             </>
                                         )}
-                                        <th className="w-12 border-b border-slate-200 bg-white"></th>
+                                        <th className="w-12 border-b border-ind-border bg-white"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {filteredRequirements.map((req, index) => (
-                                        <tr key={req.id} className="group hover:bg-slate-50 transition-all duration-200 bg-white border-b border-slate-50">
+                                        <tr key={req.id} className="group hover:bg-ind-bg transition-all duration-200 bg-white border-b border-slate-50">
                                             {/* Sticky Spacer Cell (No Index Column) */}
                                             {/* Removed 56px spacer here */}
 
@@ -941,7 +941,7 @@ const ProductionPlanningPage = () => {
                                                     <td
                                                         key={h}
                                                         style={{ left: `${leftOffset}px`, minWidth: width, maxWidth: width }}
-                                                        className={`p-1.5 align-middle sticky z-[40] bg-white group-hover:bg-slate-50 tracking-tighter`}
+                                                        className={`p-1.5 align-middle sticky z-[40] bg-white group-hover:bg-ind-bg tracking-tighter`}
                                                     >
                                                         <div className="relative group/idx flex items-center w-full h-full min-h-[44px] cursor-pointer" onClick={() => handleRowEdit(req)}>
                                                             {isSrNo ? (
@@ -950,7 +950,7 @@ const ProductionPlanningPage = () => {
                                                                 </span>
                                                             ) : (
                                                                 <div className="flex-1">
-                                                                    <div className={`w-full py-4 px-6 text-[12px] font-black uppercase text-slate-800 bg-white border border-slate-100/80 shadow-sm rounded-2xl group-hover/idx:border-[#F37021]/30 transition-all`}>
+                                                                    <div className={`w-full py-4 px-6 text-[12px] font-black uppercase text-slate-800 bg-white border border-ind-border/50/80 shadow-sm rounded-2xl group-hover/idx:border-ind-primary/30 transition-all`}>
                                                                         {req[h] || '-'}
                                                                     </div>
                                                                 </div>
@@ -972,7 +972,7 @@ const ProductionPlanningPage = () => {
                                             {/* Remaining Identification Cells */}
                                             {viewMode === 'all' && commonHeaders.slice(3).map((h) => (
                                                 <td key={h} className="p-1.5 align-middle cursor-pointer" onClick={() => handleRowEdit(req)}>
-                                                    <div className="w-full py-4 px-6 text-[12px] font-black uppercase text-slate-800 bg-white border border-slate-100/80 shadow-sm rounded-2xl group-hover:border-[#F37021]/30 transition-all">
+                                                    <div className="w-full py-4 px-6 text-[12px] font-black uppercase text-slate-800 bg-white border border-ind-border/50/80 shadow-sm rounded-2xl group-hover:border-ind-primary/30 transition-all">
                                                         {req[h] || '-'}
                                                     </div>
                                                 </td>
@@ -980,7 +980,7 @@ const ProductionPlanningPage = () => {
 
                                             {/* Material Data Cells */}
                                             {(viewMode === 'all') && materialHeaders.map((h) => (
-                                                <td key={h} className={`p-1.5 align-middle bg-slate-50/5 border-r border-b border-slate-100 last:border-r-0 cursor-pointer hover:bg-orange-50/30`} onClick={() => handleRowEdit(req)}>
+                                                <td key={h} className={`p-1.5 align-middle bg-ind-bg/5 border-r border-b border-ind-border/50 last:border-r-0 cursor-pointer hover:bg-orange-50/30`} onClick={() => handleRowEdit(req)}>
                                                     <div className="w-full py-3 px-2 text-[11px] font-bold text-slate-700 text-center min-w-[100px]">
                                                         {req[h] || '-'}
                                                     </div>
@@ -992,7 +992,7 @@ const ProductionPlanningPage = () => {
                                                         const cv = parseFloat(req[h] || '0');
                                                         const isLowCoverage = h === 'Coverage Days' && cv > 0 && cv < 5.0;
                                                         return (
-                                                            <td key={h} className={`p-1.5 border-r border-b border-slate-100 ${isLowCoverage ? 'bg-red-50' : 'bg-orange-50/10'} text-center min-w-[80px] cursor-pointer`} onClick={() => handleRowEdit(req)}>
+                                                            <td key={h} className={`p-1.5 border-r border-b border-ind-border/50 ${isLowCoverage ? 'bg-red-50' : 'bg-orange-50/10'} text-center min-w-[80px] cursor-pointer`} onClick={() => handleRowEdit(req)}>
                                                                 <div className={`text-[11px] font-bold ${isLowCoverage ? 'text-red-600' : 'text-orange-700'}`}>
                                                                     {/* Show data if manually entered, but keep it empty by default (auto-calculation disabled) */}
                                                                     {req[h] || ''}
@@ -1002,10 +1002,10 @@ const ProductionPlanningPage = () => {
                                                     })}
                                                 </>
                                             )}
-                                            <td className="py-2 px-2 text-center align-middle border-b border-slate-100">
+                                            <td className="py-2 px-2 text-center align-middle border-b border-ind-border/50">
                                                 <button
                                                     onClick={() => deleteRow(req.id)}
-                                                    className="p-2.5 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all opacity-0 group-hover:opacity-100"
+                                                    className="p-2.5 rounded-xl text-ind-text3 hover:text-rose-500 hover:bg-rose-50 transition-all opacity-0 group-hover:opacity-100"
                                                     title="Delete Row"
                                                 >
                                                     <Trash2 size={16} strokeWidth={2.5} />
@@ -1017,13 +1017,13 @@ const ProductionPlanningPage = () => {
                                 </tbody>
                             </table>
                         ) : (
-                            <div className="flex-1 flex flex-col items-center justify-center py-32 text-slate-400 gap-6">
-                                <div className="w-20 h-20 bg-white rounded-3xl border border-slate-200 flex items-center justify-center shadow-xl shadow-slate-200/50">
+                            <div className="flex-1 flex flex-col items-center justify-center py-32 text-ind-text3 gap-6">
+                                <div className="w-20 h-20 bg-white rounded-3xl border border-ind-border flex items-center justify-center shadow-xl shadow-slate-200/50">
                                     <Layers size={32} className="text-slate-200 animate-pulse" />
                                 </div>
                                 <div className="text-center space-y-2">
                                     <h3 className="text-lg font-black uppercase tracking-tight text-slate-800">No Design Data Found</h3>
-                                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 max-w-xs mx-auto leading-relaxed">
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-ind-text3 max-w-xs mx-auto leading-relaxed">
                                         Start your car design by adding the first component row to this model.
                                     </p>
                                 </div>
@@ -1058,7 +1058,7 @@ const ProductionPlanningPage = () => {
                 {/* Absolute Floating Sync Status */}
                 {isSaving && (
                     <div className="absolute top-20 right-10 z-[70] animate-in fade-in slide-in-from-right-4 duration-300">
-                        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-200 shadow-2xl flex items-center gap-3">
+                        <div className="bg-white px-4 py-2.5 rounded-2xl border border-ind-border shadow-2xl flex items-center gap-3">
                             <div className="flex gap-1">
                                 <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-bounce" style={{ animationDelay: '0ms' }} />
                                 <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-bounce" style={{ animationDelay: '150ms' }} />

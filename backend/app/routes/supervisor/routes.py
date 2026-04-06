@@ -91,15 +91,11 @@ def verify_log():
     
     # If approved, mark all individual rows as verified
     if status == 'APPROVED':
-        log_data = list(log.log_data)
-        for row in log_data:
-            if isinstance(row, dict):
-                row['row_status'] = 'VERIFIED'
-                row['supervisor_reviewed'] = True
-        log.log_data = log_data
-        flag_modified(log, "log_data")
+        for entry in log.entries:
+            entry.status = 'VERIFIED'
+            entry.supervisor_reviewed = True
         
-        # Sychronize statuses for Admin/DEO views
+        # Synchronize statuses for Admin/DEO views
         # 1. Update CarModel status (DEO Ready tab & Admin Assignment)
         if log.car_model_id:
             model = CarModel.query.get(log.car_model_id)
@@ -136,16 +132,24 @@ def verify_row():
     if not log:
         return jsonify({"success": False, "message": "Log not found"}), 404
         
-    log_data = list(log.log_data)
-    if row_index < len(log_data):
-        log_data[row_index]['row_status'] = status
-        log_data[row_index]['rejection_reason'] = reason if status == 'REJECTED' else None
-        log_data[row_index]['supervisor_reviewed'] = True
+    from app.services.production_service import get_merged_log_data
+    merged = get_merged_log_data(log)
+    
+    if 0 <= row_index < len(merged):
+        sap_part = str(merged[row_index].get('SAP PART NUMBER', '')).strip().upper()
+        from app.models.models import DEOProductionEntry
+        # Robust case-insensitive lookup
+        entry = DEOProductionEntry.query.filter(
+            DEOProductionEntry.log_id == log.id,
+            db.func.upper(db.func.trim(DEOProductionEntry.sap_part_number)) == sap_part
+        ).first()
         
-        log.log_data = log_data
-        flag_modified(log, "log_data")
-        db.session.commit()
-        return jsonify({"success": True})
+        if entry:
+            entry.status = status
+            entry.rejection_reason = reason if status == 'REJECTED' else None
+            entry.supervisor_reviewed = True
+            db.session.commit()
+            return jsonify({"success": True})
     
     return jsonify({"success": False, "message": "Row index out of bounds"}), 400
 
@@ -199,14 +203,9 @@ def finalize_assignment(model_id):
     if log:
         log.status = 'APPROVED'
         # Mark all rows as verified
-        if log.log_data:
-            log_data = list(log.log_data)
-            for row in log_data:
-                if isinstance(row, dict):
-                    row['row_status'] = 'VERIFIED'
-                    row['supervisor_reviewed'] = True
-            log.log_data = log_data
-            flag_modified(log, "log_data")
+        for entry in log.entries:
+            entry.status = 'VERIFIED'
+            entry.supervisor_reviewed = True
         
         # 3. Mark the linked Demand as COMPLETED (visible in Admin Demand Management)
         if log.demand_id:
@@ -249,8 +248,28 @@ def update_log():
     if not log:
         return jsonify({"success": False, "message": "Log not found"}), 404
         
-    log.log_data = log_data
-    flag_modified(log, "log_data")
+    from app.models.models import DEOProductionEntry
+    for row in log_data:
+        sap = str(row.get('SAP PART NUMBER', '')).strip().upper()
+        if not sap: continue
+        
+        # Robust case-insensitive lookup
+        entry = DEOProductionEntry.query.filter(
+            DEOProductionEntry.log_id == log.id,
+            db.func.upper(db.func.trim(DEOProductionEntry.sap_part_number)) == sap
+        ).first()
+        
+        if not entry:
+            entry = DEOProductionEntry(log_id=log.id, sap_part_number=sap, date=log.date, car_model_id=log.car_model_id)
+            db.session.add(entry)
+            
+        entry.sap_stock = row.get('SAP Stock', 0)
+        entry.opening_stock = row.get('Opening Stock', 0)
+        entry.todays_stock = row.get('Todays Stock', 0)
+        entry.status = row.get('Production Status') or 'PENDING'
+        entry.per_day = row.get('PER DAY') or row.get('Per Day') or 0
+        if entry.per_day > 0: entry.coverage_days = round(float(entry.todays_stock) / float(entry.per_day), 1)
+
     db.session.commit()
     
     sync_log_to_work_status(log)

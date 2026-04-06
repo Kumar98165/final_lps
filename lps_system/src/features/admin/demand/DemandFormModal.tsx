@@ -60,10 +60,10 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
             // after demand deletions cycle (CarModel records get cleaned up but MasterData is the 
             // permanent source of truth for all vehicle models).
             const modelsRes = await fetch(`${API_BASE}/manager/vehicle-models`, { headers: { 'Authorization': `Bearer ${token}` } });
-    if (modelsRes.ok) {
-        const data = await modelsRes.json();
-        if (data.success) setModels(data.data);
-    }
+            if (modelsRes.ok) {
+                const data = await modelsRes.json();
+                if (data.success) setModels(data.data);
+            }
         } catch (err) {
             console.error('Failed to fetch modal data', err);
         }
@@ -180,7 +180,7 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
             const token = getToken();
 
             const model = models.find(m => String(m.id) === selectedModel);
-            
+
             // Allow name-only fallback for Gmail requests (backend will create fresh model)
             const finalModelName = model ? model.name : (initialData?.model_name || '');
             const finalModelId = model ? Number(model.id) : 0;
@@ -285,7 +285,7 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40"
+                        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100]"
                         onClick={handleFinalClose}
                     />
                     <motion.div
@@ -293,7 +293,7 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 100 }}
                         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none p-4"
+                        className="fixed inset-0 z-[110] flex items-center justify-center pointer-events-none p-4"
                     >
                         <div className="w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden font-sans pointer-events-auto flex flex-col max-h-[90vh]">
                             {/* Error Banner */}
@@ -322,7 +322,7 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
                                     </div>
                                     <div className="space-y-1 pb-2">
                                         <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Model Authorized Successfully!</h2>
-                                        <p className="text-slate-500 font-bold text-xs underline underline-offset-4 decoration-emerald-500/30">
+                                        <p className="text-ind-text2 font-bold text-xs underline underline-offset-4 decoration-emerald-500/30">
                                             {initialData ? "Parameters confirmed & ready for system authorization." : "Target registered & Confirmation sent to customer."}
                                         </p>
                                     </div>
@@ -342,13 +342,11 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
                                             <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tight">
                                                 {editingDemand ? 'EDIT PRODUCTION TARGET' : 'REGISTER NEW PRODUCTION'}
                                             </h2>
-                                            <p className="text-slate-400 font-bold text-xs mt-1">
-                                                {editingDemand ? 'Modify production parameters for this order.' : 'Define production parameters and assign a manager.'}
-                                            </p>
+
                                         </div>
                                         <button
                                             onClick={handleFinalClose}
-                                            className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center text-slate-300 hover:text-slate-600 hover:bg-slate-50 transition-all"
+                                            className="w-10 h-10 rounded-full border border-ind-border/50 flex items-center justify-center text-ind-text3 hover:text-ind-text2 hover:bg-ind-bg transition-all"
                                         >
                                             <X size={20} />
                                         </button>
@@ -359,9 +357,9 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
 
                                             {/* 1. DETECTED ORDER DETAILS (Image 2 Style) */}
                                             {initialData && (
-                                                <div className="bg-slate-50/50 rounded-[2rem] p-8 border border-slate-100/60 transition-all">
+                                                <div className="bg-ind-bg/50 rounded-[2rem] p-8 border border-ind-border/50/60 transition-all">
                                                     <div className="flex items-center gap-3 mb-6">
-                                                        <div className="bg-indigo-50 text-[#F37021] p-2 rounded-xl">
+                                                        <div className="bg-indigo-50 text-ind-primary p-2 rounded-xl">
                                                             <Truck size={16} strokeWidth={3} />
                                                         </div>
                                                         <span className="text-[10px] font-black text-indigo-900/40 tracking-[0.2em] uppercase">Detected Order Details</span>
@@ -370,13 +368,13 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
                                                     <div className="grid grid-cols-3 gap-4">
                                                         {/* Model Card */}
                                                         <div className="bg-white rounded-2xl p-5 border border-slate-50 shadow-sm">
-                                                            <span className="text-[10px] font-black text-slate-400 uppercase block mb-2 tracking-widest">Model</span>
+                                                            <span className="text-[10px] font-black text-ind-text3 uppercase block mb-2 tracking-widest">Model</span>
                                                             <span className="text-sm font-black text-slate-800 tracking-tight">{initialData.model_name}</span>
                                                         </div>
 
                                                         {/* Quantity Card */}
                                                         <div className="bg-white rounded-2xl p-5 border border-slate-50 shadow-sm">
-                                                            <span className="text-[10px] font-black text-slate-400 uppercase block mb-2 tracking-widest">Quantity</span>
+                                                            <span className="text-[10px] font-black text-ind-text3 uppercase block mb-2 tracking-widest">Quantity</span>
                                                             <span className="text-sm font-black text-slate-800 tracking-tight">
                                                                 {initialData.quantity} Units
                                                             </span>
@@ -384,7 +382,7 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
 
                                                         {/* Customer Card */}
                                                         <div className="bg-white rounded-2xl p-5 border border-slate-50 shadow-sm">
-                                                            <span className="text-[10px] font-black text-slate-400 uppercase block mb-2 tracking-widest">Customer</span>
+                                                            <span className="text-[10px] font-black text-ind-text3 uppercase block mb-2 tracking-widest">Customer</span>
                                                             <span className="text-sm font-black text-slate-800 tracking-tight leading-tight truncate">
                                                                 {initialData.customer?.split(' <')[0] || 'Client'}
                                                             </span>
@@ -393,46 +391,46 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
                                                 </div>
                                             )}
 
-                                            {/* 2. PRODUCTION SCHEDULE (Image 3 Style) */}
-                                            <div className="bg-slate-50/50 rounded-[2rem] p-8 border border-slate-100/60 space-y-6">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="p-2 bg-indigo-50 rounded-xl text-indigo-400">
-                                                        <Calendar size={18} />
+                                            {/* 2. PRODUCTION SCHEDULE */}
+                                            <div className="bg-ind-bg/50 rounded-[2rem] p-6 border border-ind-border/50 space-y-4">
+                                                <div className="flex items-center gap-2.5">
+                                                    <div className="p-1.5 bg-indigo-50 rounded-lg text-indigo-400">
+                                                        <Calendar size={16} />
                                                     </div>
-                                                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Production Schedule</h3>
+                                                    <h3 className="text-[10px] font-black text-ind-text3 uppercase tracking-[0.2em]">Production Schedule</h3>
                                                 </div>
 
-                                                <div className="grid grid-cols-2 gap-6">
+                                                <div className="grid grid-cols-2 gap-4">
                                                     <div className="space-y-2">
-                                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Demand From (Start Date)</label>
+                                                        <label className="text-[10px] font-black text-ind-text3 uppercase tracking-widest ml-1">Demand From (Start Date)</label>
                                                         <div className="relative group">
                                                             <input
                                                                 type="date"
                                                                 value={startDate}
                                                                 onChange={(e) => setStartDate(e.target.value)}
-                                                                className="w-full bg-white border border-slate-100 rounded-xl py-4 px-5 text-slate-700 font-bold text-sm outline-none focus:border-[#F37021] focus:ring-4 focus:ring-orange-500/5 transition-all"
+                                                                className="w-full bg-white border border-ind-border/50 rounded-xl py-2.5 px-5 text-slate-700 font-bold text-sm outline-none focus:border-ind-primary focus:ring-4 focus:ring-orange-500/5 transition-all"
                                                                 required
                                                             />
-                                                            <Calendar className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" size={18} />
+                                                            <Calendar className="absolute right-5 top-1/2 -translate-y-1/2 text-ind-text3 pointer-events-none" size={16} />
                                                         </div>
                                                     </div>
                                                     <div className="space-y-2">
-                                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Scheduled Finish Date</label>
+                                                        <label className="text-[10px] font-black text-ind-text3 uppercase tracking-widest ml-1">Scheduled Finish Date</label>
                                                         <div className="relative group">
                                                             <input
                                                                 type="date"
                                                                 value={endDate}
                                                                 onChange={(e) => setEndDate(e.target.value)}
-                                                                className="w-full bg-white border border-slate-100 rounded-xl py-4 px-5 text-slate-700 font-bold text-sm outline-none focus:border-[#F37021] focus:ring-4 focus:ring-orange-500/5 transition-all"
+                                                                className="w-full bg-white border border-ind-border/50 rounded-xl py-2.5 px-5 text-slate-700 font-bold text-sm outline-none focus:border-ind-primary focus:ring-4 focus:ring-orange-500/5 transition-all"
                                                                 required
                                                             />
-                                                            <Calendar className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" size={18} />
+                                                            <Calendar className="absolute right-5 top-1/2 -translate-y-1/2 text-ind-text3 pointer-events-none" size={16} />
                                                         </div>
                                                     </div>
                                                 </div>
 
                                                 {/* Automated Reply Banner */}
-                                                <div className="bg-indigo-50/40 rounded-2xl p-4 flex items-center gap-3 border border-indigo-100/30">
+                                                <div className="bg-indigo-50/40 rounded-2xl p-3 flex items-center gap-3 border border-indigo-100/30">
                                                     <Send size={14} className="text-indigo-400" />
                                                     <p className="text-[11px] font-bold text-indigo-900/60">
                                                         Automated reply with these dates will be sent to customer upon acceptance.
@@ -448,7 +446,7 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
                                                     <select
                                                         value={selectedModel}
                                                         onChange={(e) => setSelectedModel(e.target.value)}
-                                                        className="w-full bg-white border border-slate-100 rounded-2xl py-4 px-6 text-slate-700 font-black text-sm outline-none focus:border-[#F37021] transition-all appearance-none cursor-pointer"
+                                                        className="w-full bg-white border border-ind-border/50 rounded-2xl py-4 px-6 text-slate-700 font-black text-sm outline-none focus:border-ind-primary transition-all appearance-none cursor-pointer"
                                                         required
                                                     >
                                                         <option value="">{initialData?.model_name || 'Select a vehicle model'}</option>
@@ -456,47 +454,47 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
                                                             <option key={m.id} value={m.id}>{m.name}</option>
                                                         ))}
                                                     </select>
-                                                    <ChevronDown size={18} className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" />
+                                                    <ChevronDown size={18} className="absolute right-6 top-1/2 -translate-y-1/2 text-ind-text3 pointer-events-none" />
                                                 </div>
 
                                                 {/* 4. MASTER DATA PREVIEW (NEW) */}
                                                 {(selectedModel || editingDemand) && (
-                                                    <div className="bg-slate-50/50 rounded-[2rem] p-8 border border-slate-100/60 transition-all space-y-4">
+                                                    <div className="bg-ind-bg/50 rounded-[2rem] p-8 border border-ind-border/50/60 transition-all space-y-4">
                                                         <div className="flex items-center justify-between">
                                                             <div className="flex items-center gap-3">
                                                                 <div className="p-2 bg-emerald-50 rounded-xl text-emerald-500">
                                                                     <Package size={18} />
                                                                 </div>
-                                                                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Master Data Components</h3>
+                                                                <h3 className="text-[10px] font-black text-ind-text3 uppercase tracking-[0.2em]">Master Data Components</h3>
                                                             </div>
-                                                            <span className="text-[10px] font-black text-slate-500 bg-white px-3 py-1 rounded-full border border-slate-100 italic">
+                                                            <span className="text-[10px] font-black text-ind-text2 bg-white px-3 py-1 rounded-full border border-ind-border/50 italic">
                                                                 {masterDataPreview.length} items detected
                                                             </span>
                                                         </div>
 
-                                                        <div className="relative bg-white rounded-2xl border border-slate-100 overflow-hidden min-h-[150px] max-h-[300px] flex flex-col shadow-inner">
+                                                        <div className="relative bg-white rounded-2xl border border-ind-border/50 overflow-hidden min-h-[150px] max-h-[300px] flex flex-col shadow-inner">
                                                             {isPreviewLoading ? (
                                                                 <div className="flex-1 flex flex-col items-center justify-center gap-2 p-10">
                                                                     <div className="w-8 h-8 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
-                                                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Identifying Parts...</span>
+                                                                    <span className="text-[9px] font-black text-ind-text3 uppercase tracking-widest">Identifying Parts...</span>
                                                                 </div>
                                                             ) : masterDataPreview.length > 0 ? (
                                                                 <div className="overflow-auto custom-scrollbar flex-1">
                                                                     <table className="w-full border-collapse">
-                                                                        <thead className="sticky top-0 bg-slate-50 z-10">
+                                                                        <thead className="sticky top-0 bg-ind-bg z-10">
                                                                             <tr>
-                                                                                <th className="px-4 py-2.5 text-left text-[8px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Part Number</th>
-                                                                                <th className="px-4 py-2.5 text-left text-[8px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">SAP #</th>
-                                                                                <th className="px-4 py-2.5 text-left text-[8px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Description</th>
-                                                                                <th className="px-4 py-2.5 text-left text-[8px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Assembly</th>
+                                                                                <th className="px-4 py-2.5 text-left text-[8px] font-black text-ind-text3 uppercase tracking-widest border-b border-ind-border/50">Part Number</th>
+                                                                                <th className="px-4 py-2.5 text-left text-[8px] font-black text-ind-text3 uppercase tracking-widest border-b border-ind-border/50">SAP #</th>
+                                                                                <th className="px-4 py-2.5 text-left text-[8px] font-black text-ind-text3 uppercase tracking-widest border-b border-ind-border/50">Description</th>
+                                                                                <th className="px-4 py-2.5 text-left text-[8px] font-black text-ind-text3 uppercase tracking-widest border-b border-ind-border/50">Assembly</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
                                                                             {masterDataPreview.map((item, idx) => (
                                                                                 <tr key={idx} className="border-b border-slate-50 hover:bg-orange-50/30 transition-colors">
-                                                                                    <td className="px-4 py-2 text-[9px] font-bold text-slate-600 font-mono">{item.common.part_number}</td>
-                                                                                    <td className="px-4 py-2 text-[9px] font-black text-slate-900">{item.common.sap_part_number}</td>
-                                                                                    <td className="px-4 py-2 text-[9px] font-medium text-slate-400 truncate max-w-[150px]">{item.common.description}</td>
+                                                                                    <td className="px-4 py-2 text-[9px] font-bold text-ind-text2 font-mono">{item.common.part_number}</td>
+                                                                                    <td className="px-4 py-2 text-[9px] font-black text-ind-text">{item.common.sap_part_number}</td>
+                                                                                    <td className="px-4 py-2 text-[9px] font-medium text-ind-text3 truncate max-w-[150px]">{item.common.description}</td>
                                                                                     <td className="px-4 py-2 text-[9px] font-bold text-indigo-500 italic">{item.common.assembly_number || '-'}</td>
                                                                                 </tr>
                                                                             ))}
@@ -506,18 +504,18 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
                                                             ) : (
                                                                 <div className="flex-1 flex flex-col items-center justify-center gap-3 p-10 text-center">
                                                                     <Search size={24} className="text-slate-200" />
-                                                                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">No master data found for this model</p>
+                                                                    <p className="text-[10px] font-black text-ind-text3 uppercase tracking-widest">No master data found for this model</p>
                                                                     <button
                                                                         type="button"
                                                                         onClick={() => fetchMasterDataPreview(models.find(m => String(m.id) === selectedModel)?.name || '')}
-                                                                        className="text-[9px] font-black text-[#F37021] hover:underline"
+                                                                        className="text-[9px] font-black text-ind-primary hover:underline"
                                                                     >
                                                                         RETRY DISCOVERY
                                                                     </button>
                                                                 </div>
                                                             )}
                                                         </div>
-                                                        <p className="text-[10px] font-bold text-slate-400 flex items-center gap-2 pl-2">
+                                                        <p className="text-[10px] font-bold text-ind-text3 flex items-center gap-2 pl-2">
                                                             <div className="w-1.5 h-1.5 rounded-full bg-[#F37021]" />
                                                             Parts and sub-assemblies will be automatically mapped to this production order.
                                                         </p>
@@ -526,7 +524,7 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
 
                                                 {/* Target Quantity (Full Width) */}
                                                 <div className="space-y-3">
-                                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">TARGET QUANTITY</label>
+                                                    <label className="text-[10px] font-black text-ind-text3 uppercase tracking-widest ml-1">TARGET QUANTITY</label>
                                                     <div className="relative group">
                                                         <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-200">
                                                             <CheckCircle2 size={18} />
@@ -535,7 +533,7 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
                                                             type="number"
                                                             value={quantity}
                                                             onChange={(e) => setQuantity(e.target.value)}
-                                                            className="w-full bg-white border border-slate-100 rounded-2xl py-4 pl-14 pr-4 text-slate-700 font-black text-sm outline-none focus:border-[#F37021] transition-all font-sans"
+                                                            className="w-full bg-white border border-ind-border/50 rounded-2xl py-4 pl-14 pr-4 text-slate-700 font-black text-sm outline-none focus:border-ind-primary transition-all font-sans"
                                                             placeholder="Enter target quantity (e.g. 50)"
                                                             required
                                                         />
@@ -545,35 +543,35 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
                                                 {/* Customer & Company Details */}
                                                 <div className="grid grid-cols-2 gap-6">
                                                     <div className="space-y-3">
-                                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">COMPANY NAME</label>
+                                                        <label className="text-[10px] font-black text-ind-text3 uppercase tracking-widest ml-1">COMPANY NAME</label>
                                                         <input
                                                             type="text"
                                                             value={companyName}
                                                             onChange={(e) => setCompanyName(e.target.value)}
-                                                            className="w-full bg-white border border-slate-100 rounded-2xl py-4 px-6 text-slate-700 font-black text-sm outline-none focus:border-[#F37021] transition-all"
+                                                            className="w-full bg-white border border-ind-border/50 rounded-2xl py-4 px-6 text-slate-700 font-black text-sm outline-none focus:border-ind-primary transition-all"
                                                             placeholder="e.g. Mahindra, Tesla"
                                                             required
                                                         />
                                                     </div>
                                                     <div className="space-y-3">
-                                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">CUSTOMER NAME</label>
+                                                        <label className="text-[10px] font-black text-ind-text3 uppercase tracking-widest ml-1">CUSTOMER NAME</label>
                                                         <input
                                                             type="text"
                                                             value={customer}
                                                             onChange={(e) => setCustomer(e.target.value)}
-                                                            className="w-full bg-white border border-slate-100 rounded-2xl py-4 px-6 text-slate-700 font-black text-sm outline-none focus:border-[#F37021] transition-all"
+                                                            className="w-full bg-white border border-ind-border/50 rounded-2xl py-4 px-6 text-slate-700 font-black text-sm outline-none focus:border-ind-primary transition-all"
                                                             required
                                                         />
                                                     </div>
                                                 </div>
 
                                                 <div className="space-y-3">
-                                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">CUSTOMER EMAIL</label>
+                                                    <label className="text-[10px] font-black text-ind-text3 uppercase tracking-widest ml-1">CUSTOMER EMAIL</label>
                                                     <input
                                                         type="email"
                                                         value={customerEmail}
                                                         onChange={(e) => setCustomerEmail(e.target.value)}
-                                                        className="w-full bg-white border border-slate-100 rounded-2xl py-4 px-6 text-slate-700 font-black text-sm outline-none focus:border-[#F37021] transition-all"
+                                                        className="w-full bg-white border border-ind-border/50 rounded-2xl py-4 px-6 text-slate-700 font-black text-sm outline-none focus:border-ind-primary transition-all"
                                                         placeholder="for automated notifications"
                                                     />
                                                 </div>
@@ -589,7 +587,7 @@ const DemandFormModal: React.FC<DemandFormModalProps> = ({ isOpen, onClose, onSu
                                         <button
                                             type="button"
                                             onClick={handleFinalClose}
-                                            className="bg-white border border-slate-100 text-slate-400 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:border-slate-300 hover:text-slate-600 transition-all"
+                                            className="bg-white border border-ind-border/50 text-ind-text3 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:border-slate-300 hover:text-ind-text2 transition-all"
                                         >
                                             CANCEL
                                         </button>

@@ -68,7 +68,7 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 relative overflow-hidden">
+        <div className="min-h-screen bg-ind-bg flex items-center justify-center p-6 relative overflow-hidden">
             {/* Subtle Background Elements */}
             <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-orange-500/5 rounded-full blur-[120px] pointer-events-none" />
             <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
@@ -78,7 +78,7 @@ const LoginPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="w-full max-w-[420px] relative z-10"
             >
-                <div className="bg-white rounded-[2.5rem] p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] relative overflow-hidden border border-slate-100">
+                <div className="bg-white rounded-[2.5rem] p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] relative overflow-hidden border border-ind-border/50">
 
                     {/* Branding */}
                     <div className="text-center mb-8">
@@ -86,35 +86,35 @@ const LoginPage = () => {
                             <img src={logoLps} alt="CIE Automotive" className="w-full h-auto object-contain" />
                         </div>
                         <h1 className="text-2xl font-black text-slate-800 tracking-wide uppercase mb-2 font-sans">PRODUCTION SYSTEM</h1>
-                        <p className="text-slate-400 font-bold text-xs">Sign in to access your dashboard</p>
+                        <p className="text-ind-text3 font-bold text-xs">Sign in to access your dashboard</p>
                     </div>
 
                     <form onSubmit={handleLogin} className="space-y-5">
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">USERNAME</label>
+                            <label className="text-[10px] font-black text-ind-text3 uppercase tracking-widest ml-1">USERNAME</label>
                             <div className="relative group">
-                                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#F37021] transition-colors" size={20} />
+                                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-ind-text3 group-focus-within:text-ind-primary transition-colors" size={20} />
                                 <input
                                     type="text"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                     placeholder="Enter your username"
-                                    className="w-full bg-slate-50 border-2 border-slate-100/50 rounded-2xl py-3.5 pl-12 pr-4 text-slate-700 placeholder:text-slate-300 focus:bg-white focus:border-[#F37021] focus:ring-4 focus:ring-orange-500/10 transition-all font-bold outline-none"
+                                    className="w-full bg-ind-bg border-2 border-ind-border/50/50 rounded-2xl py-3.5 pl-12 pr-4 text-slate-700 placeholder:text-ind-text3 focus:bg-white focus:border-ind-primary focus:ring-4 focus:ring-orange-500/10 transition-all font-bold outline-none"
                                     required
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">PASSWORD</label>
+                            <label className="text-[10px] font-black text-ind-text3 uppercase tracking-widest ml-1">PASSWORD</label>
                             <div className="relative group">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#F37021] transition-colors" size={20} />
+                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-ind-text3 group-focus-within:text-ind-primary transition-colors" size={20} />
                                 <input
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="••••••••"
-                                    className="w-full bg-slate-50 border-2 border-slate-100/50 rounded-2xl py-3.5 pl-12 pr-4 text-slate-700 placeholder:text-slate-300 focus:bg-white focus:border-[#F37021] focus:ring-4 focus:ring-orange-500/10 transition-all font-bold outline-none"
+                                    className="w-full bg-ind-bg border-2 border-ind-border/50/50 rounded-2xl py-3.5 pl-12 pr-4 text-slate-700 placeholder:text-ind-text3 focus:bg-white focus:border-ind-primary focus:ring-4 focus:ring-orange-500/10 transition-all font-bold outline-none"
                                     required
                                 />
                             </div>
@@ -149,9 +149,7 @@ const LoginPage = () => {
 
                     <div className="mt-12 text-center space-y-4">
                         <p className="text-[9px] font-black text-slate-200 uppercase tracking-widest">CIE AUTOMOTIVE PRODUCTION SYSTEM V3.0</p>
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                            Backend server required for authentication
-                        </p>
+
                     </div>
                 </div>
             </motion.div>

@@ -65,7 +65,7 @@ const DEOStockEditModal: React.FC<DEOStockEditModalProps> = ({
                 readOnly={formData.row_status === 'VERIFIED'}
                 onChange={(e) => handleChange(key, e.target.value)}
                 placeholder={placeholder}
-                className={`w-full bg-white border-2 ${isFocused ? 'border-[#F37021] ring-4 ring-[#F37021]/5' : 'border-[#F1F5F9]'} rounded-[1.5rem] py-4 px-6 text-[#1A202C] font-black text-sm outline-none transition-all placeholder:text-[#CBD5E0] shadow-sm`}
+                className={`w-full bg-white border-2 ${isFocused ? 'border-ind-primary ring-4 ring-[#F37021]/5' : 'border-[#F1F5F9]'} rounded-[1.5rem] py-4 px-6 text-[#1A202C] font-black text-sm outline-none transition-all placeholder:text-[#CBD5E0] shadow-sm`}
             />
         </div>
     );
@@ -104,7 +104,7 @@ const DEOStockEditModal: React.FC<DEOStockEditModalProps> = ({
                         </div>
                         <button 
                             onClick={onClose}
-                            className="w-10 h-10 bg-[#F8FAFC] hover:bg-[#F1F5F9] rounded-full flex items-center justify-center text-[#94A3B8] transition-colors"
+                            className="w-10 h-10 bg-ind-bg hover:bg-[#F1F5F9] rounded-full flex items-center justify-center text-[#94A3B8] transition-colors"
                         >
                             <X size={20} />
                         </button>
@@ -116,7 +116,7 @@ const DEOStockEditModal: React.FC<DEOStockEditModalProps> = ({
                         {/* 1. Identification Section */}
                         <div className="space-y-8">
                             <div className="inline-flex items-center gap-3 bg-[#0F172A] text-white px-6 py-2.5 rounded-full shadow-lg">
-                                <Database size={14} className="text-[#F37021]" />
+                                <Database size={14} className="text-ind-primary" />
                                 <span className="text-[10px] font-black uppercase tracking-widest">Identification</span>
                             </div>
 
@@ -131,7 +131,7 @@ const DEOStockEditModal: React.FC<DEOStockEditModalProps> = ({
                         {/* 2. Stock Inputs Section */}
                         <div className="space-y-8">
                             <div className="inline-flex items-center gap-3 bg-[#0F172A] text-white px-6 py-2.5 rounded-full shadow-lg">
-                                <Table size={14} className="text-[#F37021]" />
+                                <Table size={14} className="text-ind-primary" />
                                 <span className="text-[10px] font-black uppercase tracking-widest">Core stock Inventory</span>
                             </div>
 
@@ -146,7 +146,7 @@ const DEOStockEditModal: React.FC<DEOStockEditModalProps> = ({
                         {viewMode === 'g-chart' && (
                             <div className="space-y-8 pt-10 border-t border-[#F1F5F9]">
                                 <div className="inline-flex items-center gap-3 bg-[#0F172A] text-white px-6 py-2.5 rounded-full shadow-lg">
-                                    <Calendar size={14} className="text-[#F37021]" />
+                                    <Calendar size={14} className="text-ind-primary" />
                                     <span className="text-[10px] font-black uppercase tracking-widest">31-Day Projection Matrix</span>
                                 </div>
 
@@ -158,7 +158,7 @@ const DEOStockEditModal: React.FC<DEOStockEditModalProps> = ({
                                                 type="text"
                                                 value={formData[String(day)] || ''}
                                                 onChange={(e) => handleChange(String(day), e.target.value)}
-                                                className="w-full bg-[#FAFAFA] border-2 border-[#F1F5F9] focus:bg-white focus:border-[#F37021] rounded-xl py-2 px-1 text-[#1A202C] font-black text-[11px] text-center outline-none transition-all"
+                                                className="w-full bg-[#FAFAFA] border-2 border-[#F1F5F9] focus:bg-white focus:border-ind-primary rounded-xl py-2 px-1 text-[#1A202C] font-black text-[11px] text-center outline-none transition-all"
                                                 placeholder="0"
                                             />
                                         </div>
@@ -170,7 +170,7 @@ const DEOStockEditModal: React.FC<DEOStockEditModalProps> = ({
                         {/* 4. Remarks (Consistent with design) */}
                         <div className="space-y-6 pt-10 border-t border-[#F1F5F9]">
                             <div className="inline-flex items-center gap-3 bg-[#0F172A] text-white px-6 py-2.5 rounded-full shadow-lg">
-                                <Edit2 size={14} className="text-[#F37021]" />
+                                <Edit2 size={14} className="text-ind-primary" />
                                 <span className="text-[10px] font-black uppercase tracking-widest">Stock Remarks / Issue report</span>
                             </div>
 
@@ -182,7 +182,7 @@ const DEOStockEditModal: React.FC<DEOStockEditModalProps> = ({
                                     value={formData["Remarks"] || ''}
                                     onChange={(e) => handleChange("Remarks", e.target.value)}
                                     placeholder="Enter shift notes here..."
-                                    className="w-full bg-[#F8FAFC] border-2 border-[#F1F5F9] focus:bg-white focus:border-[#F37021] rounded-[2rem] p-8 text-sm font-bold text-[#4A5568] outline-none transition-all min-h-[120px] resize-none shadow-inner italic"
+                                    className="w-full bg-ind-bg border-2 border-[#F1F5F9] focus:bg-white focus:border-ind-primary rounded-[2rem] p-8 text-sm font-bold text-[#4A5568] outline-none transition-all min-h-[120px] resize-none shadow-inner italic"
                                 />
                             </div>
                         </div>

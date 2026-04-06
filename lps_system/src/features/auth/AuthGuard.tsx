@@ -18,11 +18,11 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ allowedRoles }) => {
     if (allowedRoles && allowedRoles.length > 0) {
         if (!allowedRoles.includes(user.role)) {
             return (
-                <div className="min-h-screen flex items-center justify-center bg-slate-50 p-8 text-center">
+                <div className="min-h-screen flex items-center justify-center bg-ind-bg p-8 text-center">
                     <div className="card-premium max-w-md">
-                        <h1 className="text-2xl font-bold text-slate-900 mb-2">Unauthorized Access</h1>
-                        <p className="text-slate-500 mb-4">Your role ({user.role}) does not have permission to view this page.</p>
-                        <p className="text-xs text-slate-400 uppercase tracking-widest">Required: {allowedRoles.join(', ')}</p>
+                        <h1 className="text-2xl font-bold text-ind-text mb-2">Unauthorized Access</h1>
+                        <p className="text-ind-text2 mb-4">Your role ({user.role}) does not have permission to view this page.</p>
+                        <p className="text-xs text-ind-text3 uppercase tracking-widest">Required: {allowedRoles.join(', ')}</p>
                         <button
                             onClick={() => window.history.back()}
                             className="mt-6 px-6 py-2 bg-primary text-white rounded-lg font-bold hover:bg-orange-600 transition-colors"

@@ -31,7 +31,7 @@ export const useManagerDashboard = () => {
 
     useEffect(() => {
         fetchData();
-        const interval = setInterval(() => fetchData(true), 15000); // Poll every 15s silently
+        const interval = setInterval(() => fetchData(true), 60000); // 1 minute
         return () => clearInterval(interval);
     }, []);
 

@@ -31,36 +31,36 @@ export const OperationalVelocityTrend: React.FC<VelocityTrendProps> = ({ product
         <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/90 backdrop-blur-xl rounded-[2.5rem] p-10 shadow-xl shadow-slate-200/50 flex flex-col h-[520px] mb-8 overflow-hidden relative border border-slate-200"
+            className="bg-white/90 backdrop-blur-xl rounded-[2.5rem] p-10 shadow-xl shadow-slate-200/50 flex flex-col h-[520px] mb-8 overflow-hidden relative border border-ind-border"
         >
             {/* Top Premium Intelligence Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 relative z-10">
                 <div className="flex items-center gap-12">
                     <div className="space-y-1">
                         <div className="flex items-baseline gap-2">
-                            <span className="text-5xl font-black text-slate-900 tracking-tighter font-sans">{productionTotal}</span>
+                            <span className="text-5xl font-black text-ind-text tracking-tighter font-sans">{productionTotal}</span>
                             {isPlayback ? (
                                 <span className="text-[0.6rem] font-bold text-ind-g1 px-1.5 py-0.5 bg-ind-g1/10 rounded border border-ind-g1/20 uppercase">Simulation</span>
                             ) : (
                                 <span className="text-[0.6rem] font-bold text-emerald-500 px-1.5 py-0.5 bg-emerald-500/10 rounded border border-emerald-500/20 uppercase">Live Performance</span>
                             )}
                         </div>
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.25em]">Units Produced</p>
+                        <p className="text-[10px] font-black text-ind-text2 uppercase tracking-[0.25em]">Units Produced</p>
                     </div>
                     
-                    <div className="space-y-1 border-l border-slate-200 pl-12">
+                    <div className="space-y-1 border-l border-ind-border pl-12">
                         <div className="flex items-baseline gap-3">
-                            <span className="text-5xl font-black text-slate-900 tracking-tighter font-sans">{efficiency.toFixed(1)}%</span>
+                            <span className="text-5xl font-black text-ind-text tracking-tighter font-sans">{efficiency.toFixed(1)}%</span>
                             <div className="flex items-center gap-1 px-1.5 py-0.5 bg-emerald-500/10 rounded-full border border-emerald-500/20 text-emerald-600 text-[9px] font-black uppercase tracking-tight">
                                 <span>↑</span>
                                 <span>Optimal</span>
                             </div>
                         </div>
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.25em]">Efficiency Rate</p>
+                        <p className="text-[10px] font-black text-ind-text2 uppercase tracking-[0.25em]">Efficiency Rate</p>
                     </div>
                 </div>
 
-                <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200">
+                <div className="flex bg-ind-border/30 p-1 rounded-2xl border border-ind-border">
                     {['YEAR', 'MONTH', 'WEEK'].map(p => (
                         <button
                             key={p}
@@ -68,7 +68,7 @@ export const OperationalVelocityTrend: React.FC<VelocityTrendProps> = ({ product
                             className={`px-6 py-2.5 rounded-xl text-[10px] font-black transition-all duration-300 tracking-[0.1em] ${
                                 period === p 
                                 ? 'bg-[#F37021] text-white shadow-lg shadow-orange-500/20' 
-                                : 'text-slate-500 hover:text-slate-700'
+                                : 'text-ind-text2 hover:text-slate-700'
                             }`}
                         >
                             {p}

@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-    LayoutGrid, User, UserCheck, Factory, Calendar, 
-    Clock, PlayCircle, CheckCircle2, Package, 
-    MailOpen, ThumbsUp, ThumbsDown, ClipboardList, Zap, ChevronDown, Search 
+import {
+    LayoutGrid, User, UserCheck, Factory, Calendar,
+    Clock, PlayCircle, CheckCircle2, Package,
+    MailOpen, ThumbsUp, ThumbsDown, ClipboardList, Zap, ChevronDown, Search
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -30,7 +30,7 @@ const CustomFilterDropdown: React.FC<CustomDropdownProps> = ({ label, current, s
     const [search, setSearch] = useState('');
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const filtered = options.filter(opt => 
+    const filtered = options.filter(opt =>
         opt.toLowerCase().includes(search.toLowerCase())
     );
 
@@ -50,7 +50,7 @@ const CustomFilterDropdown: React.FC<CustomDropdownProps> = ({ label, current, s
             blue: { bg: 'bg-blue-50/50', text: 'text-ind-blue', ring: 'focus:ring-blue-500/20', hover: 'hover:bg-blue-50' },
             teal: { bg: 'bg-teal-50/50', text: 'text-ind-teal', ring: 'focus:ring-teal-500/20', hover: 'hover:bg-teal-50' },
             indigo: { bg: 'bg-indigo-50/50', text: 'text-ind-indigo', ring: 'focus:ring-indigo-500/20', hover: 'hover:bg-indigo-50' },
-            slate: { bg: 'bg-slate-50', text: 'text-ind-text3', ring: 'focus:ring-slate-500/20', hover: 'hover:bg-slate-50' }
+            slate: { bg: 'bg-ind-bg', text: 'text-ind-text3', ring: 'focus:ring-slate-500/20', hover: 'hover:bg-ind-bg' }
         };
         return maps[color] || maps.slate;
     };
@@ -59,7 +59,7 @@ const CustomFilterDropdown: React.FC<CustomDropdownProps> = ({ label, current, s
 
     return (
         <div className="relative h-full" ref={containerRef}>
-            <div 
+            <div
                 onClick={() => setIsOpen(!isOpen)}
                 className={`h-full bg-white border border-ind-border rounded-[1.25rem] p-4 flex flex-col justify-between shadow-sm cursor-pointer hover:border-ind-border2 transition-all group ${isOpen ? 'ring-2 ring-ind-blue/10 border-ind-blue' : ''}`}
             >
@@ -67,12 +67,12 @@ const CustomFilterDropdown: React.FC<CustomDropdownProps> = ({ label, current, s
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${classes.bg} ${classes.text}`}>
                         {icon}
                     </div>
-                    <span className="font-black text-[0.55rem] text-ind-text3 [font-variant:small-caps] tracking-[0.15em]">{label}</span>
+                    <span className="text-sm whitespace-nowrap font-semibold">{label}</span>
                 </div>
-                
-                <div className="flex items-center justify-between">
-                    <span className="text-[0.8rem] font-black text-ind-text tracking-tight uppercase truncate max-w-[85%]">
-                        {current === 'all' ? `ALL ${label.split(' ')[0]}S` : current}
+
+                <div className="flex items-center justify-between p-2 bg-[#f5f5f5] rounded-full">
+                    <span className="text-xs font-medium">
+                        {current === 'all' ? `ALL ${label.split(' ')[0]}` : current}
                     </span>
                     <ChevronDown size={14} className={`text-ind-text3 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                 </div>
@@ -80,42 +80,41 @@ const CustomFilterDropdown: React.FC<CustomDropdownProps> = ({ label, current, s
 
             <AnimatePresence>
                 {isOpen && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, scale: 0.95, y: 10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
                         className="absolute top-full left-0 right-0 mt-2 bg-white border border-ind-border rounded-xl shadow-2xl z-50 overflow-hidden"
                     >
                         {options.length > 5 && (
-                            <div className="p-2 border-b border-ind-border bg-slate-50/50">
+                            <div className="p-2 border-b border-ind-border bg-ind-bg/50">
                                 <div className="relative">
                                     <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ind-text3" />
-                                    <input 
+                                    <input
                                         autoFocus
                                         placeholder={`Search ${label}...`}
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
-                                        className="w-full bg-white border border-ind-border rounded-md py-1.5 pl-8 pr-3 text-[0.7rem] font-bold text-ind-text focus:ring-2 focus:ring-ind-blue/20 focus:border-ind-blue outline-none transition-all placeholder:text-slate-300"
+                                        className="w-full bg-white border border-ind-border rounded-md py-1.5 pl-8 pr-3 text-[0.7rem] font-bold text-ind-text focus:ring-2 focus:ring-ind-blue/20 focus:border-ind-blue outline-none transition-all placeholder:text-ind-text3"
                                     />
                                 </div>
                             </div>
                         )}
-                        
+
                         <div className="max-h-[12rem] overflow-y-auto custom-scrollbar p-1">
                             {filtered.length === 0 ? (
                                 <div className="px-3 py-4 text-center text-ind-text3 italic text-[0.65rem]">No results found</div>
                             ) : (
                                 filtered.map(opt => (
-                                    <div 
+                                    <div
                                         key={opt}
                                         onClick={() => {
                                             set(opt);
                                             setIsOpen(false);
                                             setSearch('');
                                         }}
-                                        className={`px-3 py-2 rounded-lg text-[0.7rem] font-bold cursor-pointer transition-all flex items-center justify-center relative group ${
-                                            current === opt ? 'bg-ind-blue/5 text-ind-blue' : 'text-ind-text2 hover:bg-slate-50'
-                                        }`}
+                                        className={`px-3 py-2 rounded-lg text-[0.7rem] font-bold cursor-pointer transition-all flex items-center justify-center relative group ${current === opt ? 'bg-ind-blue/5 text-ind-blue' : 'text-ind-text2 hover:bg-ind-bg'
+                                            }`}
                                     >
                                         <span className="uppercase text-center">{opt === 'all' ? `ALL ${label.split(' ')[0]}S` : opt}</span>
                                         {current === opt && <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-ind-blue" />}
@@ -139,15 +138,17 @@ export const AdminFilterBar: React.FC<FilterProps> = ({ filters, lines, allModel
 
     const filterItems = [
         { label: 'Vehicle Model', current: filters.curModel, set: filters.setCurModel, options: models, icon: <LayoutGrid size={16} />, color: 'blue' as const },
-        { label: 'Operators (DEO)', current: filters.curDEO, set: filters.setCurDEO, options: deos, icon: <User size={16} />, color: 'teal' as const },
-        { label: 'Supervisors', current: filters.curSupervisor, set: filters.setCurSupervisor, options: supervisors, icon: <UserCheck size={16} />, color: 'indigo' as const },
         { label: 'Production Line', current: filters.curLine, set: filters.setCurLine, options: lineNames, icon: <Factory size={16} />, color: 'slate' as const },
+        { label: 'Supervisors', current: filters.curSupervisor, set: filters.setCurSupervisor, options: supervisors, icon: <UserCheck size={16} />, color: 'indigo' as const },
+        { label: 'Operators (DEO)', current: filters.curDEO, set: filters.setCurDEO, options: deos, icon: <User size={16} />, color: 'teal' as const }
+
+
     ];
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-8">
             {filterItems.map((item, i) => (
-                <CustomFilterDropdown 
+                <CustomFilterDropdown
                     key={i}
                     label={item.label}
                     current={item.current}
@@ -161,18 +162,18 @@ export const AdminFilterBar: React.FC<FilterProps> = ({ filters, lines, allModel
             <div className="relative group h-full">
                 <div className="h-full bg-white border border-ind-border rounded-[1.25rem] p-4 flex flex-col justify-between shadow-sm hover:border-ind-border2 transition-all">
                     <div className="flex items-center gap-2.5 mb-2">
-                        <div className="w-8 h-8 rounded-lg bg-orange-50/50 text-[#F37021] flex items-center justify-center transition-all">
+                        <div className="w-8 h-8 rounded-lg bg-orange-50/50 text-ind-primary flex items-center justify-center transition-all">
                             <Calendar size={16} />
                         </div>
-                        <span className="font-black text-[0.55rem] text-ind-text3 [font-variant:small-caps] tracking-[0.15em] text-nowrap">Time Period</span>
+                        <span className="text-sm whitespace-nowrap font-semibold">Time Period</span>
                     </div>
-                    
+
                     <div className="flex items-center justify-between gap-1 mt-auto">
                         <div className="relative flex-1">
-                            <select 
+                            <select
                                 value={filters.curTime}
                                 onChange={(e) => filters.setCurTime(e.target.value)}
-                                className="w-full bg-slate-50 border border-ind-border/40 rounded-lg py-1 px-2 text-[0.7rem] font-bold text-ind-text uppercase outline-none focus:ring-2 focus:ring-ind-blue/10 appearance-none cursor-pointer pr-6"
+                                className="w-full bg-ind-bg border border-ind-border/40 rounded-lg py-1 px-2 text-[0.7rem] font-bold text-ind-text uppercase outline-none focus:ring-2 focus:ring-ind-blue/10 appearance-none cursor-pointer pr-6"
                             >
                                 <option value="day">Daily</option>
                                 <option value="week">Weekly</option>
@@ -182,9 +183,9 @@ export const AdminFilterBar: React.FC<FilterProps> = ({ filters, lines, allModel
                             </select>
                             <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 text-ind-text3 pointer-events-none" />
                         </div>
-                        
+
                         <div className="relative flex items-center group/cal">
-                            <input 
+                            <input
                                 type="date"
                                 value={filters.curDate || ''}
                                 onChange={(e) => {
@@ -194,9 +195,8 @@ export const AdminFilterBar: React.FC<FilterProps> = ({ filters, lines, allModel
                                 className="absolute inset-0 opacity-0 cursor-pointer z-10 w-8"
                                 title="Pick Custom Date"
                             />
-                            <div className={`w-8 h-8 flex items-center justify-center rounded-lg border transition-all ${
-                                filters.curTime === 'custom' ? 'bg-ind-blue text-white border-ind-blue shadow-md' : 'bg-white text-ind-text3 border-ind-border hover:border-ind-border2 group-hover/cal:border-ind-blue'
-                            }`}>
+                            <div className={`w-8 h-8 flex items-center justify-center rounded-lg border transition-all ${filters.curTime === 'custom' ? 'bg-ind-blue text-white border-ind-blue shadow-md' : 'bg-white text-ind-text3 border-ind-border hover:border-ind-border2 group-hover/cal:border-ind-blue'
+                                }`}>
                                 <Calendar size={13} strokeWidth={2.5} />
                             </div>
                         </div>
@@ -214,7 +214,7 @@ export const IndustrialKPICards: React.FC<{ stats: any }> = ({ stats }) => {
         { label: 'PROCESSING', value: stats.acceptedOrdersCount.toLocaleString(), subText: 'LIVE NOW', color: 'emerald', icon: <PlayCircle size={16} /> },
         { label: 'COMPLETED', value: (stats.completedOrdersCount || 0).toLocaleString(), subText: 'THIS WEEK', color: 'indigo', icon: <CheckCircle2 size={16} /> },
         { label: 'TOTAL PRODUCTION', value: stats.totalProduction.toLocaleString(), subText: '+12.5%', color: 'blue', icon: <Package size={16} /> },
-        
+
         { label: 'OEE PERFORMANCE', value: stats.avgOEE ? `${stats.avgOEE.toFixed(1)}%` : '0%', subText: '+2.1%', color: 'blue', icon: <Zap size={16} /> },
         { label: 'APPROVED PARTS', value: stats.totalProduction.toLocaleString(), subText: '98.5%', color: 'emerald', icon: <ThumbsUp size={16} /> },
         { label: 'REJECTED PARTS', value: stats.totalRejections.toLocaleString(), subText: '1.5%', color: 'red', icon: <ThumbsDown size={16} /> },
@@ -243,7 +243,7 @@ export const IndustrialKPICards: React.FC<{ stats: any }> = ({ stats }) => {
                         className={`bg-white border-t-[4px] ${colors.border} rounded-2xl p-4 shadow-sm hover:shadow-lg transition-all group flex flex-col justify-between h-32`}
                     >
                         <div className="flex justify-between items-start">
-                            <span className="text-[0.6rem] font-black text-slate-400 [font-variant:small-caps] tracking-[0.1em]">{kpi.label}</span>
+                            <span className="text-[0.6rem] font-black text-ind-text3 [font-variant:small-caps] tracking-[0.1em]">{kpi.label}</span>
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center ${colors.icon}`}>
                                 {kpi.icon}
                             </div>

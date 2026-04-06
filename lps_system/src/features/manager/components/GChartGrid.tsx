@@ -6,22 +6,22 @@ const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
 const GChartGrid = ({ data }: { data: GChartData[] }) => {
     if (!data || data.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-20 bg-slate-50/50 rounded-[2.5rem] border border-dashed border-slate-200">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Awaiting Production Nodes...</p>
+            <div className="flex flex-col items-center justify-center py-20 bg-ind-bg/50 rounded-[2.5rem] border border-dashed border-ind-border">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-ind-text3">Awaiting Production Nodes...</p>
             </div>
         );
     }
 
     return (
-        <div className="w-full overflow-x-auto custom-scrollbar border border-slate-100 rounded-[2.5rem] bg-white shadow-xl shadow-slate-200/50">
+        <div className="w-full overflow-x-auto custom-scrollbar border border-ind-border/50 rounded-[2.5rem] bg-white shadow-xl shadow-slate-200/50">
             <table className="w-full border-collapse">
                 <thead>
-                    <tr className="bg-slate-50 border-b border-slate-100">
-                        <th className="sticky left-0 z-20 bg-slate-50 p-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-r border-slate-100 min-w-[180px]">
+                    <tr className="bg-ind-bg border-b border-ind-border/50">
+                        <th className="sticky left-0 z-20 bg-ind-bg p-6 text-left text-[10px] font-black text-ind-text3 uppercase tracking-[0.2em] border-r border-ind-border/50 min-w-[180px]">
                             Car Model
                         </th>
                         {DAYS.map(day => (
-                            <th key={day} className="p-4 text-center text-[10px] font-black text-slate-400 border-r border-slate-100 min-w-[60px] last:border-r-0">
+                            <th key={day} className="p-4 text-center text-[10px] font-black text-ind-text3 border-r border-ind-border/50 min-w-[60px] last:border-r-0">
                                 {day.toString().padStart(2, '0')}
                             </th>
                         ))}
@@ -29,10 +29,10 @@ const GChartGrid = ({ data }: { data: GChartData[] }) => {
                 </thead>
                 <tbody className="divide-y divide-slate-50">
                     {data.map((row, idx) => (
-                        <tr key={idx} className="group hover:bg-slate-50 transition-colors">
-                            <td className="sticky left-0 z-10 bg-white p-6 text-xs font-black text-slate-900 border-r border-slate-100 group-hover:bg-slate-50 transition-colors uppercase tracking-wider">
+                        <tr key={idx} className="group hover:bg-ind-bg transition-colors">
+                            <td className="sticky left-0 z-10 bg-white p-6 text-xs font-black text-ind-text border-r border-ind-border/50 group-hover:bg-ind-bg transition-colors uppercase tracking-wider">
                                 {row.model_name}
-                                <div className="text-[9px] text-slate-400 font-bold mt-1">VIN Series: 2024-X</div>
+                                <div className="text-[9px] text-ind-text3 font-bold mt-1">VIN Series: 2024-X</div>
                             </td>
                             {row.days.length > 0 ? row.days.map((cellData: any, dIdx: number) => {
                                 const status = cellData.actual === 0 ? 'none' : cellData.actual >= cellData.plan ? 'success' : 'missed';
@@ -42,7 +42,7 @@ const GChartGrid = ({ data }: { data: GChartData[] }) => {
                                             "flex flex-col items-center justify-center py-3 rounded-2xl transition-all duration-300",
                                             status === 'success' ? "bg-emerald-50 text-emerald-700 border border-emerald-100 shadow-sm shadow-emerald-100" :
                                                 status === 'missed' ? "bg-rose-50 text-rose-600 border border-rose-100 shadow-sm shadow-rose-100" :
-                                                    "bg-slate-50 text-slate-300 border border-transparent"
+                                                    "bg-ind-bg text-ind-text3 border border-transparent"
                                         )}>
                                             <span className="text-[12px] font-black leading-none">{cellData.actual}</span>
                                             <div className="w-4 h-[1px] bg-current opacity-20 my-1.5" />
@@ -51,7 +51,7 @@ const GChartGrid = ({ data }: { data: GChartData[] }) => {
                                     </td>
                                 );
                             }) : (
-                                <td colSpan={31} className="p-4 text-center text-[10px] font-black text-slate-300 uppercase tracking-widest italic opacity-50">
+                                <td colSpan={31} className="p-4 text-center text-[10px] font-black text-ind-text3 uppercase tracking-widest italic opacity-50">
                                     No node data for sequence
                                 </td>
                             )}

@@ -37,17 +37,15 @@ def get_merged_log_data(log_entry):
     
     # 3. Format BOM into the structure the frontend expects
     merged_data = []
-    log_rows = log_entry.log_data if isinstance(log_entry.log_data, list) else []
     
     # Index by SAP Part Number or Part Number for better matching (Case-Insensitive)
     log_by_sap = {}
     log_by_part = {}
-    for r in log_rows:
-        if not isinstance(r, dict): continue
-        sap = str(r.get('SAP PART NUMBER') or r.get('SAP PART #') or r.get('sap_part_number') or '').strip().upper()
-        if sap: log_by_sap[sap] = r
-        part = str(r.get('PART NUMBER') or r.get('part_number') or '').strip().upper()
-        if part: log_by_part[part] = r
+    for entry in log_entry.entries:
+        sap = str(entry.sap_part_number or '').strip().upper()
+        if sap: log_by_sap[sap] = entry
+        part = str(entry.part_number or '').strip().upper()
+        if part: log_by_part[part] = entry
 
     for idx, item in enumerate(bom):
         common = item.get('common', {})
@@ -76,61 +74,68 @@ def get_merged_log_data(log_entry):
             "Target Qty": default_target,
             "PER DAY": default_target,
             "Per Day": default_target,
-            "Today Produced": "0",
+            "SAP Stock": "0",
+            "Opening Stock": "0",
+            "Todays Stock": "0",
             "Remain Qty": default_target,
             "Production Status": "PENDING",
             "row_status": None,
             "rejection_reason": None,
+            "deo_reply": None,
             "supervisor_reviewed": False
         }
         
         row.update(prod)
         row.update(mat)
         
-        # 4. OVERWRITE with data from log
+        # 4. OVERWRITE with data from database entry
         match = None
         if sap in log_by_sap: match = log_by_sap[sap]
         elif part in log_by_part: match = log_by_part[part]
         
         if match:
-            deo_fields = [
-                "SAP Stock", "Opening Stock", "Todays Stock",
-                "Target Qty", "Today Produced", "Remain Qty",
-                "Balance Qty", "Production Status", "Defect Count",
-                "Failure Reason", "Remarks", "PER DAY", "Per Day",
-                "row_status", "rejection_reason", "supervisor_reviewed"
-            ]
-            for field in deo_fields:
-                if field in match and match[field] is not None:
-                    # Don't overwrite with 0 if we have a valid default target
-                    val = str(match[field])
-                    if field in ["PER DAY", "Per Day", "Target Qty"] and (val == "0" or not val) and row.get(field) != "0":
-                        continue
-                    row[field] = match[field]
+            # Map object attributes back to the frontend dictionary format
+            # Use non-destructive mapping for numeric fields (don't overwrite with 0 if BOM has data)
+            match_data = {
+                "SAP Stock": str(match.sap_stock),
+                "Opening Stock": str(match.opening_stock),
+                "Todays Stock": str(match.todays_stock),
+                "Production Status": match.status,
+                "row_status": match.row_status,
+                "rejection_reason": match.rejection_reason,
+                "deo_reply": match.deo_reply,
+                "supervisor_reviewed": match.supervisor_reviewed,
+                "id": match.id
+            }
             
-            # Recalculate Remain Qty & Coverage Days
+            # Only overwrite Target/Per Day if the DB value is > 0
+            if match.per_day and match.per_day > 0:
+                match_data["PER DAY"] = str(match.per_day)
+                match_data["Per Day"] = str(match.per_day)
+            
+            row.update(match_data)
+            
+            if match.coverage_days:
+                row["Coverage Days"] = str(match.coverage_days)
+            
+            # Live Calculate Coverage Days if not stored or if stock changed
             try:
-                # Prioritize PER DAY for coverage as it often contains part-specific usage rates
-                t_val = row.get("PER DAY") or row.get("Per Day") or row.get("Target Qty", "0")
-                t = float(str(t_val).replace(',', '').strip() or '0')
-                p = float(str(row.get("Today Produced", "0")).replace(',', '').strip() or '0')
+                t = float(str(row.get("PER DAY", "0")).replace(',', '').strip() or '0')
                 s = float(str(row.get("Todays Stock", "0")).replace(',', '').strip() or '0')
-                
-                row["Remain Qty"] = str(int(max(0, t - p)))
-                
-                # Live Calculate Coverage Days in decimal format (130.0 etc)
                 if t > 0:
                     row["Coverage Days"] = "{:.1f}".format(s / t)
-                else:
-                    row["Coverage Days"] = "0.0"
             except:
                 pass
 
-            if "id" in match: row["id"] = match["id"]
+            # Keep the fake index id for URL routing; store real DB id separately
+            # so the frontend can pass it as real_entry_id in the sync body
+            row["id"] = 10000 + idx          # restore fake index
+            row["_real_id"] = match.id       # real DB primary key
             
         merged_data.append(row)
     
     return merged_data
+
 
 def sync_log_to_work_status(log):
     """
@@ -139,16 +144,16 @@ def sync_log_to_work_status(log):
     total_actual = 0
     total_planned = 0
     
-    log_data = list(log.log_data)
-    for row in log_data:
-        if isinstance(row, dict):
-            try:
-                produced = float(str(row.get('Today Produced', 0)).replace(',', '').strip() or 0)
-                target = float(str(row.get('Target Qty', 0)).replace(',', '').strip() or 0)
-                total_actual += produced
-                total_planned += target
-            except:
-                pass
+    for entry in log.entries:
+        try:
+            # Since Today Produced is removed, we measure actual as 1 per 'COMPLETE' status?
+            # Or maybe the user just wants the planned qty tracked for now.
+            target = float(entry.per_day or 0)
+            total_planned += target
+            if entry.status == 'COMPLETE' or entry.status == 'APPROVED':
+                total_actual += target # Or some other metric
+        except:
+            pass
                 
     work_status = DailyWorkStatus.query.filter_by(
         date=log.date,

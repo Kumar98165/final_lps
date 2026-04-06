@@ -25,19 +25,19 @@ const ManagerDashboardPage = () => {
             initial="hidden"
             animate="visible"
             variants={containerVariants}
-            className="p-6 lg:p-10 space-y-8 bg-[#FAFBFC] min-h-screen flex flex-col"
+            className="p-6 lg:p-10 space-y-8 bg-ind-bg min-h-screen flex flex-col"
         >
             {/* Professional Header Section */}
-            <motion.div variants={itemVariants} className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-slate-200/60 pb-10">
+            <motion.div variants={itemVariants} className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-ind-border/60 pb-10">
                 <div className="space-y-2">
                     <div className="flex items-center gap-3">
                         <div className="h-2 w-12 bg-slate-900 rounded-full" />
-                        <span className="text-[10px] font-black text-slate-900 uppercase tracking-[0.3em]">Operational Overview</span>
+                        <span className="text-[10px] font-black text-ind-text uppercase tracking-[0.3em]">Operational Overview</span>
                     </div>
                 </div>
             </motion.div>
 
-            <motion.div variants={itemVariants} className="flex-1 flex items-center justify-center border-2 border-dashed border-slate-100 rounded-[3rem]">
+            <motion.div variants={itemVariants} className="flex-1 flex items-center justify-center border-2 border-dashed border-ind-border/50 rounded-[3rem]">
                 {/* Dashboard content will be streamed here */}
             </motion.div>
         </motion.div>

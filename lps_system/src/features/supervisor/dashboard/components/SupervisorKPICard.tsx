@@ -14,8 +14,8 @@ export const SupervisorKPICard = ({ title, value, icon: Icon, color }: Superviso
             <Icon size={40} strokeWidth={1.5} />
         </div>
         <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">{title}</p>
-            <p className="text-5xl font-black text-slate-900 tracking-tighter leading-none">{value}</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-ind-text3 mb-2">{title}</p>
+            <p className="text-5xl font-black text-ind-text tracking-tighter leading-none">{value}</p>
         </div>
     </div>
 );

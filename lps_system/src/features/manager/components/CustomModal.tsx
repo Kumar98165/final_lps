@@ -50,7 +50,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
                     initial={{ opacity: 0, scale: 0.9, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                    className="relative w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 p-8 overflow-hidden"
+                    className="relative w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl border border-ind-border/50 p-8 overflow-hidden"
                 >
                     {/* Content type icons for success/error */}
                     {type === 'success' && (
@@ -71,14 +71,14 @@ const CustomModal: React.FC<CustomModalProps> = ({
                         </h3>
                         <button
                             onClick={onClose}
-                            className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400"
+                            className="p-2 hover:bg-ind-border/30 rounded-full transition-colors text-ind-text3"
                         >
                             <X size={20} />
                         </button>
                     </div>
 
                     {description && (
-                        <p className="text-slate-500 text-sm font-medium mb-8 leading-relaxed text-center">
+                        <p className="text-ind-text2 text-sm font-medium mb-8 leading-relaxed text-center">
                             {description}
                         </p>
                     )}
@@ -93,7 +93,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
                                     value={value}
                                     onChange={(e) => setValue(e.target.value)}
                                     placeholder={placeholder}
-                                    className="w-full bg-slate-50 border-2 border-slate-100 focus:border-orange-500/30 focus:bg-white rounded-2xl py-4 px-6 text-slate-700 font-bold text-lg outline-none transition-all placeholder:text-slate-300 shadow-inner"
+                                    className="w-full bg-ind-bg border-2 border-ind-border/50 focus:border-orange-500/30 focus:bg-white rounded-2xl py-4 px-6 text-slate-700 font-bold text-lg outline-none transition-all placeholder:text-ind-text3 shadow-inner"
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') onConfirm(value);
                                         if (e.key === 'Escape') onClose();
@@ -102,7 +102,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
                             </div>
                         )}
                         {type === 'confirm' && (
-                           <p className="text-slate-500 font-medium text-center">{description || "Are you sure you want to proceed with this action?"}</p>
+                           <p className="text-ind-text2 font-medium text-center">{description || "Are you sure you want to proceed with this action?"}</p>
                         )}
                     </div>
 
@@ -110,7 +110,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
                     <div className="flex gap-3">
                         <button
                             onClick={onClose}
-                            className="flex-1 py-4 px-6 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all active:scale-95"
+                            className="flex-1 py-4 px-6 bg-ind-border/30 hover:bg-ind-border/50 text-ind-text2 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all active:scale-95"
                         >
                             {type === 'success' || type === 'error' ? 'Close' : 'Cancel'}
                         </button>

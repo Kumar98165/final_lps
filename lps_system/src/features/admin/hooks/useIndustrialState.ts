@@ -195,8 +195,8 @@ export const useIndustrialState = () => {
 
     useEffect(() => {
         syncWithBackend();
-        // Potential polling every 30 seconds for "Live" feel
-        const timer = setInterval(syncWithBackend, 30000);
+        // Polling every 60 seconds for "Live" feel without slamming the DB
+        const timer = setInterval(syncWithBackend, 60000);
         return () => clearInterval(timer);
     }, [syncWithBackend]);
 

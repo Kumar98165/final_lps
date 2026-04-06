@@ -3,7 +3,7 @@
 @plugin "tailwindcss-animate";
 
 @theme {
-  --color-primary: #F37021;
+  --color-primary: #F37021; /* CIE Orange */
   --color-primary-foreground: #FFFFFF;
   --color-sidebar: #FFFFFF;
   --color-sidebar-foreground: #64748b;
@@ -11,16 +11,16 @@
   --font-outfit: "Outfit", "sans-serif";
   --font-mono-jet: "JetBrains Mono", "monospace";
 
-  /* Admin Production Design Palette - High Fidelity */
+  /* Admin Production Design Palette - CIE Brand Aligned */
   --color-ind-primary: #F37021;
-  --color-ind-bg: #f1f5f9; /* Cool targeted light gray-blue */
+  --color-ind-bg: #FAF9F6; /* Warm Brand Off-White */
   --color-ind-bg2: #ffffff;
   --color-ind-card: #ffffff;
   --color-ind-card2: #ffffff;
-  --color-ind-card3: #f8fafc;
-  --color-ind-border: #e2e8f0;
-  --color-ind-border2: #cbd5e1;
-  --color-ind-border3: #94a3b8;
+  --color-ind-card3: #fffaf8;
+  --color-ind-border: #EDEAE5; /* Warm neutral border */
+  --color-ind-border2: #DBD7D1;
+  --color-ind-border3: #A39E98;
   --color-ind-g1: #F37021; 
   --color-ind-g2: #e0651d;
   --color-ind-g3: #cd5a19;
@@ -29,25 +29,24 @@
   --color-ind-yellow: #f59e0b;
   --color-ind-red: #ef4444;
   --color-ind-orange: #f97316;
-  --color-ind-blue: #2563eb; /* Target Blue */
-  --color-ind-emerald: #10b981; /* Target Green */
-  --color-ind-indigo: #6366f1; /* Target Purple/Indigo */
-  --color-ind-text: #0f172a; /* Deep Navy/Black */
-  --color-ind-text2: #475569;
-  --color-ind-text3: #64748b;
+  --color-ind-blue: #2563eb; 
+  --color-ind-emerald: #10b981; 
+  --color-ind-indigo: #6366f1; 
+  --color-ind-text: #1A1A1A; /* Logo Charcoal/Black */
+  --color-ind-text2: #4A4A4A;
+  --color-ind-text3: #7A7A7A;
 }
 
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --primary: 24.6 90.1% 54.3%;
-    /* #F37021 as HSL */
-    --primary-foreground: 210 40% 98%;
+    --foreground: 0 0% 10%;
+    --primary: 24.6 90.1% 54.3%; /* #F37021 */
+    --primary-foreground: 0 0% 100%;
   }
 
   body {
-    @apply bg-slate-50 text-slate-900 font-sans;
+    @apply bg-ind-bg text-ind-text font-sans;
   }
 }
 
@@ -55,7 +54,7 @@
 
   /* Common UI patterns */
   .card-premium {
-    @apply bg-white rounded-xl shadow-sm border border-slate-200 p-6 transition-all hover:shadow-md;
+    @apply bg-white rounded-xl shadow-sm border border-ind-border p-6 transition-all hover:shadow-md;
   }
 }
 
@@ -66,7 +65,7 @@
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-slate-200 rounded-full;
+  @apply bg-ind-border/50 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb {

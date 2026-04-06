@@ -20,11 +20,11 @@ export const SupervisorKPI = ({
             label: 'Total deos',
             value: totalDeos,
             icon: Users,
-            color: 'text-indigo-600',
-            iconBg: 'bg-indigo-50',
+            color: 'text-ind-text',
+            iconBg: 'bg-ind-bg',
             bg: 'bg-white',
-            textColor: 'text-[#0f172a]',
-            labelColor: 'text-slate-500'
+            textColor: 'text-ind-text',
+            labelColor: 'text-ind-text2'
         },
         {
             label: 'Active now',
@@ -44,8 +44,8 @@ export const SupervisorKPI = ({
             color: 'text-rose-600',
             iconBg: 'bg-rose-50',
             bg: 'bg-white',
-            textColor: 'text-[#0f172a]',
-            labelColor: 'text-slate-500',
+            textColor: 'text-ind-text',
+            labelColor: 'text-ind-text2',
             alert: pendingModels > 0
         },
         {
@@ -55,8 +55,8 @@ export const SupervisorKPI = ({
             color: 'text-emerald-600',
             iconBg: 'bg-emerald-50',
             bg: 'bg-white',
-            textColor: 'text-[#0f172a]',
-            labelColor: 'text-slate-500'
+            textColor: 'text-ind-text',
+            labelColor: 'text-ind-text2'
         },
         {
             label: 'Rejected models',
@@ -65,8 +65,8 @@ export const SupervisorKPI = ({
             color: 'text-rose-600',
             iconBg: 'bg-rose-50',
             bg: 'bg-white',
-            textColor: 'text-[#0f172a]',
-            labelColor: 'text-slate-500',
+            textColor: 'text-ind-text',
+            labelColor: 'text-ind-text2',
             alert: rejectedModels > 0
         }
     ];
@@ -76,7 +76,7 @@ export const SupervisorKPI = ({
             {kpis.map((kpi, index) => (
                 <div
                     key={index}
-                    className={`${kpi.bg} rounded-xl p-4 border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-md group flex flex-col justify-between min-h-[130px] relative overflow-hidden`}
+                    className={`${kpi.bg} rounded-xl p-4 border border-ind-border/50 shadow-sm transition-all duration-300 hover:shadow-md group flex flex-col justify-between min-h-[130px] relative overflow-hidden`}
                 >
                     {kpi.isSpecial && (
                         <div className="absolute top-[-30%] right-[-15%] w-20 h-20 bg-white/10 blur-xl rounded-full" />
@@ -88,7 +88,7 @@ export const SupervisorKPI = ({
                         </div>
                         <div className="flex items-center gap-1.5">
                             <div className={`w-1 h-1 rounded-full ${kpi.alert ? 'bg-rose-500' : 'bg-emerald-500'} animate-pulse`} />
-                            <span className={`text-[8px] font-black uppercase tracking-widest ${kpi.textColor === 'text-white' ? 'text-white/80' : 'text-slate-400'}`}>
+                            <span className={`text-[8px] font-black uppercase tracking-widest ${kpi.textColor === 'text-white' ? 'text-white/80' : 'text-ind-text3'}`}>
                                 {kpi.alert ? 'Alert' : 'Live'}
                             </span>
                         </div>
@@ -102,7 +102,7 @@ export const SupervisorKPI = ({
                             <span className={`text-3xl font-black tracking-tighter tabular-nums ${kpi.alert && !kpi.isSpecial ? 'text-rose-600' : kpi.textColor}`}>
                                 {kpi.value.toString().padStart(2, '0')}
                             </span>
-                            <span className={`text-[8px] font-bold uppercase tracking-tight ${kpi.textColor === 'text-white' ? 'text-orange-100' : 'text-slate-400'}`}>
+                            <span className={`text-[8px] font-bold uppercase tracking-tight ${kpi.textColor === 'text-white' ? 'text-orange-100' : 'text-ind-text3'}`}>
                                 units
                             </span>
                         </div>

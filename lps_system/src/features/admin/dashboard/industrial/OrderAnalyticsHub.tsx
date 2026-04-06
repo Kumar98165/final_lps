@@ -73,7 +73,7 @@ export const OrderAnalyticsHub: React.FC<Props> = ({ orders }) => {
                         <div className="space-y-2 mb-3">
                             {Object.entries(companyDetails.models).slice(0, 3).map(([model, qty]: [string, any]) => (
                                 <div key={model} className="flex justify-between items-center gap-4">
-                                    <span className="text-[0.65rem] font-black text-slate-400 uppercase tracking-tight">{model}</span>
+                                    <span className="text-[0.65rem] font-black text-ind-text3 uppercase tracking-tight">{model}</span>
                                     <span className="text-[0.7rem] font-black text-white">{qty.toLocaleString()}</span>
                                 </div>
                             ))}
@@ -90,11 +90,11 @@ export const OrderAnalyticsHub: React.FC<Props> = ({ orders }) => {
         return null;
     };
 
-    const cardClass = "bg-white/90 backdrop-blur-xl border border-slate-200 rounded-[2.5rem] p-10 h-[480px] shadow-sm flex flex-col mb-6 relative overflow-hidden";
-    const titleClass = "flex items-center gap-3 text-[0.8rem] font-black text-slate-900 uppercase tracking-[0.25em] mb-10";
+    const cardClass = "bg-white/90 backdrop-blur-xl border border-ind-border rounded-[2.5rem] p-10 h-[480px] shadow-sm flex flex-col mb-6 relative overflow-hidden";
+    const titleClass = "flex items-center gap-3 text-[0.8rem] font-black text-ind-text uppercase tracking-[0.25em] mb-10";
 
     return (
-        <div className="space-y-8 mb-12">
+        <>
 
             {/* SECTION 1: Strategic Demand Distribution */}
             <div className="grid grid-cols-1 gap-8">
@@ -160,11 +160,11 @@ export const OrderAnalyticsHub: React.FC<Props> = ({ orders }) => {
                         ) : (
                             <motion.div key="detail" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="h-full flex flex-col">
                                 <div className="flex items-center justify-between mb-8">
-                                    <button onClick={() => setSelectedCompany(null)} className="flex items-center gap-2 px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-2xl transition-all font-black text-[0.65rem] uppercase tracking-widest border border-slate-300">
+                                    <button onClick={() => setSelectedCompany(null)} className="flex items-center gap-2 px-6 py-2.5 bg-ind-border/30 hover:bg-ind-border/50 text-slate-800 rounded-2xl transition-all font-black text-[0.65rem] uppercase tracking-widest border border-slate-300">
                                         <ArrowLeft size={14} /> Back to Overview
                                     </button>
                                     <div className="px-4 py-2 bg-blue-50 border border-blue-100 rounded-xl flex items-center gap-3">
-                                        <span className="text-[0.6rem] font-black text-slate-400 uppercase tracking-widest">Total Volume:</span>
+                                        <span className="text-[0.6rem] font-black text-ind-text3 uppercase tracking-widest">Total Volume:</span>
                                         <span className="text-sm font-black text-blue-600">{activeCompany?.value.toLocaleString()}</span>
                                     </div>
                                 </div>
@@ -173,25 +173,25 @@ export const OrderAnalyticsHub: React.FC<Props> = ({ orders }) => {
                                         <Building2 size={32} />
                                     </div>
                                     <div>
-                                        <h3 className="text-3xl font-black text-slate-900 tracking-tighter uppercase leading-none mb-1">{selectedCompany}</h3>
-                                        <p className="text-[0.7rem] font-bold text-slate-400 uppercase tracking-[0.2em] leading-none">Intelligence Drill-Down by Car Design</p>
+                                        <h3 className="text-3xl font-black text-ind-text tracking-tighter uppercase leading-none mb-1">{selectedCompany}</h3>
+                                        <p className="text-[0.7rem] font-bold text-ind-text3 uppercase tracking-[0.2em] leading-none">Intelligence Drill-Down by Car Design</p>
                                     </div>
                                 </div>
                                 <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {activeCompany?.models && Object.entries(activeCompany.models).map(([model, qty]: [string, any]) => (
-                                            <div key={model} className="bg-slate-50 border border-slate-200 rounded-3xl p-6 flex items-center justify-between group hover:border-blue-400 hover:bg-white transition-all duration-300">
+                                            <div key={model} className="bg-ind-bg border border-ind-border rounded-3xl p-6 flex items-center justify-between group hover:border-blue-400 hover:bg-white transition-all duration-300">
                                                 <div className="flex items-center gap-5">
-                                                    <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-800 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
+                                                    <div className="w-12 h-12 rounded-2xl bg-white border border-ind-border flex items-center justify-center text-slate-800 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
                                                         <LayoutGrid size={20} />
                                                     </div>
                                                     <div>
-                                                        <div className="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-0.5">Asset Design</div>
-                                                        <div className="text-lg font-black text-slate-900 uppercase tracking-tight">{model}</div>
+                                                        <div className="text-[0.65rem] font-black text-ind-text3 uppercase tracking-widest mb-0.5">Asset Design</div>
+                                                        <div className="text-lg font-black text-ind-text uppercase tracking-tight">{model}</div>
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
-                                                    <div className="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mb-0.5">Order Quantity</div>
+                                                    <div className="text-[0.65rem] font-black text-ind-text3 uppercase tracking-widest mb-0.5">Order Quantity</div>
                                                     <div className="text-2xl font-black text-blue-600 tracking-tighter">{qty.toLocaleString()}</div>
                                                 </div>
                                             </div>
@@ -204,6 +204,6 @@ export const OrderAnalyticsHub: React.FC<Props> = ({ orders }) => {
                 </motion.div>
             </div>
 
-        </div>
+        </>
     );
 };

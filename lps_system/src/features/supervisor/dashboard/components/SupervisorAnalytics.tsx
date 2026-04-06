@@ -87,12 +87,12 @@ export const SupervisorAnalytics = ({ assignedModels, verifications }: Superviso
             </div>
             <div>
                 <h3 className="text-[11px] font-black text-slate-800 leading-none uppercase tracking-tight">{title}</h3>
-                <p className="text-[9px] font-bold text-slate-400 mt-1">{subtitle}</p>
+                <p className="text-[9px] font-bold text-ind-text3 mt-1">{subtitle}</p>
             </div>
         </div>
     );
 
-    const cardClass = "bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col h-[320px] transition-all hover:shadow-md";
+    const cardClass = "bg-white rounded-2xl p-6 border border-ind-border/50 shadow-sm flex flex-col h-[320px] transition-all hover:shadow-md";
 
     return (
         <div className="space-y-5 pb-8 font-sans">
@@ -115,7 +115,7 @@ export const SupervisorAnalytics = ({ assignedModels, verifications }: Superviso
                                     cursor={{ fill: '#F8FAFC' }} 
                                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.05)', fontSize: '10px', fontWeight: 'bold' }} 
                                 />
-                                <Legend iconType="circle" wrapperStyle={{ paddingTop: '8px' }} formatter={(v) => <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wide">{v} units</span>} />
+                                <Legend iconType="circle" wrapperStyle={{ paddingTop: '8px' }} formatter={(v) => <span className="text-[9px] font-bold text-ind-text2 uppercase tracking-wide">{v} units</span>} />
                                 <Bar dataKey="produced" fill={COLORS.emerald} radius={[3, 3, 0, 0]} barSize={20} name="produced" />
                                 <Bar dataKey="planned" fill={COLORS.orange} radius={[3, 3, 0, 0]} barSize={20} name="planned" />
                             </BarChart>
@@ -145,7 +145,7 @@ export const SupervisorAnalytics = ({ assignedModels, verifications }: Superviso
                         </ResponsiveContainer>
                         <div className="absolute inset-x-0 inset-y-0 flex flex-col items-center justify-center mt-8 pointer-events-none">
                             <span className="text-3xl font-black text-slate-800 tracking-tighter leading-none">{activeDeoNames.length.toString().padStart(2, '0')}</span>
-                            <span className="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Active floor</span>
+                            <span className="text-[9px] font-bold text-ind-text3 mt-1 uppercase tracking-widest">Active floor</span>
                         </div>
                     </div>
                 </div>
@@ -161,7 +161,7 @@ export const SupervisorAnalytics = ({ assignedModels, verifications }: Superviso
                             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 9, fontWeight: 700 }} />
                             <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 9, fontWeight: 700 }} />
                             <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.05)', fontSize: '10px', fontWeight: 'bold' }} />
-                            <Legend iconType="circle" wrapperStyle={{ paddingTop: '15px' }} formatter={(v) => <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wide">{v.replace('_', ' ')}</span>} />
+                            <Legend iconType="circle" wrapperStyle={{ paddingTop: '15px' }} formatter={(v) => <span className="text-[9px] font-bold text-ind-text2 uppercase tracking-wide">{v.replace('_', ' ')}</span>} />
                             <Bar dataKey="verified" stackId="a" fill={COLORS.emerald} radius={[0, 0, 0, 0]} barSize={35} name="Ready / verified models" />
                             <Bar dataKey="awaiting" stackId="a" fill={COLORS.orange} radius={[0, 0, 0, 0]} barSize={35} name="Awaiting review" />
                             <Bar dataKey="in_progress" stackId="a" fill="#E2E8F0" radius={[5, 5, 0, 0]} barSize={35} name="Pending setup" />

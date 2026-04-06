@@ -159,8 +159,8 @@ export const DEOAnalytics = ({ assignedModels, submissionHistory, selectedDate }
                 {icon}
             </div>
             <div>
-                <h3 className="text-sm font-black text-[#0f172a] leading-none uppercase tracking-tight">{title}</h3>
-                <p className="text-[10px] font-bold text-slate-400 mt-1.5 uppercase tracking-widest">{subtitle}</p>
+                <h3 className="text-sm font-black text-ind-text leading-none uppercase tracking-tight">{title}</h3>
+                <p className="text-[10px] font-bold text-ind-text3 mt-1.5 uppercase tracking-widest">{subtitle}</p>
             </div>
         </div>
     );
@@ -171,27 +171,27 @@ export const DEOAnalytics = ({ assignedModels, submissionHistory, selectedDate }
             const modelEntries = Object.entries(data.models || {});
             return (
                 <div className="bg-white/95 backdrop-blur-2xl border border-white/40 p-5 rounded-[1.5rem] shadow-2xl animate-in zoom-in-95 duration-200">
-                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#F37021] mb-3">{data.name}</p>
+                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-ind-primary mb-3">{data.name}</p>
                     <div className="space-y-2">
                         {modelEntries.length > 0 ? (
                             modelEntries.map(([name, qty]: any) => (
                                 <div key={name} className="flex items-center gap-6 justify-between min-w-[140px]">
-                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">{name} FINISHED:</span>
-                                    <span className="text-[10px] font-black text-[#0f172a]">{qty}</span>
+                                    <span className="text-[10px] font-bold text-ind-text2 uppercase tracking-tight">{name} FINISHED:</span>
+                                    <span className="text-[10px] font-black text-ind-text">{qty}</span>
                                 </div>
                             ))
                         ) : (
-                            <p className="text-[10px] font-bold text-slate-300 uppercase italic">No production logged</p>
+                            <p className="text-[10px] font-bold text-ind-text3 uppercase italic">No production logged</p>
                         )}
                         {data.production > 0 && (
-                            <div className="mt-3 pt-3 border-t border-slate-100/50 space-y-1.5">
+                            <div className="mt-3 pt-3 border-t border-ind-border/50/50 space-y-1.5">
                                 <div className="flex items-center justify-between">
                                     <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest">MODELS ASSIGNED:</span>
-                                    <span className="text-[10px] font-black text-[#0f172a]">{data.modelCount || 0}</span>
+                                    <span className="text-[10px] font-black text-ind-text">{data.modelCount || 0}</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest">TOTAL PRODUCTION:</span>
-                                    <span className="text-[10px] font-black text-[#0f172a]">{data.production} Units</span>
+                                    <span className="text-[10px] font-black text-ind-text">{data.production} Units</span>
                                 </div>
                             </div>
                         )}
@@ -202,7 +202,7 @@ export const DEOAnalytics = ({ assignedModels, submissionHistory, selectedDate }
         return null;
     };
 
-    const cardClass = "bg-white rounded-[1.5rem] p-8 border border-slate-100 shadow-sm flex flex-col h-[400px] transition-all hover:shadow-md";
+    const cardClass = "bg-white rounded-[1.5rem] p-8 border border-ind-border/50 shadow-sm flex flex-col h-[400px] transition-all hover:shadow-md";
 
     return (
         <div className="space-y-6 pb-12 font-sans">
@@ -248,7 +248,7 @@ export const DEOAnalytics = ({ assignedModels, submissionHistory, selectedDate }
                                 <div key={idx} className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
-                                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{item.name}</span>
+                                        <span className="text-[10px] font-bold text-ind-text2 uppercase tracking-widest">{item.name}</span>
                                     </div>
                                     <span className="text-xs font-black text-slate-700">{item.value}</span>
                                 </div>
@@ -262,13 +262,13 @@ export const DEOAnalytics = ({ assignedModels, submissionHistory, selectedDate }
                         <div>
                             <div className="flex items-center gap-2 mb-1">
                                 <ChartIcon size={16} className="text-blue-500" />
-                                <h3 className="text-xs font-black text-[#0f172a] uppercase tracking-tight">Production Trend</h3>
+                                <h3 className="text-xs font-black text-ind-text uppercase tracking-tight">Production Trend</h3>
                             </div>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Historical Performance</p>
+                            <p className="text-[10px] font-bold text-ind-text3 uppercase tracking-widest">Historical Performance</p>
                         </div>
-                        <div className="flex bg-slate-100 p-1 rounded-xl">
+                        <div className="flex bg-ind-border/30 p-1 rounded-xl">
                             {['week', 'month'].map((t) => (
-                                <button key={t} onClick={() => setTimeframe(t as any)} className={`px-3 py-1 text-[9px] font-black uppercase tracking-tighter rounded-lg transition-all ${timeframe === t ? 'bg-white shadow-sm text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}>
+                                <button key={t} onClick={() => setTimeframe(t as any)} className={`px-3 py-1 text-[9px] font-black uppercase tracking-tighter rounded-lg transition-all ${timeframe === t ? 'bg-white shadow-sm text-blue-600' : 'text-ind-text3 hover:text-ind-text2'}`}>
                                     {t}
                                 </button>
                             ))}

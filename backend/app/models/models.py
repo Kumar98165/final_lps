@@ -35,7 +35,6 @@ class ProductionData(db.Model):
     stock = db.Column(db.String(100))
     total_disp = db.Column(db.String(100))
     target_qty = db.Column(db.String(100))
-    today_produced = db.Column(db.String(100))
     remain_qty = db.Column(db.String(100))
     sn_no = db.Column(db.String(100))
     row_status = db.Column(db.String(100))
@@ -56,7 +55,6 @@ class ProductionData(db.Model):
             "STOCK": self.stock,
             "Total disp": self.total_disp,
             "Target Qty": self.target_qty,
-            "Today Produced": self.today_produced,
             "Remain Qty": self.remain_qty,
             "SN NO": self.sn_no,
             "row_status": self.row_status
@@ -414,6 +412,61 @@ class Demand(db.Model):
             "createdAt": self.created_at.isoformat() if self.created_at else None
         }
 
+# ----------------------------- DEOProductionEntry -----------------------------
+class DEOProductionEntry(db.Model):
+    """
+    Relational storage for individual production rows. 
+    Replaces the JSON log_data snapshot with queryable columns.
+    """
+    __tablename__ = 'deo_production_entries'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    log_id = db.Column(db.Integer, db.ForeignKey('daily_production_logs.id', ondelete='CASCADE'), index=True)
+    
+    # Identification
+    sn_no = db.Column(db.Integer)
+    sap_part_number = db.Column(db.String(255), index=True)
+    part_number = db.Column(db.String(255))
+    part_description = db.Column(db.Text)
+    
+    # Production Data (Separate Columns)
+    per_day = db.Column(db.Float, default=0.0)
+    sap_stock = db.Column(db.Float, default=0.0)
+    opening_stock = db.Column(db.Float, default=0.0)
+    todays_stock = db.Column(db.Float, default=0.0)
+    coverage_days = db.Column(db.Float, default=0.0)
+    
+    # Status
+    status = db.Column(db.String(20), default=Status.PENDING)
+    row_status = db.Column(db.String(100))
+    supervisor_reviewed = db.Column(db.Boolean, default=False)
+    rejection_reason = db.Column(db.Text)
+    deo_reply = db.Column(db.Text)
+    
+    # Metadata
+    date = db.Column(db.Date, index=True)
+    car_model_id = db.Column(db.Integer, index=True)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "log_id": self.log_id,
+            "SN NO": self.sn_no,
+            "SAP PART NUMBER": self.sap_part_number,
+            "PART NUMBER": self.part_number,
+            "PART DESCRIPTION": self.part_description,
+            "PER DAY": self.per_day,
+            "SAP Stock": self.sap_stock,
+            "Opening Stock": self.opening_stock,
+            "Todays Stock": self.todays_stock,
+            "Coverage Days": self.coverage_days,
+            "Production Status": self.status,
+            "row_status": self.row_status,
+            "supervisor_reviewed": self.supervisor_reviewed,
+            "rejection_reason": self.rejection_reason,
+            "deo_reply": self.deo_reply
+        }
+
 # ----------------------------- DailyProductionLog -----------------------------
 class DailyProductionLog(db.Model):
     __tablename__ = 'daily_production_logs'
@@ -424,32 +477,26 @@ class DailyProductionLog(db.Model):
     car_model_id = db.Column(db.Integer, db.ForeignKey('car_models.id'), nullable=True, index=True)
     demand_id = db.Column(db.Integer, db.ForeignKey('demands.id'), nullable=True, index=True)
     model_name = db.Column(db.String(100), nullable=False)  # Keep for historical/display
-    log_data = db.Column(db.JSON, nullable=False)  # Stores the full table snapshot
-    status = db.Column(db.String(20), default=Status.PENDING)  # Use constant
+    status = db.Column(db.String(20), default=Status.PENDING)  # Overall log status
     supervisor_comment = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=db.func.now(), index=True)
 
     deo = db.relationship('User', foreign_keys=[deo_id], backref='daily_logs')
     car_model = db.relationship('CarModel', backref='daily_logs')
     demand = db.relationship('Demand', backref='daily_logs')
+    entries = db.relationship('DEOProductionEntry', backref='log', cascade='all, delete-orphan')
 
     # Computed properties for derived stats
     @property
     def total_unique_parts(self):
-        return len(self.log_data) if self.log_data else 0
-
+        return len(self.entries)
+    
     @property
     def total_requirements(self):
-        if not self.log_data:
-            return 0
         total = 0
-        for row in self.log_data:
-            try:
-                target = float(row.get("Target Qty", 0))
-            except (ValueError, TypeError):
-                target = 0
-            total += target
-        return int(total)  # keep int as original
+        for entry in self.entries:
+            total += (entry.per_day or 0)
+        return int(total)
 
     @property
     def target_vehicles(self):
@@ -481,9 +528,10 @@ class DailyProductionLog(db.Model):
             "car_model_id": self.car_model_id,
             "demand_id": self.demand_id,
             "model_name": self.model_name,
-            "log_data": self.log_data,
             "status": self.status,
             "supervisor_comment": self.supervisor_comment,
+            "log_data": [e.to_dict() for e in self.entries], # Replaces JSON with Relational Entries (Frontend bridge)
+            "entries": [e.to_dict() for e in self.entries],
             "createdAt": self.created_at.isoformat() if self.created_at else None,
             "target_vehicles": self.target_vehicles,
             "line_name": self.line_name,

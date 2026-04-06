@@ -61,8 +61,8 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ summary }) => {
             value: summary.stats.active_deos,
             icon: Users,
             trend: 'Live',
-            color: 'text-slate-600',
-            bgColor: 'bg-slate-100'
+            color: 'text-ind-text2',
+            bgColor: 'bg-ind-border/30'
         }
     ];
 
@@ -74,7 +74,7 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ summary }) => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.1 }}
-                    className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group"
+                    className="bg-white p-6 rounded-[2rem] border border-ind-border/50 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group"
                 >
                     <div className="flex justify-between items-start mb-4">
                         <div className={`p-2.5 ${stat.bgColor} ${stat.color} rounded-xl group-hover:scale-110 transition-transform`}>
@@ -86,8 +86,8 @@ export const StatsGrid: React.FC<StatsGridProps> = ({ summary }) => {
                         </span>
                     </div>
                     <div>
-                        <h3 className="text-2xl font-black text-slate-900 tracking-tighter">{stat.value}</h3>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{stat.label}</p>
+                        <h3 className="text-2xl font-black text-ind-text tracking-tighter">{stat.value}</h3>
+                        <p className="text-[10px] font-bold text-ind-text3 uppercase tracking-widest mt-1">{stat.label}</p>
                     </div>
                     {/* Decorative subtle background icon */}
                     <stat.icon className="absolute -right-4 -bottom-4 text-slate-50 opacity-10" size={80} strokeWidth={1} />

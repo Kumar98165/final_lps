@@ -22,7 +22,7 @@ export const KPICardGrid: React.FC = () => {
         { label: 'Approved Parts', value: '0', icon: CheckCircle, tag: '98.5%', color: 'text-emerald-600', bg: 'bg-emerald-100', borderColor: 'border-emerald-300' },
         { label: 'Rejected Parts', value: '0', icon: AlertTriangle, tag: '1.5%', color: 'text-rose-600', bg: 'bg-rose-100', borderColor: 'border-rose-300' },
         { label: 'Pending Reviews', value: '0', icon: Layers, tag: 'NEEDS ACTION', color: 'text-amber-600', bg: 'bg-amber-100', borderColor: 'border-amber-300' },
-        { label: 'Active Lines', value: '2', icon: Zap, tag: 'STABLE', color: 'text-slate-600', bg: 'bg-slate-100', borderColor: 'border-slate-300' },
+        { label: 'Active Lines', value: '2', icon: Zap, tag: 'STABLE', color: 'text-ind-text2', bg: 'bg-ind-border/30', borderColor: 'border-slate-300' },
     ];
 
     return (
@@ -33,7 +33,7 @@ export const KPICardGrid: React.FC = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
-                    className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-lg transition-all group relative overflow-hidden flex flex-col"
+                    className="bg-white p-6 rounded-[2.5rem] border border-ind-border/50 shadow-sm hover:shadow-lg transition-all group relative overflow-hidden flex flex-col"
                 >
                     <div className="flex justify-between items-start mb-6">
                         <div className={`p-2.5 ${kpi.bg} ${kpi.color} rounded-xl group-hover:scale-110 transition-transform`}>
@@ -44,8 +44,8 @@ export const KPICardGrid: React.FC = () => {
                         </div>
                     </div>
                     <div className="flex-1">
-                        <h3 className="text-4xl font-black text-slate-900 tracking-tighter leading-none mb-2">{kpi.value}</h3>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mt-4">{kpi.label}</p>
+                        <h3 className="text-4xl font-black text-ind-text tracking-tighter leading-none mb-2">{kpi.value}</h3>
+                        <p className="text-[10px] font-black text-ind-text3 uppercase tracking-widest leading-none mt-4">{kpi.label}</p>
                     </div>
                     {/* Decorative subtle background icon */}
                     <kpi.icon className="absolute -right-4 -bottom-4 text-slate-50 opacity-10" size={100} strokeWidth={1} />

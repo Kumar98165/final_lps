@@ -81,11 +81,11 @@ function App() {
           {/* Protected Routes Area */}
           <Route element={<AuthGuard />}>
             <Route path="*" element={
-              <div className="flex h-screen bg-slate-50 overflow-hidden">
+              <div className="flex h-screen bg-ind-bg overflow-hidden">
                 <Sidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
                 <div className="flex-1 flex flex-col min-w-0">
                   <Header onMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
-                  <main className="flex-1 overflow-auto bg-slate-50/30">
+                  <main className="flex-1 overflow-auto bg-ind-bg/30">
                     <Routes>
                       <Route path={ADMIN_HOME}>
                         {/* Shared Routes (Admin + Manager) */}

@@ -62,11 +62,11 @@ export const DEOStats: React.FC<DEOStatsProps> = ({
             label: 'Total Demand', 
             value: totalDemand, 
             icon: Flame, 
-            color: 'text-indigo-600', 
-            iconBg: 'bg-indigo-50',
+            color: 'text-ind-text', 
+            iconBg: 'bg-ind-bg',
             bg: 'bg-white',
-            textColor: 'text-[#0f172a]',
-            labelColor: 'text-slate-500'
+            textColor: 'text-ind-text',
+            labelColor: 'text-ind-text2'
         },
         { 
             label: 'Active Models', 
@@ -86,8 +86,8 @@ export const DEOStats: React.FC<DEOStatsProps> = ({
             color: 'text-rose-600', 
             iconBg: 'bg-rose-50',
             bg: 'bg-white',
-            textColor: 'text-[#0f172a]',
-            labelColor: 'text-slate-500'
+            textColor: 'text-ind-text',
+            labelColor: 'text-ind-text2'
         },
         { 
             label: 'Ready Models', 
@@ -96,8 +96,8 @@ export const DEOStats: React.FC<DEOStatsProps> = ({
             color: 'text-emerald-600', 
             iconBg: 'bg-emerald-50',
             bg: 'bg-white',
-            textColor: 'text-[#0f172a]',
-            labelColor: 'text-slate-500'
+            textColor: 'text-ind-text',
+            labelColor: 'text-ind-text2'
         },
         { 
             label: 'Rejections', 
@@ -106,8 +106,8 @@ export const DEOStats: React.FC<DEOStatsProps> = ({
             color: 'text-rose-600', 
             iconBg: 'bg-rose-50',
             bg: 'bg-white',
-            textColor: 'text-[#0f172a]',
-            labelColor: 'text-slate-500'
+            textColor: 'text-ind-text',
+            labelColor: 'text-ind-text2'
         }
     ];
 
@@ -121,7 +121,7 @@ export const DEOStats: React.FC<DEOStatsProps> = ({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className={`${kpi.bg} rounded-2xl p-5 border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-md group flex flex-col justify-between min-h-[140px] relative overflow-hidden`}
+                        className={`${kpi.bg} rounded-2xl p-5 border border-ind-border/50 shadow-sm transition-all duration-300 hover:shadow-md group flex flex-col justify-between min-h-[140px] relative overflow-hidden`}
                     >
                         {kpi.isSpecial && (
                             <div className="absolute top-[-30%] right-[-15%] w-24 h-24 bg-white/10 blur-xl rounded-full" />
@@ -133,7 +133,7 @@ export const DEOStats: React.FC<DEOStatsProps> = ({
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                                <span className={`text-[8px] font-black uppercase tracking-widest ${kpi.textColor === 'text-white' ? 'text-white/80' : 'text-slate-400'}`}>
+                                <span className={`text-[8px] font-black uppercase tracking-widest ${kpi.textColor === 'text-white' ? 'text-white/80' : 'text-ind-text3'}`}>
                                     Live
                                 </span>
                             </div>
@@ -147,7 +147,7 @@ export const DEOStats: React.FC<DEOStatsProps> = ({
                                 <span className={`text-3xl font-black tracking-tighter tabular-nums ${kpi.textColor}`}>
                                     {kpi.value.toString().padStart(2, '0')}
                                 </span>
-                                <span className={`text-[8px] font-bold uppercase tracking-tight ${kpi.textColor === 'text-white' ? 'text-orange-100' : 'text-slate-400'}`}>
+                                <span className={`text-[8px] font-bold uppercase tracking-tight ${kpi.textColor === 'text-white' ? 'text-orange-100' : 'text-ind-text3'}`}>
                                     units
                                 </span>
                             </div>
@@ -157,7 +157,7 @@ export const DEOStats: React.FC<DEOStatsProps> = ({
             </div>
 
             {/* 2. Unified Analytics Suite */}
-            <div className="bg-slate-50/20 rounded-[2.5rem] p-4 lg:p-8 border border-slate-100/50">
+            <div className="bg-ind-bg/20 rounded-[2.5rem] p-4 lg:p-8 border border-ind-border/50/50">
                  <DEOAnalytics 
                     assignedModels={assignedModels} 
                     submissionHistory={submissionHistory} 

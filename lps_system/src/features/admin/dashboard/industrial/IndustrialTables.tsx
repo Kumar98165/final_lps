@@ -12,13 +12,14 @@ interface TablesProps {
     onAssign: () => void;
 }
 
-export const IndustrialTablesSection: React.FC<TablesProps> = ({ 
-    lines, assignments, orders, rejections, onRecordProd, onAddLine, onAssign 
+export const IndustrialTablesSection: React.FC<TablesProps> = ({
+    lines, assignments, orders, rejections, onRecordProd, onAddLine, onAssign
 }) => {
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10 overflow-x-auto">
+        <>
+
             {/* Production Lines */}
-            <div className="bg-ind-card border border-ind-border rounded-xl flex flex-col shadow-lg min-w-[280px]">
+            {/* <div className="bg-ind-card border border-ind-border rounded-xl flex flex-col shadow-lg min-w-[280px]">
                 <div className="flex items-center justify-between p-3.5 border-b border-ind-border bg-ind-bg2/40">
                     <div className="flex items-center gap-2 font-bold text-ind-text text-sm">
                         <Factory size={15} /> Lines
@@ -29,7 +30,7 @@ export const IndustrialTablesSection: React.FC<TablesProps> = ({
                     {lines.map(l => {
                         const pct = Math.round((l.completed / l.target) * 100);
                         return (
-                            <div key={l.id} className="pb-3 border-b border-slate-100 last:border-0 group">
+                            <div key={l.id} className="pb-3 border-b border-ind-border/50 last:border-0 group">
                                 <div className="flex justify-between items-start mb-1.5">
                                     <div>
                                         <div className="text-sm font-bold text-ind-text group-hover:text-ind-g1 transition-colors">{l.name}</div>
@@ -39,7 +40,7 @@ export const IndustrialTablesSection: React.FC<TablesProps> = ({
                                         <div className="font-mono-jet text-[0.7rem] text-ind-text2 font-bold"><span className="text-ind-g1">{l.completed}</span>/{l.target}</div>
                                     </div>
                                 </div>
-                                <div className="h-1 bg-slate-100 rounded-full overflow-hidden mb-2 shadow-inner">
+                                <div className="h-1 bg-ind-border/30 rounded-full overflow-hidden mb-2 shadow-inner">
                                     <div className="h-full bg-linear-to-r from-ind-g3 to-ind-g1 shadow-sm" style={{ width: `${pct}%` }} />
                                 </div>
                                 <div className="flex items-center justify-between">
@@ -56,7 +57,7 @@ export const IndustrialTablesSection: React.FC<TablesProps> = ({
                         );
                     })}
                 </div>
-            </div>
+            </div> */}
 
             {/* Assignments */}
             <div className="bg-ind-card border border-ind-border rounded-xl shadow-lg min-w-[280px]">
@@ -91,7 +92,7 @@ export const IndustrialTablesSection: React.FC<TablesProps> = ({
             </div>
 
             {/* All Orders */}
-            <div className="bg-ind-card border border-ind-border rounded-xl shadow-lg min-w-[280px]">
+            {/* <div className="bg-ind-card border border-ind-border rounded-xl shadow-lg min-w-[280px]">
                 <div className="flex items-center justify-between p-3.5 border-b border-ind-border bg-ind-bg2/40">
                     <div className="flex items-center gap-2 font-bold text-ind-text text-sm">
                         <Box size={15} /> All Orders
@@ -127,10 +128,10 @@ export const IndustrialTablesSection: React.FC<TablesProps> = ({
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </div> */}
 
             {/* Rejection Log */}
-            <div className="bg-ind-card border border-ind-border rounded-xl shadow-lg min-w-[280px]">
+            {/* <div className="bg-ind-card border border-ind-border rounded-xl shadow-lg min-w-[280px]">
                 <div className="flex items-center justify-between p-3.5 border-b border-ind-border bg-ind-bg2/40">
                     <div className="flex items-center gap-2 font-bold text-ind-text text-sm">
                         <AlertTriangle size={15} className="text-ind-red" />
@@ -160,7 +161,7 @@ export const IndustrialTablesSection: React.FC<TablesProps> = ({
                         ))
                     )}
                 </div>
-            </div>
-        </div>
+            </div> */}
+        </>
     );
 };

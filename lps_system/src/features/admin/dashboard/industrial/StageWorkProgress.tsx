@@ -49,19 +49,19 @@ export const StageWorkProgress: React.FC<StageProgressProps> = ({ lines, assignm
             const lineData = payload[0].payload;
             return (
                 <div className="pointer-events-none z-50 p-0 text-left">
-                    <p className="text-[12px] font-black text-slate-900 uppercase mb-1">
+                    <p className="text-[12px] font-black text-ind-text uppercase mb-1">
                         {lineData.name}: {lineData.progress}%
                     </p>
-                    <p className="text-[10px] font-bold text-slate-600 leading-tight">
+                    <p className="text-[10px] font-bold text-ind-text2 leading-tight">
                         MODEL: <span className="text-emerald-600 font-black">{lineData.model}</span>
                     </p>
-                    <p className="text-[10px] font-bold text-slate-600 leading-tight">
-                        OPERATOR: <span className="text-slate-900 font-black">{lineData.deo}</span>
+                    <p className="text-[10px] font-bold text-ind-text2 leading-tight">
+                        OPERATOR: <span className="text-ind-text font-black">{lineData.deo}</span>
                     </p>
-                    <p className="text-[10px] font-bold text-slate-600 leading-tight">
-                        SUPERVISOR: <span className="text-slate-900 font-black">{lineData.supervisor}</span>
+                    <p className="text-[10px] font-bold text-ind-text2 leading-tight">
+                        SUPERVISOR: <span className="text-ind-text font-black">{lineData.supervisor}</span>
                     </p>
-                    <p className="text-[10px] font-bold text-slate-600 leading-tight">
+                    <p className="text-[10px] font-bold text-ind-text2 leading-tight">
                         TOTAL ORDERS: <span className="text-blue-600 font-black">{lineData.totalOrders}</span>
                     </p>
                 </div>
@@ -74,9 +74,9 @@ export const StageWorkProgress: React.FC<StageProgressProps> = ({ lines, assignm
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-[#EDF2F7] border border-ind-border rounded-[2.5rem] p-8 shadow-sm flex flex-col h-[550px] mb-8"
+            className="bg-white border border-ind-border rounded-[2.5rem] p-8 shadow-sm flex flex-col h-[550px] mb-8"
         >
-            <div className="flex items-center justify-between mb-10 pb-4 border-b border-slate-200">
+            <div className="flex items-center justify-between mb-10 pb-4 border-b border-ind-border">
                 <div className="flex items-center gap-3">
                     <div className="w-1.5 h-6 bg-[#38BDF8] rounded-full" />
                     <h3 className="text-xl font-black text-slate-800 tracking-tight uppercase">
@@ -85,7 +85,7 @@ export const StageWorkProgress: React.FC<StageProgressProps> = ({ lines, assignm
                 </div>
                 <div className="flex items-center gap-2 bg-white/50 px-4 py-1.5 rounded-full border border-slate-300">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">
+                    <span className="text-[10px] font-black text-ind-text2 uppercase tracking-widest leading-none">
                         Live Monitoring
                     </span>
                 </div>
@@ -152,17 +152,17 @@ export const StageWorkProgress: React.FC<StageProgressProps> = ({ lines, assignm
                 </ResponsiveContainer>
             </div>
 
-            <div className="flex justify-center items-center gap-4 mt-6 pt-4 border-t border-slate-200">
+            <div className="flex justify-center items-center gap-4 mt-6 pt-4 border-t border-ind-border">
                 <div className="flex items-center gap-2">
                     <div className="w-3.5 h-3.5 rounded-sm bg-emerald-500" />
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                    <span className="text-[10px] font-black text-ind-text2 uppercase tracking-widest">
                         In Progress
                     </span>
                 </div>
                 <div className="w-1 h-1 rounded-full bg-slate-300" />
                 <div className="flex items-center gap-2">
                     <div className="w-3.5 h-3.5 rounded-sm bg-slate-300 opacity-30" />
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <span className="text-[10px] font-black text-ind-text3 uppercase tracking-widest">
                         Pending
                     </span>
                 </div>

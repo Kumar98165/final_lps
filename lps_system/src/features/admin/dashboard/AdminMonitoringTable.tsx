@@ -60,21 +60,21 @@ export const AdminMonitoringTable = () => {
 
     if (isLoading) {
         return (
-            <div className="bg-white rounded-[2.5rem] p-8 border border-slate-200 mt-10">
-                <div className="animate-pulse h-10 w-48 bg-slate-100 rounded-lg mb-6"></div>
+            <div className="bg-white rounded-[2.5rem] p-8 border border-ind-border mt-10">
+                <div className="animate-pulse h-10 w-48 bg-ind-border/30 rounded-lg mb-6"></div>
                 <div className="space-y-4">
-                    {[1, 2, 3].map(i => <div key={i} className="h-16 bg-slate-50 rounded-2xl"></div>)}
+                    {[1, 2, 3].map(i => <div key={i} className="h-16 bg-ind-bg rounded-2xl"></div>)}
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="bg-white rounded-[2.5rem] p-8 lg:p-10 border border-slate-200 shadow-sm mt-10">
+        <div className="bg-white rounded-[2.5rem] p-8 lg:p-10 border border-ind-border shadow-sm mt-10">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
                 <div>
-                    <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight mb-2">Production Monitoring</h2>
-                    <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Track Rejected and Approved Components</p>
+                    <h2 className="text-2xl font-black text-ind-text uppercase tracking-tight mb-2">Production Monitoring</h2>
+                    <p className="text-sm font-bold text-ind-text3 uppercase tracking-widest">Track Rejected and Approved Components</p>
                 </div>
             </div>
 
@@ -82,17 +82,17 @@ export const AdminMonitoringTable = () => {
                 <table className="w-full text-left border-separate border-spacing-y-3">
                     <thead>
                         <tr>
-                            <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Date & Model</th>
-                            <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Part Description</th>
-                            <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 text-right">Current Stock</th>
-                            <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 table-cell">Status</th>
-                            <th className="pb-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">Comment</th>
+                            <th className="pb-4 px-4 text-[10px] font-black text-ind-text3 uppercase tracking-widest border-b border-ind-border/50">Date & Model</th>
+                            <th className="pb-4 px-4 text-[10px] font-black text-ind-text3 uppercase tracking-widest border-b border-ind-border/50">Part Description</th>
+                            <th className="pb-4 px-4 text-[10px] font-black text-ind-text3 uppercase tracking-widest border-b border-ind-border/50 text-right">Current Stock</th>
+                            <th className="pb-4 px-4 text-[10px] font-black text-ind-text3 uppercase tracking-widest border-b border-ind-border/50 table-cell">Status</th>
+                            <th className="pb-4 px-4 text-[10px] font-black text-ind-text3 uppercase tracking-widest border-b border-ind-border/50">Comment</th>
                         </tr>
                     </thead>
                     <tbody>
                         {flattenedData.length === 0 ? (
                             <tr>
-                                <td colSpan={5} className="py-12 text-center text-slate-400 font-bold uppercase text-xs">
+                                <td colSpan={5} className="py-12 text-center text-ind-text3 font-bold uppercase text-xs">
                                     No records found
                                 </td>
                             </tr>
@@ -102,33 +102,33 @@ export const AdminMonitoringTable = () => {
                                 animate={{ opacity: 1, y: 0 }} 
                                 transition={{ delay: Math.min(idx * 0.05, 0.5) }}
                                 key={`${row.logId}-${idx}`}
-                                className="bg-white border border-slate-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] rounded-2xl transition-all hover:scale-[1.01]"
+                                className="bg-white border border-ind-border/50 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] rounded-2xl transition-all hover:scale-[1.01]"
                             >
-                                <td className="p-4 rounded-l-2xl border-y border-l border-slate-100">
+                                <td className="p-4 rounded-l-2xl border-y border-l border-ind-border/50">
                                     <div className="flex items-center gap-3">
-                                        <div className="bg-slate-50 p-2 rounded-xl">
-                                            <Box size={16} className="text-slate-400" />
+                                        <div className="bg-ind-bg p-2 rounded-xl">
+                                            <Box size={16} className="text-ind-text3" />
                                         </div>
                                         <div>
-                                            <p className="font-black text-sm uppercase tracking-tight text-slate-900">{row.modelName}</p>
-                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                            <p className="font-black text-sm uppercase tracking-tight text-ind-text">{row.modelName}</p>
+                                            <p className="text-[10px] font-bold text-ind-text3 uppercase tracking-widest flex items-center gap-1">
                                                 <Clock size={10} /> {row.date}
                                             </p>
                                         </div>
                                     </div>
                                 </td>
-                                <td className="p-4 border-y border-slate-100">
+                                <td className="p-4 border-y border-ind-border/50">
                                     <p className="text-[11px] font-bold text-slate-700 max-w-[250px] uppercase leading-tight">{row.partDescription}</p>
                                 </td>
-                                <td className="p-4 border-y border-slate-100 text-right">
+                                <td className="p-4 border-y border-ind-border/50 text-right">
                                     <div className="flex flex-col items-end">
                                         <div className="flex items-end gap-1">
-                                            <span className="text-sm font-black text-[#F37021]">{row.todaysStock}</span>
-                                            <span className="text-[10px] font-bold text-slate-400 mb-0.5">Units In Stock</span>
+                                            <span className="text-sm font-black text-ind-primary">{row.todaysStock}</span>
+                                            <span className="text-[10px] font-bold text-ind-text3 mb-0.5">Units In Stock</span>
                                         </div>
                                     </div>
                                 </td>
-                                <td className="p-4 border-y border-slate-100">
+                                <td className="p-4 border-y border-ind-border/50">
                                     {row.logStatus === 'APPROVED' || row.logStatus === 'VERIFIED' ? (
                                         <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase tracking-widest border border-emerald-100">
                                             <CheckCircle size={12} />
@@ -141,11 +141,11 @@ export const AdminMonitoringTable = () => {
                                         </div>
                                     )}
                                 </td>
-                                <td className="p-4 rounded-r-2xl border-y border-r border-slate-100">
+                                <td className="p-4 rounded-r-2xl border-y border-r border-ind-border/50">
                                     {row.logStatus === 'REJECTED' && row.supervisorComment ? (
-                                        <p className="text-xs font-bold text-slate-600 max-w-xs">{row.supervisorComment}</p>
+                                        <p className="text-xs font-bold text-ind-text2 max-w-xs">{row.supervisorComment}</p>
                                     ) : (
-                                        <span className="text-slate-300 font-bold">-</span>
+                                        <span className="text-ind-text3 font-bold">-</span>
                                     )}
                                 </td>
                             </motion.tr>

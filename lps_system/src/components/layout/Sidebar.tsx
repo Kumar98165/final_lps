@@ -122,13 +122,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             {/* Mobile Backdrop */}
             {isOpen && (
                 <div
-                    className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 md:hidden animate-in fade-in duration-200"
+                    className="fixed inset-0 bg-ind-text/50 backdrop-blur-sm z-30 md:hidden animate-in fade-in duration-200"
                     onClick={onClose}
                 />
             )}
 
             <div className={cn(
-                "fixed inset-y-0 left-0 z-40 bg-white flex flex-col border-r border-slate-200/50 transition-transform duration-300 md:translate-x-0 md:static md:h-full shadow-2xl md:shadow-none",
+                "fixed inset-y-0 left-0 z-40 bg-ind-bg flex flex-col border-r border-ind-border/30 transition-transform duration-300 md:translate-x-0 md:static md:h-full shadow-2xl md:shadow-none",
                 isOpen ? "translate-x-0" : "-translate-x-full",
                 isCollapsed ? "w-24" : "w-72"
             )}>
@@ -136,13 +136,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <div className="p-6 relative">
                     <button
                         onClick={onClose}
-                        className="absolute top-2 right-2 p-2 text-slate-400 hover:text-slate-900 md:hidden"
+                        className="absolute top-2 right-2 p-2 text-ind-text/40 hover:text-ind-text md:hidden"
                     >
                         <X size={20} />
                     </button>
 
                     <div className={cn(
-                        "bg-[#F8E3D7]/30 border border-[#F8E3D7] rounded-xl p-4 flex items-center group transition-all duration-500 overflow-hidden relative mt-4 md:mt-0",
+                        "bg-white border border-ind-border/50 rounded-xl p-4 flex items-center group transition-all duration-500 overflow-hidden relative mt-4 md:mt-0 shadow-sm",
                         isCollapsed ? "justify-center px-0" : "justify-between"
                     )}>
                         {!isCollapsed && (
@@ -151,11 +151,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                         <button
                             onClick={() => setIsCollapsed(!isCollapsed)}
                             className={cn(
-                                "h-8 w-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-slate-100 shadow-sm transition-all duration-500 hover:bg-white hover:scale-110 active:scale-95 hidden md:flex",
+                                "h-8 w-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-ind-border/20 shadow-sm transition-all duration-500 hover:bg-white hover:scale-110 active:scale-95 hidden md:flex",
                                 isCollapsed ? "" : "relative z-10"
                             )}
                         >
-                            {isCollapsed ? <Menu size={14} className="text-slate-400" /> : <ChevronLeft size={14} className="text-slate-400" />}
+                            {isCollapsed ? <Menu size={14} className="text-ind-text/30" /> : <ChevronLeft size={14} className="text-ind-text/30" />}
                         </button>
                     </div>
                 </div>
@@ -168,7 +168,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                         return (
                             <div key={idx} className="space-y-4">
                                 {!isCollapsed && (
-                                    <h3 className="px-1 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] animate-in slide-in-from-left-2 duration-500">
+                                    <h3 className="px-1 text-[10px] font-black text-ind-text/30 uppercase tracking-[0.2em] animate-in slide-in-from-left-2 duration-500">
                                         {section.title}
                                     </h3>
                                 )}
@@ -183,14 +183,14 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                                 className={cn(
                                                     "flex items-center gap-4 px-4 py-3 rounded-[1.25rem] transition-all duration-300 relative group overflow-hidden",
                                                     isActive
-                                                        ? "bg-[#F37021] text-white shadow-[0_10px_20px_-5px_rgba(243,112,33,0.4)]"
-                                                        : "text-slate-500 hover:text-slate-900",
+                                                        ? "bg-ind-primary text-white shadow-[0_10px_20px_-5px_rgba(243,112,33,0.4)]"
+                                                        : "text-ind-text2 hover:text-ind-text",
                                                     isCollapsed && "justify-center px-0"
                                                 )}
                                             >
                                                 <item.icon size={20} className={cn(
                                                     "transition-colors flex-shrink-0",
-                                                    isActive ? "text-white" : "text-slate-400 group-hover:text-primary"
+                                                    isActive ? "text-white" : "text-ind-text/30 group-hover:text-ind-primary"
                                                 )} />
                                                 {!isCollapsed && (
                                                     <span className="font-black text-[13px] tracking-tight whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-500">
@@ -214,17 +214,17 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 {/* Footer / User Profile Card */}
                 <div className="p-6">
                     <div className={cn(
-                        "px-4 py-4 bg-white border border-slate-100 rounded-[1.5rem] shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex items-center group transition-all duration-500",
+                        "px-4 py-4 bg-white border border-ind-border/50 rounded-[1.5rem] shadow-[0_10px_30px_-15px_rgba(0,0,0,0.05)] flex items-center group transition-all duration-500",
                         isCollapsed ? "justify-center px-0" : "justify-between"
                     )}>
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white font-black text-sm shadow-lg shadow-primary/20 flex-shrink-0">
-                                {user?.username?.[0]?.toUpperCase() || 'A'}
+                             <div className="w-10 h-10 rounded-xl bg-ind-primary flex items-center justify-center text-white font-black text-sm shadow-lg shadow-ind-primary/20 flex-shrink-0">
+                                {(user?.name || user?.username || 'A')?.[0]?.toUpperCase()}
                             </div>
                             {!isCollapsed && (
                                 <div className="flex flex-col animate-in fade-in slide-in-from-left-2 duration-500">
-                                    <span className="text-sm font-black text-slate-900 leading-none mb-1">{user?.username || 'admin'}</span>
-                                    <span className="text-[10px] font-black text-[#F37021] uppercase tracking-widest">
+                                    <span className="text-sm font-black text-ind-text leading-none mb-1">{user?.name || user?.username || 'admin'}</span>
+                                    <span className="text-[10px] font-black text-ind-primary uppercase tracking-widest">
                                         {user?.role?.toUpperCase() === 'MANAGER' ? 'SUPERVISOR' : (user?.role || 'ADMIN')}
                                     </span>
                                 </div>
@@ -233,7 +233,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                         {!isCollapsed && (
                             <button
                                 onClick={handleLogout}
-                                className="p-2 text-slate-300 hover:text-slate-900 transition-colors animate-in fade-in duration-700"
+                                className="p-2 text-ind-text/20 hover:text-ind-text transition-colors animate-in fade-in duration-700"
                             >
                                 <LogOut size={20} className="transform rotate-180" />
                             </button>
